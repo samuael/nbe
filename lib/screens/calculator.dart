@@ -1,12 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart' as dom;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences/util/legacy_to_async_migration_util.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
 
+  @override
   State<CalculatorScreen> createState() => _CalculatorScreenState();
 }
 
@@ -14,9 +18,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _specificGravityController =
       TextEditingController();
-  double purchaseRate = 0;
-  String demoText = '';
-  final url = 'https://nbe.gov.et/exchange/gold-purchasing-rate/';
+  Map<String, String> pricesMap = {};
+  final url = 'https://api.nbe.gov.et/api/filter-gold-rates';
 
   bool areSameDates(DateTime day1, DateTime day2) {
     return day1.toIso8601String().substring(0, 10) ==
@@ -24,15 +27,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Future<void> getPurchasingRate() async {
-    // final cached = await SharedPreferences.getInstance();
+    final cached = await SharedPreferences.getInstance();
+    DateTime? lastUpdated = DateTime.tryParse(
+      cached.getString('last_updated') ?? '',
+    );
 
-    // DateTime? lastUpdated = DateTime.tryParse(
-    //   cached.getString('lastUpdated') ?? '',
-    // );
-
-    DateTime? lastUpdated = null;
-
-    if (lastUpdated == null || !areSameDates(lastUpdated, DateTime.now())) {
+    if (lastUpdated == null ||
+        !areSameDates(
+          lastUpdated,
+          DateTime.now().subtract(Duration(days: 1)),
+        )) {
       final parsed = Uri.parse(url);
       final response = await http.get(
         parsed,
@@ -47,36 +51,33 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       );
 
       if (response.statusCode == 200) {
-        dom.Document document = parser.parse(response.body);
-        final table = document.querySelector('table');
-        if (table == null) {
-          print('No table');
-          return;
+        final Map<String, dynamic> document = jsonDecode(response.body);
+
+        try {
+          final List rates = document['data'];
+          cached.setString('last_updated', rates[0]['date'] as String);
+          for (var rate in rates) {
+            cached.setString(rate["gold_type"]["karat"], rate["price_birr"]);
+            pricesMap[rate["gold_type"]["karat"]] = rate["price_birr"];
+          }
+          print(pricesMap);
+        } catch (e) {
+          print('Something wrong in caching');
         }
-        final rows = table.querySelectorAll('tr');
-        if (rows.isEmpty) {
-          print('no rows');
-          return;
-        } else {
-          print(rows.length);
-          return;
-        }
-        final firstDataRow = rows.firstWhere(
-          (row) => row.querySelectorAll('td').isNotEmpty,
-        ); //24 Karat's
-        if (firstDataRow.querySelectorAll('td').isEmpty) {
-          print('no table data');
-          return;
-        }
-        final loadedPurchaseRate = firstDataRow.querySelectorAll('td')[0];
-        print(loadedPurchaseRate.text);
-        setState(() {
-          demoText = loadedPurchaseRate.text;
-        });
       } else {
         print('Failed to load page');
         print(response.statusCode);
       }
+    } else {
+      final keys = cached.getKeys();
+      for (var key in keys) {
+        final value = cached.get(key);
+        if (value != null) {
+          pricesMap[key] = value as String;
+        }
+      }
+      setState(() {});
+      print("From Cache $pricesMap");
     }
   }
 
@@ -108,7 +109,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     ),
                     SizedBox(height: 15),
                     Text(
-                      '$purchaseRate EtB per gram $demoText',
+                      '${pricesMap['24'] ?? '0'} EtB per gram ',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         backgroundColor: Colors.grey[400],
