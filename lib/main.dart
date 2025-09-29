@@ -28,7 +28,7 @@ class _NavigationControllerState extends State<NavigationController> {
   int _currentIndex = 0;
   static const List<Widget> widgetList = [
     Center(child: Text('Index 0')),
-    Center(child: Text('Index 1')),
+    CalculatorScreen(),
     Center(child: Text('Index 2')),
     Center(child: Text('Index 3')),
   ];
@@ -41,13 +41,6 @@ class _NavigationControllerState extends State<NavigationController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Gold Purchaser'),
-        actions: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.edit)),
-          IconButton(onPressed: () {}, icon: Icon(Icons.settings)),
-        ],
-      ),
       body: widgetList[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
