@@ -27,8 +27,8 @@ class NavigationController extends StatefulWidget {
 class _NavigationControllerState extends State<NavigationController> {
   int _currentIndex = 0;
   static const List<Widget> widgetList = [
-    Center(child: Text('Index 0')),
     CalculatorScreen(),
+    Center(child: Text('Index 0')),
     Center(child: Text('Index 2')),
     Center(child: Text('Index 3')),
   ];
@@ -50,7 +50,7 @@ class _NavigationControllerState extends State<NavigationController> {
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.calculate),
-            label: 'Calculate',
+            label: 'Calculator',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
           BottomNavigationBarItem(
