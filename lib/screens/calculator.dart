@@ -2,10 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' as parser;
-import 'package:html/dom.dart' as dom;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shared_preferences/util/legacy_to_async_migration_util.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -21,11 +18,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   Map<String, String> pricesMap = {};
   final url = 'https://api.nbe.gov.et/api/filter-gold-rates';
 
+  //to check if the day has changed
   bool areSameDates(DateTime day1, DateTime day2) {
     return day1.toIso8601String().substring(0, 10) ==
         day2.toIso8601String().substring(0, 10);
   }
 
+  // to get the rates either from cache or from api
   Future<void> getPurchasingRate() async {
     final cached = await SharedPreferences.getInstance();
     DateTime? lastUpdated = DateTime.tryParse(
@@ -79,6 +78,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       setState(() {});
       print("From Cache $pricesMap");
     }
+  }
+
+  @override
+  void initState() {
+    getPurchasingRate();
+    super.initState();
   }
 
   @override
@@ -222,6 +227,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
               ),
             ),
+            Divider(),
             SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.fromLTRB(8.0, 0, 8, 0),
@@ -245,10 +251,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ElevatedButton(
               onPressed: () {},
               child: Text('Calculate', style: TextStyle(fontSize: 20)),
-            ),
-            ElevatedButton(
-              onPressed: getPurchasingRate,
-              child: Text('Get Today\'s Rate'),
             ),
           ],
         ),
