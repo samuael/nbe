@@ -14,6 +14,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
   final bonus = 0.1;
   final bankFee = 0.0001;
   final immediatePayment = 0.95;
+  bool isSaving = false;
 
   double taxValue = 0;
   double bonusValue = 0;
@@ -37,8 +38,20 @@ class _CalculationDetailsState extends State<CalculationDetails> {
   }
 
   void onSaveTapped() async {
+    setState(() {
+      isSaving = true;
+    });
     await DataHandler.instance.addTransactionToDb(widget.transaction);
-    print('Saved');
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Saved Successfully'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      Navigator.of(context).pop();
+    }
   }
 
   @override

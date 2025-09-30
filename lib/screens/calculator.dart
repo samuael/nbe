@@ -281,6 +281,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 if (transaction == null) {
                   return;
                 }
+                _specificGravityController.clear();
+                _weightController.clear();
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (ctx) =>
