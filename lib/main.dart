@@ -2,6 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:nbe/screens/calculator.dart';
 import 'package:nbe/screens/report_screen.dart';
 
+final ThemeData theme = ThemeData(
+  scaffoldBackgroundColor: const Color.fromARGB(255, 3, 37, 65),
+  listTileTheme: ListTileThemeData(
+    titleTextStyle: TextStyle(
+      color: Colors.white,
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+    ),
+    leadingAndTrailingTextStyle: TextStyle(
+      fontSize: 20,
+      color: Colors.grey,
+      fontStyle: FontStyle.italic,
+    ),
+  ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ButtonStyle(
+      foregroundColor: WidgetStatePropertyAll(
+        const Color.fromARGB(255, 3, 48, 85),
+      ),
+    ),
+  ),
+  appBarTheme: AppBarTheme(
+    backgroundColor: Color.fromARGB(255, 3, 37, 65),
+    foregroundColor: Colors.amber,
+    titleTextStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+  ),
+);
+
 void main() {
   runApp(const MyApp());
 }
@@ -12,6 +40,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: theme,
       title: 'Gold Purchasing Rate',
       home: NavigationController(),
     );

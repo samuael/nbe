@@ -127,131 +127,81 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         child: Column(
           children: [
             SizedBox(
-              height: 120,
+              height: 140,
               width: double.infinity,
-              child: Card(
-                shadowColor: Colors.grey,
+              child: Container(
+                width: double.infinity,
+                // color: Colors.grey,
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(123, 0, 0, 0),
+                  image: DecorationImage(
+                    opacity: 0.5,
+                    fit: BoxFit.cover,
+                    image: Image.asset(
+                      'lib/assets/images/gold_pic.png',
+                      width: double.infinity,
+                    ).image,
+                  ),
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                // shadowColor: Colors.grey,
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       'Today\'s National Bank Rate for\n 24 Karat Gold',
                       softWrap: true,
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 22),
+                      style: TextStyle(
+                        fontSize: 22,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: 20),
                     Text(
-                      '${pricesMap['24'] ?? '0'} EtB per gram ',
+                      '${currencyFormatter(double.tryParse(pricesMap['24'] ?? '') ?? 0)} per gram ',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        backgroundColor: Colors.grey[400],
-                        color: Colors.black,
+                        color: Colors.amber,
                         fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        fontStyle: FontStyle.italic,
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-            SizedBox(
-              height: 200,
-              width: double.infinity,
-              child: Card(
-                shadowColor: Colors.grey,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'Immediate Payment Amount: ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.all(1),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(8),
-                              color: const Color.fromARGB(181, 158, 158, 158),
-                            ),
-                            child: Text('95%', style: TextStyle(fontSize: 20)),
-                          ),
-                        ],
+
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ListTile(
+                    title: Text(
+                      'Immediate Payment Amount: ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
                       ),
-                      Row(
-                        children: [
-                          Text(
-                            'Tax per gram: ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: const Color.fromARGB(181, 158, 158, 158),
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: EdgeInsets.all(1),
-                            child: Text(
-                              '5000 EtB',
-                              style: TextStyle(fontSize: 20),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            'Bank Fee in Percentage: ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: const Color.fromARGB(181, 158, 158, 158),
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: EdgeInsets.all(1),
-                            child: Text(
-                              '0.01%',
-                              style: TextStyle(fontSize: 20),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            'Bonus by NBE: ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: const Color.fromARGB(181, 158, 158, 158),
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: EdgeInsets.all(1),
-                            child: Text('10%', style: TextStyle(fontSize: 20)),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
+                    trailing: Text('95%'),
                   ),
-                ),
+                  ListTile(
+                    title: Text('Tax per gram'),
+                    trailing: Text('5000 EtB'),
+                  ),
+
+                  ListTile(
+                    title: Text('Bank Fee in percent:'),
+                    trailing: Text('0.01%'),
+                  ),
+
+                  ListTile(title: Text('Bonus by NBE:'), trailing: Text('10%')),
+                ],
               ),
             ),
             Divider(),
@@ -261,17 +211,28 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               child: TextField(
                 controller: _weightController,
                 keyboardType: TextInputType.numberWithOptions(),
-                decoration: InputDecoration(label: Text('Weight in grams')),
+                decoration: InputDecoration(
+                  label: Text(
+                    'Weight in grams',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                style: TextStyle(color: Colors.white),
               ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(8.0, 8, 8, 0),
               child: TextField(
+                cursorColor: Colors.white,
                 controller: _specificGravityController,
                 keyboardType: TextInputType.numberWithOptions(),
                 decoration: InputDecoration(
-                  label: Text('Specific gravity in cm^3'),
+                  label: Text(
+                    'Specific gravity in cm^3',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
+                style: TextStyle(color: Colors.white),
               ),
             ),
             SizedBox(height: 10),
