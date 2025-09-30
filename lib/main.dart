@@ -74,8 +74,9 @@ class _NavigationControllerState extends State<NavigationController> {
       body: widgetList[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        fixedColor: Colors.white,
-        backgroundColor: Colors.grey,
+        unselectedItemColor: Colors.grey,
+        fixedColor: Colors.amber,
+        backgroundColor: const Color.fromARGB(255, 1, 28, 49),
 
         items: [
           BottomNavigationBarItem(

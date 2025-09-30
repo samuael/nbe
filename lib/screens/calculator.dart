@@ -232,6 +232,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     'Specific gravity in cm^3',
                     style: TextStyle(color: Colors.white),
                   ),
+                  helper: Text(
+                    'Between 15.2 and 19.5 cm^3',
+                    style: TextStyle(
+                      color: const Color.fromARGB(139, 255, 255, 255),
+                    ),
+                  ),
                 ),
                 style: TextStyle(color: Colors.white),
               ),
