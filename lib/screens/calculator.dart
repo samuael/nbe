@@ -209,6 +209,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(8.0, 0, 8, 0),
               child: TextField(
+                cursorColor: Colors.white,
                 controller: _weightController,
                 keyboardType: TextInputType.numberWithOptions(),
                 decoration: InputDecoration(
