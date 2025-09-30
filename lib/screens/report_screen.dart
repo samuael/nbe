@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nbe/services/data_handler.dart';
+import 'package:intl/intl.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -11,7 +12,8 @@ class _ReportScreenState extends State<ReportScreen> {
   final List<Transaction> transactions = [];
 
   void _loadTransactions() async {
-    final tran = await DataHandler().loadAllTransactions();
+    final tran = await DataHandler.instance.loadAllTransactions();
+    print(tran.length);
 
     setState(() {
       transactions.addAll(tran);
@@ -32,9 +34,14 @@ class _ReportScreenState extends State<ReportScreen> {
         itemCount: transactions.length,
         itemBuilder: (ctx, index) {
           return ListTile(
-            leading: Text(transactions[index].date.day.toString()),
-            title: Text(transactions[index].weight.toStringAsFixed(2)),
-            trailing: Row(children: [Icon(Icons.check), Text('Completed')]),
+            leading: Text(DateFormat.MMMd().format(transactions[index].date)),
+            title: Text(
+              '${transactions[index].weight.toStringAsFixed(2)} gram',
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [Icon(Icons.check), Text('Completed')],
+            ),
           );
         },
       ),

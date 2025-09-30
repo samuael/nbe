@@ -3,6 +3,9 @@ import 'package:path/path.dart';
 import 'package:intl/intl.dart';
 
 class DataHandler {
+  DataHandler._privateConstructor();
+  static final instance = DataHandler._privateConstructor();
+
   Database? _db;
 
   Future<Database> get database async {
@@ -55,10 +58,10 @@ class DataHandler {
       final transaction = Transaction(
         id: tran['id'] as String,
         date: DateTime.parse(tran['date'] as String),
-        specificGravity: tran['specific_gravity'] as double,
-        todayRate: tran['todays_rate'] as double,
-        totalAmount: tran['total_amount'] as double,
-        weight: tran['weight'] as double,
+        specificGravity: (tran['specific_gravity'] as num).toDouble(),
+        todayRate: (tran['todays_rate'] as num).toDouble(),
+        totalAmount: (tran['total_amount'] as num).toDouble(),
+        weight: (tran['weight'] as num).toDouble(),
         isCompleted: tran['is_completed'] as int == 1,
       );
       transactions.add(transaction);

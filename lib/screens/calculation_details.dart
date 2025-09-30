@@ -36,6 +36,11 @@ class _CalculationDetailsState extends State<CalculationDetails> {
     });
   }
 
+  void onSaveTapped() async {
+    await DataHandler.instance.addTransactionToDb(widget.transaction);
+    print('Saved');
+  }
+
   @override
   void initState() {
     calculateValues();
@@ -80,9 +85,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
               style: ButtonStyle(
                 minimumSize: WidgetStatePropertyAll(Size(double.infinity, 60)),
               ),
-              onPressed: () {
-                DataHandler().addTransactionToDb(widget.transaction);
-              },
+              onPressed: onSaveTapped,
               child: Text('Save'),
             ),
           ],
