@@ -38,23 +38,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     if (latestDate.hour >= 0 && latestDate.hour < 8) {
       latestDate = latestDate.subtract(Duration(days: 1));
     }
-    print(lastUpdated);
-    print(latestDate);
-    print(areSameDates(latestDate, latestDate));
 
     if (lastUpdated == null || !areSameDates(lastUpdated, latestDate)) {
       final parsed = Uri.parse(url);
-      final response = await http.get(
-        parsed,
-        headers: {
-          "User-Agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-              "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          "Accept":
-              "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-          "Accept-Language": "en-US,en;q=0.9",
-        },
-      );
+      final response = await http.get(parsed);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> document = jsonDecode(response.body);
@@ -66,13 +53,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             cached.setString(rate["gold_type"]["karat"], rate["price_birr"]);
             pricesMap[rate["gold_type"]["karat"]] = rate["price_birr"];
           }
-          print(pricesMap);
+          setState(() {});
         } catch (e) {
           print('Something wrong in caching');
         }
       } else {
-        print('Failed to load page');
-        print(response.statusCode);
+        print('Failed to load page. Status Code:${response.statusCode}');
       }
     } else {
       final keys = cached.getKeys();
@@ -83,7 +69,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         }
       }
       setState(() {});
-      print("From Cache $pricesMap");
     }
   }
 
