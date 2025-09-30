@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:nbe/services/data_handler.dart';
 
 class CalculationDetails extends StatefulWidget {
+  final Transaction transaction;
+  const CalculationDetails({required this.transaction, super.key});
   @override
   State<CalculationDetails> createState() => _CalculationDetailsState();
 }

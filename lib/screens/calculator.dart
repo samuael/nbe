@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:nbe/screens/calculation_details.dart';
+import 'package:nbe/services/data_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CalculatorScreen extends StatefulWidget {
@@ -79,6 +80,40 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       setState(() {});
       print("From Cache $pricesMap");
     }
+  }
+
+  Transaction? calculate() {
+    final weight = double.tryParse(_weightController.text);
+    final specificGravity = double.tryParse(_specificGravityController.text);
+    if (weight == null || specificGravity == null) {
+      return null;
+    }
+
+    int estimatedCarat = 0;
+    if (specificGravity <= 19.51 && specificGravity > 19.13) {
+      estimatedCarat = 24;
+    } else if (specificGravity <= 19.13 && specificGravity > 18.24) {
+      estimatedCarat = 23;
+    } else if (specificGravity <= 18.24 && specificGravity > 17.45) {
+      estimatedCarat = 22;
+    } else if (specificGravity <= 17.45 && specificGravity > 17.11) {
+      estimatedCarat = 21;
+    } else if (specificGravity <= 17.11 && specificGravity > 16.03) {
+      estimatedCarat = 20;
+    } else if (specificGravity <= 16.03 && specificGravity > 15.2) {
+      estimatedCarat = 18;
+    }
+
+    final rate = pricesMap[estimatedCarat.toString()];
+    final totalAmount = (double.tryParse(rate ?? '') ?? 0) * weight;
+    return Transaction(
+      date: DateTime.now(),
+      specificGravity: specificGravity,
+      todayRate: double.tryParse(rate ?? '') ?? 0,
+      totalAmount: totalAmount,
+      weight: weight,
+      isCompleted: true,
+    );
   }
 
   @override
@@ -251,8 +286,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
+                final transaction = calculate();
+                if (transaction == null) {
+                  return;
+                }
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (ctx) => CalculationDetails()),
+                  MaterialPageRoute(
+                    builder: (ctx) =>
+                        CalculationDetails(transaction: transaction),
+                  ),
                 );
               },
               child: Text('Calculate', style: TextStyle(fontSize: 20)),
