@@ -10,6 +10,37 @@ class CalculationDetails extends StatefulWidget {
 
 class _CalculationDetailsState extends State<CalculationDetails> {
   final _remainingController = TextEditingController();
+  final tax = 100;
+  final bonus = 0.1;
+  final bankFee = 0.0001;
+  final immediatePayment = 0.95;
+
+  double taxValue = 0;
+  double bonusValue = 0;
+  double bankFeeValue = 0;
+  double immediatePaymentValue = 0;
+  double netValue = 0;
+  double netCompleted = 0;
+
+  void calculateValues() {
+    final tran = widget.transaction;
+    setState(() {
+      immediatePaymentValue = immediatePayment * tran.totalAmount;
+      taxValue = tax * tran.weight;
+      bonusValue = bonus * tran.totalAmount;
+      bankFeeValue = bankFee * tran.totalAmount;
+      netValue =
+          (immediatePaymentValue + bonusValue) - (taxValue + bankFeeValue);
+      netCompleted =
+          (tran.totalAmount + bonusValue) - (taxValue + bankFeeValue);
+    });
+  }
+
+  @override
+  void initState() {
+    calculateValues();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,10 +50,22 @@ class _CalculationDetailsState extends State<CalculationDetails> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            ListTile(title: Text('Total of 95%'), trailing: Text('122232 Etb')),
-            ListTile(title: Text('Bank Fee:'), trailing: Text('12230 Etb')),
-            ListTile(title: Text('Tax:'), trailing: Text('5000 Etb')),
-            ListTile(title: Text('Net:'), trailing: Text('1230 Etb')),
+            ListTile(
+              title: Text('Total of 95%'),
+              trailing: Text(immediatePaymentValue.toStringAsFixed(2)),
+            ),
+            ListTile(
+              title: Text('Bank Fee:'),
+              trailing: Text(bankFeeValue.toStringAsFixed(2)),
+            ),
+            ListTile(
+              title: Text('Tax:'),
+              trailing: Text(taxValue.toStringAsFixed(2)),
+            ),
+            ListTile(
+              title: Text('Net:'),
+              trailing: Text(netValue.toStringAsFixed(2)),
+            ),
             Divider(),
 
             TextField(
@@ -31,7 +74,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
             ),
             ListTile(
               title: Text('Net Complete:'),
-              subtitle: Text('12314212 Etb'),
+              subtitle: Text(netCompleted.toStringAsFixed(2)),
             ),
             ElevatedButton(
               style: ButtonStyle(
