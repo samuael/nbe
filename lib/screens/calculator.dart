@@ -228,18 +228,57 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 controller: _specificGravityController,
                 keyboardType: TextInputType.numberWithOptions(),
                 decoration: InputDecoration(
-                  label: Text(
-                    'Specific gravity in cm^3',
-                    style: TextStyle(color: Colors.white),
+                  label: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Specific gravity in cm',
+                          style: TextStyle(color: Colors.white, fontSize: 15),
+                        ),
+                        WidgetSpan(
+                          child: Transform.translate(
+                            offset: Offset(2, -6),
+                            child: Text(
+                              '3',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  helper: Text(
-                    'Between 15.2 and 19.5 cm^3',
-                    style: TextStyle(
-                      color: const Color.fromARGB(139, 255, 255, 255),
+                  helper: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Between 15.2 and 19.5 cm',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: const Color.fromARGB(166, 255, 255, 255),
+                          ),
+                        ),
+                        WidgetSpan(
+                          child: Transform.translate(
+                            offset: Offset(2, -6),
+                            child: Text(
+                              '3',
+                              style: TextStyle(
+                                color: const Color.fromARGB(169, 255, 255, 255),
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: const Color.fromARGB(255, 255, 255, 255),
+                ),
               ),
             ),
             SizedBox(height: 10),
