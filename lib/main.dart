@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nbe/screens/calculator.dart';
+import 'package:nbe/screens/report_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,7 +29,7 @@ class _NavigationControllerState extends State<NavigationController> {
   int _currentIndex = 0;
   static const List<Widget> widgetList = [
     CalculatorScreen(),
-    Center(child: Text('Index 0')),
+    ReportScreen(),
     Center(child: Text('Index 2')),
     Center(child: Text('Index 3')),
   ];

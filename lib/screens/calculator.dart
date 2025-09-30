@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:nbe/screens/calculation_details.dart';
 import 'package:nbe/services/data_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -19,6 +20,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       TextEditingController();
   Map<String, String> pricesMap = {};
   final url = 'https://api.nbe.gov.et/api/filter-gold-rates';
+  final uuid = Uuid();
 
   //to check if the day has changed
   bool areSameDates(DateTime day1, DateTime day2) {
@@ -107,6 +109,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final rate = pricesMap[estimatedCarat.toString()];
     final totalAmount = (double.tryParse(rate ?? '') ?? 0) * weight;
     return Transaction(
+      id: uuid.v4(),
       date: DateTime.now(),
       specificGravity: specificGravity,
       todayRate: double.tryParse(rate ?? '') ?? 0,

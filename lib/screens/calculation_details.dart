@@ -80,7 +80,9 @@ class _CalculationDetailsState extends State<CalculationDetails> {
               style: ButtonStyle(
                 minimumSize: WidgetStatePropertyAll(Size(double.infinity, 60)),
               ),
-              onPressed: () {},
+              onPressed: () {
+                DataHandler().addTransactionToDb(widget.transaction);
+              },
               child: Text('Save'),
             ),
           ],

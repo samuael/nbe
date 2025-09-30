@@ -22,7 +22,7 @@ class DataHandler {
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE Transactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id TEXT PRIMARY KEY,
             date TEXT,
             todays_rate REAL,
             weight REAL,
@@ -36,6 +36,7 @@ class DataHandler {
   Future<void> addTransactionToDb(Transaction transaction) async {
     final db = await database;
     db.insert('Transactions', {
+      'id': transaction.id,
       'date': transaction.date.toIso8601String(),
       'todays_rate': transaction.todayRate,
       'weight': transaction.weight,
@@ -52,6 +53,7 @@ class DataHandler {
 
     for (var tran in transactionData) {
       final transaction = Transaction(
+        id: tran['id'] as String,
         date: DateTime.parse(tran['date'] as String),
         specificGravity: tran['specific_gravity'] as double,
         todayRate: tran['todays_rate'] as double,
@@ -66,6 +68,7 @@ class DataHandler {
 }
 
 class Transaction {
+  final String id;
   final DateTime date;
   final double todayRate;
   final double weight;
@@ -74,6 +77,7 @@ class Transaction {
   final bool isCompleted;
 
   const Transaction({
+    required this.id,
     required this.date,
     required this.specificGravity,
     required this.todayRate,
