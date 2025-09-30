@@ -52,19 +52,19 @@ class _CalculationDetailsState extends State<CalculationDetails> {
           children: [
             ListTile(
               title: Text('Total of 95%'),
-              trailing: Text(immediatePaymentValue.toStringAsFixed(2)),
+              trailing: Text(currencyFormatter(immediatePaymentValue)),
             ),
             ListTile(
               title: Text('Bank Fee:'),
-              trailing: Text(bankFeeValue.toStringAsFixed(2)),
+              trailing: Text(currencyFormatter(bankFeeValue)),
             ),
             ListTile(
               title: Text('Tax:'),
-              trailing: Text(taxValue.toStringAsFixed(2)),
+              trailing: Text(currencyFormatter(taxValue)),
             ),
             ListTile(
               title: Text('Net:'),
-              trailing: Text(netValue.toStringAsFixed(2)),
+              trailing: Text(currencyFormatter(netValue)),
             ),
             Divider(),
 
@@ -74,7 +74,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
             ),
             ListTile(
               title: Text('Net Complete:'),
-              subtitle: Text(netCompleted.toStringAsFixed(2)),
+              subtitle: Text(currencyFormatter(netCompleted)),
             ),
             ElevatedButton(
               style: ButtonStyle(

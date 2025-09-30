@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:intl/intl.dart';
 
 class DataHandler {
   Database? _db;
@@ -80,4 +81,10 @@ class Transaction {
     required this.weight,
     required this.isCompleted,
   });
+}
+
+String currencyFormatter(double value) {
+  final formatter = NumberFormat('#,##0.##');
+  final formattedValue = formatter.format(value);
+  return '$formattedValue EtB';
 }
