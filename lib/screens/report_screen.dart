@@ -29,7 +29,11 @@ class _ReportScreenState extends State<ReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('History')),
+      appBar: AppBar(
+        title: Row(
+          children: [Icon(Icons.history), SizedBox(width: 10), Text('History')],
+        ),
+      ),
       body: ListView.builder(
         itemCount: transactions.length,
         itemBuilder: (ctx, index) {

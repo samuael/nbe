@@ -46,6 +46,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          backgroundColor: Colors.green,
           content: Text('Saved Successfully'),
           duration: Duration(seconds: 3),
         ),
@@ -66,42 +67,51 @@ class _CalculationDetailsState extends State<CalculationDetails> {
       appBar: AppBar(title: Text('Calculation Details')),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            ListTile(
-              title: Text('Total of 95%'),
-              trailing: Text(currencyFormatter(immediatePaymentValue)),
-            ),
-            ListTile(
-              title: Text('Bank Fee:'),
-              trailing: Text(currencyFormatter(bankFeeValue)),
-            ),
-            ListTile(
-              title: Text('Tax:'),
-              trailing: Text(currencyFormatter(taxValue)),
-            ),
-            ListTile(
-              title: Text('Net:'),
-              trailing: Text(currencyFormatter(netValue)),
-            ),
-            Divider(),
-
-            TextField(
-              controller: _remainingController,
-              decoration: InputDecoration(label: Text('Remaining')),
-            ),
-            ListTile(
-              title: Text('Net Complete:'),
-              subtitle: Text(currencyFormatter(netCompleted)),
-            ),
-            ElevatedButton(
-              style: ButtonStyle(
-                minimumSize: WidgetStatePropertyAll(Size(double.infinity, 60)),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              ListTile(
+                title: Text('Total of 95%'),
+                trailing: Text(currencyFormatter(immediatePaymentValue)),
               ),
-              onPressed: onSaveTapped,
-              child: Text('Save'),
-            ),
-          ],
+              ListTile(
+                title: Text('Bank Fee:'),
+                trailing: Text(currencyFormatter(bankFeeValue)),
+              ),
+              ListTile(
+                title: Text('Tax:'),
+                trailing: Text(currencyFormatter(taxValue)),
+              ),
+              ListTile(
+                title: Text('Net:'),
+                trailing: Text(currencyFormatter(netValue)),
+              ),
+              Divider(),
+
+              TextField(
+                controller: _remainingController,
+                decoration: InputDecoration(
+                  label: Text(
+                    'Remaining',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+              ListTile(
+                title: Text('Net Complete:'),
+                trailing: Text(currencyFormatter(netCompleted)),
+              ),
+              ElevatedButton(
+                style: ButtonStyle(
+                  minimumSize: WidgetStatePropertyAll(
+                    Size(double.infinity, 60),
+                  ),
+                ),
+                onPressed: onSaveTapped,
+                child: Text('Save'),
+              ),
+            ],
+          ),
         ),
       ),
     );
