@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:nbe/screens/calculation_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CalculatorScreen extends StatefulWidget {
@@ -249,7 +250,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
             SizedBox(height: 10),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (ctx) => CalculationDetails()),
+                );
+              },
               child: Text('Calculate', style: TextStyle(fontSize: 20)),
             ),
           ],
