@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nbe/libs.dart';
 import 'package:nbe/services/data_handler.dart';
 
 class CalculationDetails extends StatefulWidget {
@@ -86,23 +87,22 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                 title: Text('Net:'),
                 trailing: Text(currencyFormatter(netValue)),
               ),
-              Divider(),
-
-              TextField(
-                controller: _remainingController,
-                decoration: InputDecoration(
-                  label: Text(
-                    'Remaining',
-                    style: TextStyle(color: Colors.white),
-                  ),
+              const Divider(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: CommonTextField(
+                  controller: _remainingController,
+                  errorMessage: "",
+                  label: "Remaining",
+                  onChanged: (val) {},
                 ),
               ),
               ListTile(
-                title: Text('Net Complete:'),
+                title: const Text('Net Complete:'),
                 trailing: Text(currencyFormatter(netCompleted)),
               ),
               ElevatedButton(
-                style: ButtonStyle(
+                style: const ButtonStyle(
                   minimumSize: WidgetStatePropertyAll(
                     Size(double.infinity, 60),
                   ),

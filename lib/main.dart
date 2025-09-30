@@ -3,8 +3,8 @@ import 'package:nbe/screens/calculator.dart';
 import 'package:nbe/screens/report_screen.dart';
 
 final ThemeData theme = ThemeData(
-  scaffoldBackgroundColor: const Color.fromARGB(255, 3, 37, 65),
-  listTileTheme: ListTileThemeData(
+  // scaffoldBackgroundColor: const Color.fromARGB(255, 3, 37, 65),
+  listTileTheme: const ListTileThemeData(
     titleTextStyle: TextStyle(
       color: Colors.white,
       fontSize: 20,
@@ -16,15 +16,15 @@ final ThemeData theme = ThemeData(
       fontStyle: FontStyle.italic,
     ),
   ),
-  elevatedButtonTheme: ElevatedButtonThemeData(
+  elevatedButtonTheme: const ElevatedButtonThemeData(
     style: ButtonStyle(
-      foregroundColor: WidgetStatePropertyAll(
-        const Color.fromARGB(255, 3, 48, 85),
-      ),
-    ),
+        // foregroundColor: WidgetStatePropertyAll(
+        //   Color.fromARGB(255, 3, 48, 85),
+        // ),
+        ),
   ),
-  appBarTheme: AppBarTheme(
-    backgroundColor: Color.fromARGB(255, 3, 37, 65),
+  appBarTheme: const AppBarTheme(
+    // backgroundColor: Color.fromARGB(255, 3, 37, 65),
     foregroundColor: Colors.amber,
     titleTextStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
   ),
@@ -34,15 +34,38 @@ void main() {
   runApp(const MyApp());
 }
 
+MaterialColor ourMainThemeColor = MaterialColor(
+  _mainThemeValue,
+  <int, Color>{
+    50: Color(0xFF74C9F8),
+    100: Color(0xFF74C9F8),
+    200: Color(0xFF409dd6),
+    300: Color(0xFF248BC4),
+    400: Color(0xFF1a87da),
+    500: Color(_mainThemeValue),
+    600: Color(0xFF055fab),
+    700: Color(0xFF055fab),
+    800: Color(0xFF055fab),
+    900: Color(0xFF055fab),
+  },
+);
+
+int _mainThemeValue = 0xFF055fab;
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: theme,
+      theme: ThemeData(
+        primaryColorLight: Color(0xFF1a87da),
+        primaryColor: Color(_mainThemeValue),
+        primarySwatch: ourMainThemeColor,
+        // canvasColor: Colors.black,
+      ),
       title: 'Gold Purchasing Rate',
-      home: NavigationController(),
+      home: const NavigationController(),
     );
   }
 }
@@ -76,9 +99,8 @@ class _NavigationControllerState extends State<NavigationController> {
         type: BottomNavigationBarType.fixed,
         unselectedItemColor: Colors.grey,
         fixedColor: Colors.amber,
-        backgroundColor: const Color.fromARGB(255, 1, 28, 49),
-
-        items: [
+        // backgroundColor: const Color.fromARGB(255, 1, 28, 49),
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.calculate),
             label: 'Calculator',

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:nbe/libs.dart';
 import 'package:nbe/screens/calculation_details.dart';
 import 'package:nbe/services/data_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -133,7 +134,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 width: double.infinity,
                 // color: Colors.grey,
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(123, 0, 0, 0),
+                  // color: const Color.fromARGB(123, 0, 0, 0),
                   image: DecorationImage(
                     opacity: 0.5,
                     fit: BoxFit.cover,
@@ -142,14 +143,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       width: double.infinity,
                     ).image,
                   ),
-                  border: Border.all(color: Colors.grey),
+                  // border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 // shadowColor: Colors.grey,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       'Today\'s National Bank Rate for\n 24 Karat Gold',
                       softWrap: true,
                       textAlign: TextAlign.center,
@@ -159,131 +160,91 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Text(
                       '${currencyFormatter(double.tryParse(pricesMap['24'] ?? '') ?? 0)} per gram ',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.amber,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontStyle: FontStyle.italic,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ListTile(
-                    title: Text(
-                      'Immediate Payment Amount: ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.0),
+              child: TitledContainer(
+                "Settings",
+                [
+                  Row(children: [
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        'Immediate Payment Amount: ',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          // fontSize: 20,
+                        ),
                       ),
                     ),
-                    trailing: Text('95%'),
-                  ),
-                  ListTile(
-                    title: Text('Tax per gram'),
-                    trailing: Text('5000 EtB'),
-                  ),
-
-                  ListTile(
-                    title: Text('Bank Fee in percent:'),
-                    trailing: Text('0.01%'),
-                  ),
-
+                    Expanded(
+                      flex: 1,
+                      child: Text('95%'),
+                    ),
+                  ]),
+                  Row(children: [
+                    Expanded(
+                      flex: 2,
+                      child: Text('Tax per gram'),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text('5000 EtB'),
+                    ),
+                  ]),
+                  Row(children: [
+                    Expanded(
+                      flex: 2,
+                      child: Text('Bank Fee in percent:'),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text('0.01%'),
+                    ),
+                  ]),
                   ListTile(title: Text('Bonus by NBE:'), trailing: Text('10%')),
                 ],
               ),
             ),
-            Divider(),
-            SizedBox(height: 20),
+            const Divider(),
+            const SizedBox(height: 20),
             Padding(
-              padding: const EdgeInsets.fromLTRB(8.0, 0, 8, 0),
-              child: TextField(
-                cursorColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              child: CommonTextField(
                 controller: _weightController,
-                keyboardType: TextInputType.numberWithOptions(),
-                decoration: InputDecoration(
-                  label: Text(
-                    'Weight in grams',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                style: TextStyle(color: Colors.white),
+                label: "Weight in grams",
+                errorMessage: "",
+                onChanged: (val) {},
+                keyboardType: const TextInputType.numberWithOptions(),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(8.0, 8, 8, 0),
-              child: TextField(
-                cursorColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              child: CommonTextField(
+                label: "Specific gravity in cm^3",
+                errorMessage: "",
+                onChanged: (val) {},
                 controller: _specificGravityController,
                 keyboardType: TextInputType.numberWithOptions(),
-                decoration: InputDecoration(
-                  label: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Specific gravity in cm',
-                          style: TextStyle(color: Colors.white, fontSize: 15),
-                        ),
-                        WidgetSpan(
-                          child: Transform.translate(
-                            offset: Offset(2, -6),
-                            child: Text(
-                              '3',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  helper: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Between 15.2 and 19.5 cm',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: const Color.fromARGB(166, 255, 255, 255),
-                          ),
-                        ),
-                        WidgetSpan(
-                          child: Transform.translate(
-                            offset: Offset(2, -6),
-                            child: Text(
-                              '3',
-                              style: TextStyle(
-                                color: const Color.fromARGB(169, 255, 255, 255),
-                                fontSize: 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                style: TextStyle(
-                  color: const Color.fromARGB(255, 255, 255, 255),
-                ),
               ),
             ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
+            const SizedBox(height: 10),
+            FancyWideButton(
+              "Calculate",
+              () {
                 final transaction = calculate();
                 if (transaction == null) {
                   return;
@@ -297,7 +258,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
                 );
               },
-              child: Text('Calculate', style: TextStyle(fontSize: 20)),
             ),
           ],
         ),
