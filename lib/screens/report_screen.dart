@@ -16,7 +16,7 @@ class _ReportScreenState extends State<ReportScreen> {
     print(tran.length);
 
     setState(() {
-      transactions.addAll(tran);
+      transactions.addAll(tran.reversed);
     });
   }
 
