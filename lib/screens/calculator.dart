@@ -34,12 +34,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     DateTime? lastUpdated = DateTime.tryParse(
       cached.getString('last_updated') ?? '',
     );
+    DateTime latestDate = DateTime.now();
+    if (latestDate.hour >= 0 && latestDate.hour < 8) {
+      latestDate = latestDate.subtract(Duration(days: 1));
+    }
+    print(lastUpdated);
+    print(latestDate);
+    print(areSameDates(latestDate, latestDate));
 
-    if (lastUpdated == null ||
-        !areSameDates(
-          lastUpdated,
-          DateTime.now().subtract(Duration(days: 1)),
-        )) {
+    if (lastUpdated == null || !areSameDates(lastUpdated, latestDate)) {
       final parsed = Uri.parse(url);
       final response = await http.get(
         parsed,
