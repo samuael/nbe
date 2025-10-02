@@ -37,16 +37,16 @@ void main() {
 MaterialColor ourMainThemeColor = MaterialColor(
   _mainThemeValue,
   <int, Color>{
-    50: Color(0xFF74C9F8),
-    100: Color(0xFF74C9F8),
-    200: Color(0xFF409dd6),
-    300: Color(0xFF248BC4),
-    400: Color(0xFF1a87da),
+    50: const Color(0xFF74C9F8),
+    100: const Color(0xFF74C9F8),
+    200: const Color(0xFF409dd6),
+    300: const Color(0xFF248BC4),
+    400: const Color(0xFF1a87da),
     500: Color(_mainThemeValue),
-    600: Color(0xFF055fab),
-    700: Color(0xFF055fab),
-    800: Color(0xFF055fab),
-    900: Color(0xFF055fab),
+    600: const Color(0xFF055fab),
+    700: const Color(0xFF055fab),
+    800: const Color(0xFF055fab),
+    900: const Color(0xFF055fab),
   },
 );
 
@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        primaryColorLight: Color(0xFF1a87da),
+        primaryColorLight: const Color(0xFF1a87da),
         primaryColor: Color(_mainThemeValue),
         primarySwatch: ourMainThemeColor,
         // canvasColor: Colors.black,

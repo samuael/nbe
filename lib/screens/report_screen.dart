@@ -30,7 +30,7 @@ class _ReportScreenState extends State<ReportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
+        title: const Row(
           children: [Icon(Icons.history), SizedBox(width: 10), Text('History')],
         ),
       ),
@@ -42,7 +42,7 @@ class _ReportScreenState extends State<ReportScreen> {
             title: Text(
               '${transactions[index].weight.toStringAsFixed(2)} gram',
             ),
-            trailing: Row(
+            trailing: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [Icon(Icons.check), Text('Completed')],
             ),

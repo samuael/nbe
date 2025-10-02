@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
 import 'package:nbe/libs.dart';
-import 'package:nbe/services/data_handler.dart';
 
 class CalculationDetails extends StatefulWidget {
   final Transaction transaction;
@@ -46,7 +44,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           backgroundColor: Colors.green,
           content: Text('Saved Successfully'),
           duration: Duration(seconds: 3),
@@ -65,26 +63,26 @@ class _CalculationDetailsState extends State<CalculationDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Calculation Details')),
+      appBar: AppBar(title: const Text('Calculation Details')),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
               ListTile(
-                title: Text('Total of 95%'),
+                title: const Text('Total of 95%'),
                 trailing: Text(currencyFormatter(immediatePaymentValue)),
               ),
               ListTile(
-                title: Text('Bank Fee:'),
+                title: const Text('Bank Fee:'),
                 trailing: Text(currencyFormatter(bankFeeValue)),
               ),
               ListTile(
-                title: Text('Tax:'),
+                title: const Text('Tax:'),
                 trailing: Text(currencyFormatter(taxValue)),
               ),
               ListTile(
-                title: Text('Net:'),
+                title: const Text('Net:'),
                 trailing: Text(currencyFormatter(netValue)),
               ),
               const Divider(),
@@ -108,7 +106,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                   ),
                 ),
                 onPressed: onSaveTapped,
-                child: Text('Save'),
+                child: const Text('Save'),
               ),
             ],
           ),

@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:nbe/libs.dart';
-import 'package:nbe/screens/calculation_details.dart';
-import 'package:nbe/services/data_handler.dart';
+// import 'package:nbe/screens/calculation_details.dart';
+// import 'package:nbe/services/data_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
@@ -21,7 +21,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       TextEditingController();
   Map<String, String> pricesMap = {};
   final url = 'https://api.nbe.gov.et/api/filter-gold-rates';
-  final uuid = Uuid();
+  final uuid = const Uuid();
 
   //to check if the day has changed
   bool areSameDates(DateTime day1, DateTime day2) {
@@ -37,7 +37,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
     DateTime latestDate = DateTime.now();
     if (latestDate.hour >= 0 && latestDate.hour < 8) {
-      latestDate = latestDate.subtract(Duration(days: 1));
+      latestDate = latestDate.subtract(const Duration(days: 1));
     }
 
     if (lastUpdated == null || !areSameDates(lastUpdated, latestDate)) {
@@ -118,10 +118,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Gold Purchaser'),
+        title: const Text('Gold Purchaser'),
         actions: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.edit)),
-          IconButton(onPressed: () {}, icon: Icon(Icons.settings)),
+          IconButton(onPressed: () {}, icon: const Icon(Icons.edit)),
+          IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
         ],
       ),
       body: SingleChildScrollView(
@@ -238,7 +238,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 errorMessage: "",
                 onChanged: (val) {},
                 controller: _specificGravityController,
-                keyboardType: TextInputType.numberWithOptions(),
+                keyboardType: const TextInputType.numberWithOptions(),
               ),
             ),
             const SizedBox(height: 10),
