@@ -1,4 +1,3 @@
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:nbe/libs.dart';
 
 import 'package:intl/intl.dart';

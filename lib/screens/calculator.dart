@@ -32,6 +32,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   // to get the rates either from cache or from api
   Future<void> getPurchasingRate() async {
     final cached = await SharedPreferences.getInstance();
+    if (cached.getString('last_updated') != null) {
+      print('DATE');
+      print(cached.getString('last_updated'));
+    }
     DateTime? lastUpdated = DateTime.tryParse(
       cached.getString('last_updated') ?? '',
     );
@@ -50,7 +54,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
           try {
             final List rates = document['data'];
-            cached.setString('last_updated', rates[0]['date'] as String);
+            cached.setString(
+                'last_updated', DateTime.now().toString().substring(0, 10));
             for (var rate in rates) {
               cached.setString(rate["gold_type"]["karat"], rate["price_birr"]);
               pricesMap[rate["gold_type"]["karat"]] = rate["price_birr"];

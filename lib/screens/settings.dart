@@ -41,6 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           spacing: 9,
           children: [
             CommonTextField(
+                borderRadius: 15,
                 prefix: const Padding(
                   padding: EdgeInsets.fromLTRB(2, 0, 7, 0),
                   child: Icon(
@@ -54,6 +55,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onChanged: (val) {},
                 errorMessage: ''),
             CommonTextField(
+                borderRadius: 15,
                 controller: taxController,
                 prefix: _createPrefixWidget(FontAwesomeIcons.sackDollar),
                 suffix: Text('EtB'),
@@ -61,6 +63,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onChanged: (val) {},
                 errorMessage: ''),
             CommonTextField(
+                borderRadius: 15,
                 controller: bankFeeController,
                 prefix: _createPrefixWidget(FontAwesomeIcons.sackDollar),
                 suffix: Text('%'),
@@ -68,6 +71,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onChanged: (val) {},
                 errorMessage: ''),
             CommonTextField(
+                borderRadius: 15,
                 controller: bonusController,
                 prefix: _createPrefixWidget(FontAwesomeIcons.sackDollar),
                 suffix: Text('%'),
