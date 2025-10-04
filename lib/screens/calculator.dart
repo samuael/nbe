@@ -160,41 +160,30 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             SizedBox(
               height: 140,
               width: double.infinity,
-              child: Container(
-                width: double.infinity,
-                // color: Colors.grey,
-                decoration: BoxDecoration(
-                  // color: const Color.fromARGB(123, 0, 0, 0),
-
-                  // border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                // shadowColor: Colors.grey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Today\'s National Bank Rate for\n 24 Karat Gold',
-                      softWrap: true,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 22,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Today\'s National Bank Rate for\n 24 Karat Gold',
+                    softWrap: true,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 22,
+                      color: Colors.black,
+                      fontWeight: FontWeight.normal,
                     ),
-                    const SizedBox(height: 20),
-                    Text(
-                      '${currencyFormatter(double.tryParse(pricesMap['24'] ?? '') ?? 0)} per gram ',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.amber,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    '${currencyFormatter(double.tryParse(pricesMap['24'] ?? '') ?? 0)} per gram ',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.amber,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             const Padding(
@@ -207,10 +196,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       flex: 2,
                       child: Text(
                         'Immediate Payment Amount: ',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          // fontSize: 20,
-                        ),
                       ),
                     ),
                     Expanded(
@@ -238,7 +223,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       child: Text('0.01%'),
                     ),
                   ]),
-                  ListTile(title: Text('Bonus by NBE:'), trailing: Text('10%')),
+                  Row(
+                    children: [
+                      Expanded(flex: 2, child: Text('Bonus by NBE:')),
+                      Expanded(flex: 1, child: Text('10%'))
+                    ],
+                  )
                 ],
               ),
             ),

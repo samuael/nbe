@@ -37,14 +37,24 @@ class _ReportScreenState extends State<ReportScreen> {
       body: ListView.builder(
         itemCount: transactions.length,
         itemBuilder: (ctx, index) {
-          return ListTile(
-            leading: Text(DateFormat.MMMd().format(transactions[index].date)),
-            title: Text(
-              '${transactions[index].weight.toStringAsFixed(2)} gram',
-            ),
-            trailing: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [Icon(Icons.check), Text('Completed')],
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            child: Container(
+              decoration: const BoxDecoration(
+                  border: Border(
+                      bottom: BorderSide(
+                          color: Color.fromARGB(160, 158, 158, 158)))),
+              child: ListTile(
+                leading:
+                    Text(DateFormat.MMMd().format(transactions[index].date)),
+                title: Text(
+                  '${transactions[index].weight.toStringAsFixed(2)} gram',
+                ),
+                trailing: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [Icon(Icons.check), Text('Completed')],
+                ),
+              ),
             ),
           );
         },
