@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:nbe/libs.dart';
-import 'package:nbe/services/data_handler.dart';
+
 import 'package:intl/intl.dart';
 
 class ReportScreen extends StatefulWidget {
@@ -29,39 +29,100 @@ class _ReportScreenState extends State<ReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, List<Transaction>> grouped = {};
+    for (var tran in transactions) {
+      final key = DateFormat.yMMMM().format(tran.date);
+      grouped.putIfAbsent(key, () => []);
+      grouped[key]!.add(tran);
+    }
+
+    final months = grouped.keys.toList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Row(
           children: [Icon(Icons.history), SizedBox(width: 10), Text('History')],
         ),
+        actions: [
+          Padding(
+              padding: const EdgeInsetsGeometry.only(right: 4),
+              child:
+                  IconButton(onPressed: () {}, icon: const Icon(Icons.print)))
+        ],
       ),
       body: ListView.builder(
-        itemCount: transactions.length,
+        itemCount: months.length,
         itemBuilder: (ctx, index) {
+          final month = months[index];
+          final transactions = grouped[month]!;
+
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            child: Container(
-              decoration: const BoxDecoration(
-                  border: Border(
-                      bottom: BorderSide(
-                          color: Color.fromARGB(160, 158, 158, 158)))),
-              child: ListTile(
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (ctx) => ReportDetailsScreen(
-                            transaction: transactions[index],
-                          )));
-                },
-                leading:
-                    Text(DateFormat.MMMd().format(transactions[index].date)),
-                title: Text(
-                  '${transactions[index].weight.toStringAsFixed(2)} gram',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  month,
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                trailing: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [Icon(Icons.check), Text('Completed')],
-                ),
-              ),
+                ...transactions.map((transaction) {
+                  return Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    child: Container(
+                      decoration: const BoxDecoration(
+                          border: Border(
+                              bottom: BorderSide(
+                                  color: Color.fromARGB(160, 158, 158, 158)))),
+                      child: ListTile(
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (ctx) => ReportDetailsScreen(
+                                    transaction: transaction,
+                                  )));
+                        },
+                        leading: Text(
+                          DateFormat.MMMd().format(
+                            transaction.date,
+                          ),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        title: Text(
+                          '${transaction.weight.toStringAsFixed(2)} gram',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            transaction.isCompleted
+                                ? Icon(Icons.check)
+                                : Icon(Icons.circle),
+                            Text(
+                              transaction.isCompleted ? 'Completed' : 'Pending',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                })
+              ],
             ),
           );
         },

@@ -284,10 +284,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     ],
                   ),
                   Positioned(
-                    top: 2,
-                    right: 2,
+                    top: 0,
+                    right: 0,
                     child: IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (ctx) => const SettingsScreen()));
+                      },
                       splashColor: Theme.of(context).primaryColor,
                       icon: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 5),
