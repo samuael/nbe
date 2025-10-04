@@ -63,23 +63,153 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
               ],
             ),
             const Divider(),
-            _createListTile('Gold in Grams', '${widget.transaction.weight} g'),
-            _createListTile(
-                'Specific Gravity', '${widget.transaction.specificGravity}'),
-            _createListTile('Karat', 'K'),
-            _createListTile('Purchasing Rate',
-                currencyFormatter(widget.transaction.todayRate)),
+            // _createListTile('Gold in Grams', '${widget.transaction.weight} g'),
+            // _createListTile(
+            //     'Specific Gravity', '${widget.transaction.specificGravity}'),
+            // _createListTile('Karat', 'K'),
+            // _createListTile('Purchasing Rate',
+            //     currencyFormatter(widget.transaction.todayRate)),
+
+            Row(children: [
+              const Expanded(
+                flex: 2,
+                child: Text(
+                  'Gold in Grams: ',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Text(
+                  '${widget.transaction.weight} g',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+            ]),
+            Row(children: [
+              const Expanded(
+                flex: 2,
+                child: Text(
+                  'Specific Gravity:',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Text(
+                  '${widget.transaction.specificGravity}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+            ]),
+            const Row(children: [
+              Expanded(
+                flex: 2,
+                child: Text(
+                  'Karat:',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Text(
+                  'K',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ]),
+            Row(
+              children: [
+                const Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Purchasing Rate',
+                      style: TextStyle(fontSize: 16),
+                    )),
+                Expanded(
+                    flex: 1,
+                    child: Text(
+                      currencyFormatter(widget.transaction.todayRate),
+                      style: const TextStyle(fontSize: 16),
+                    ))
+              ],
+            ),
             const Divider(),
-            Text("Settings", style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            _createListTile('Immediate Payment:', '95%'),
-            _createListTile('Tax per Gram:', '5000 EtB'),
-            _createListTile('Bank Fee in Percentage:', '0.01%'),
-            _createListTile('Bonus', '10%'),
+            const TitledContainer(
+              "Settings",
+              [
+                SizedBox(
+                  height: 5,
+                ),
+                Row(children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Immediate Payment Amount: ',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      '95%',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ]),
+                Row(children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Tax per gram',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      '5000 EtB',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ]),
+                Row(children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Bank Fee in percent:',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      '0.01%',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ]),
+                Row(
+                  children: [
+                    Expanded(
+                        flex: 2,
+                        child: Text(
+                          'Bonus by NBE:',
+                          style: TextStyle(fontSize: 16),
+                        )),
+                    Expanded(
+                        flex: 1,
+                        child: Text(
+                          '10%',
+                          style: TextStyle(fontSize: 16),
+                        ))
+                  ],
+                )
+              ],
+            ),
             const SizedBox(
               height: 20,
             ),
-            FancyWideButton('Print', () {})
           ],
         ),
       ),
