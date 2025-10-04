@@ -15,12 +15,12 @@ class SettingLocalProvider {
 
   static String createOrReplaceTableString() {
     return """CREATE TABLE IF NOT EXISTS $tableName(
-        $_idCol ${SQLLiteTypes.intType} PRIMARY KEY,
+        $_idCol ${SQLLiteTypes.stringType} PRIMARY KEY,
         $_nbe24KaratRateCol ${SQLLiteTypes.doubleType} NOT NULL,
         $_taxPerGramCol ${SQLLiteTypes.doubleType} DEFAULT 0.0,
         $_bankFeePercentageCol ${SQLLiteTypes.doubleType} NOT NULL,
         $_excludePercentageCol ${SQLLiteTypes.doubleType} default 0.0 NOT NULL,
-        $_createdAtCol ${SQLLiteTypes.intType} NOT NULL,
+        $_createdAtCol ${SQLLiteTypes.intType} NOT NULL
       )""";
   }
 
@@ -43,7 +43,7 @@ class SettingLocalProvider {
     return result.isNotEmpty;
   }
 
-  Future<List<Setting>?> getRecentSetting(int offset, int limit) async {
+  Future<List<Setting>> getRecentSettings(int offset, int limit) async {
     final db = await wrapper.database;
     final result = await db.query(
       tableName,
@@ -51,14 +51,14 @@ class SettingLocalProvider {
       offset: offset,
       limit: limit,
     );
-    result.map((el) {
+    return result.map((el) {
       return Setting.fromJson(
         el,
       );
     }).toList();
   }
 
-  Future<Setting?> getSettingByID(int id) async {
+  Future<Setting?> getSettingByID(String id) async {
     final db = await wrapper.database;
     final result = await db.query(
       tableName,

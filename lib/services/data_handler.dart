@@ -31,7 +31,9 @@ class DataHandler {
             weight REAL,
             specific_gravity REAL,
             total_amount REAL,
-            is_completed INTEGER)''');
+            is_completed INTEGER,
+            setting_id TEXT
+            )''');
       },
     );
   }
@@ -46,6 +48,7 @@ class DataHandler {
       'specific_gravity': transaction.specificGravity,
       'total_amount': transaction.totalAmount,
       'is_completed': transaction.isCompleted ? 1 : 0,
+      'setting_id': transaction.settingId,
     });
   }
 
@@ -63,6 +66,7 @@ class DataHandler {
         totalAmount: (tran['total_amount'] as num).toDouble(),
         weight: (tran['weight'] as num).toDouble(),
         isCompleted: tran['is_completed'] as int == 1,
+        settingId: tran['setting_id'] as String,
       );
       transactions.add(transaction);
     }
@@ -78,6 +82,7 @@ class Transaction {
   final double specificGravity;
   final double totalAmount;
   final bool isCompleted;
+  final String settingId;
 
   const Transaction({
     required this.id,
@@ -87,6 +92,7 @@ class Transaction {
     required this.totalAmount,
     required this.weight,
     required this.isCompleted,
+    required this.settingId,
   });
 }
 

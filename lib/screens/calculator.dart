@@ -8,6 +8,8 @@ import 'package:nbe/libs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+final uuid = const Uuid();
+
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
 
@@ -21,8 +23,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       TextEditingController();
   Map<String, String> pricesMap = {};
   final url = 'https://api.nbe.gov.et/api/filter-gold-rates';
-  final uuid = const Uuid();
-
+  Setting? _setting;
   //to check if the day has changed
   bool areSameDates(DateTime day1, DateTime day2) {
     return day1.toIso8601String().substring(0, 10) ==
@@ -30,7 +31,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   // to get the rates either from cache or from api
-  Future<void> getPurchasingRate() async {
+  Future<void> _getPurchasingRate() async {
     final cached = await SharedPreferences.getInstance();
     if (cached.getString('last_updated') != null) {
       print('DATE');
@@ -96,14 +97,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         action: SnackBarAction(
             label: 'Retry',
             onPressed: () {
-              getPurchasingRate();
+              _getPurchasingRate();
+              _getSettings();
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
             }),
       ),
     );
   }
 
-  Transaction? calculate() {
+  Transaction? _calculate() {
     final weight = double.tryParse(_weightController.text);
     final specificGravity = double.tryParse(_specificGravityController.text);
     if (weight == null || specificGravity == null) {
@@ -135,12 +137,31 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       totalAmount: totalAmount,
       weight: weight,
       isCompleted: true,
+      settingId: _setting!.id,
     );
+  }
+
+  void _getSettings() async {
+    final db = NBEDatabase.constructor(
+        [SettingLocalProvider.createOrReplaceTableString()]);
+    final recentSettings =
+        await SettingLocalProvider(db).getRecentSettings(0, 10);
+    if (recentSettings.isNotEmpty) {
+      setState(() {
+        _setting = recentSettings.last;
+      });
+    } else {
+      setState(() {
+        _setting = Setting(uuid.v4(),
+            double.tryParse(pricesMap['24'] ?? '') ?? 0, 5000, 0.01, 0.1);
+      });
+    }
   }
 
   @override
   void initState() {
-    getPurchasingRate();
+    _getPurchasingRate();
+    _getSettings();
     super.initState();
   }
 
@@ -355,7 +376,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             FancyWideButton(
               "Calculate",
               () {
-                final transaction = calculate();
+                final transaction = _calculate();
                 if (transaction == null) {
                   return;
                 }

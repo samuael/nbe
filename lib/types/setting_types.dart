@@ -1,5 +1,5 @@
 class Setting {
-  int id;
+  String id;
   double nbe24KaratRate;
   double taxPerGram;
   double bankFeePercentage;
