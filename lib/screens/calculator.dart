@@ -23,7 +23,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       TextEditingController();
   Map<String, String> pricesMap = {};
   final url = 'https://api.nbe.gov.et/api/filter-gold-rates';
-  Setting? _setting;
+  Setting _setting = Setting(uuid.v4(), 0, 5000, 0.01, 0.1);
   //to check if the day has changed
   bool areSameDates(DateTime day1, DateTime day2) {
     return day1.toIso8601String().substring(0, 10) ==
@@ -137,7 +137,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       totalAmount: totalAmount,
       weight: weight,
       isCompleted: true,
-      settingId: _setting!.id,
+      settingId: _setting.id,
     );
   }
 
@@ -284,7 +284,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         ),
                         Expanded(
                           flex: 1,
-                          child: Text('5000 EtB', style: _commonLabelStyle),
+                          child: Text('${_setting.taxPerGram} EtB',
+                              style: _commonLabelStyle),
                         ),
                       ]),
                       Row(children: [
@@ -295,7 +296,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         ),
                         Expanded(
                           flex: 1,
-                          child: Text('0.01%', style: _commonLabelStyle),
+                          child: Text('${_setting.bankFeePercentage * 100}%',
+                              style: _commonLabelStyle),
                         ),
                       ]),
                       Row(
@@ -304,7 +306,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               flex: 2,
                               child: Text('Bonus by NBE:',
                                   style: _commonLabelStyle)),
-                          const Expanded(flex: 1, child: Text('10%'))
+                          Expanded(
+                              flex: 1,
+                              child:
+                                  Text('${_setting.excludePercentage * 100}%'))
                         ],
                       )
                     ],
@@ -313,9 +318,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     top: 0,
                     right: 0,
                     child: IconButton(
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (ctx) => const SettingsScreen()));
+                      onPressed: () async {
+                        final Setting? newSetting = await Navigator.of(context)
+                            .push(MaterialPageRoute(
+                                builder: (ctx) => SettingsScreen(
+                                    nbe24KaratRate: double.tryParse(
+                                            pricesMap['24'] ?? '') ??
+                                        0)));
+
+                        if (newSetting != null) {
+                          setState(() {
+                            _setting = newSetting;
+                          });
+                        }
                       },
                       splashColor: Theme.of(context).primaryColor,
                       icon: Container(
@@ -387,7 +402,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   MaterialPageRoute(
                     builder: (ctx) => CalculationDetails(
                       transaction: transaction,
-                      setting: _setting!,
+                      setting: _setting,
                     ),
                   ),
                 );

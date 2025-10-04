@@ -3,7 +3,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:nbe/libs.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final double nbe24KaratRate;
+  const SettingsScreen({super.key, required this.nbe24KaratRate});
 
   @override
   State<StatefulWidget> createState() => _SettingsScreenState();
@@ -81,7 +82,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(
               height: 24,
             ),
-            FancyWideButton('Save', () {})
+            FancyWideButton('Save', () {
+              final tax = double.tryParse(taxController.text) ?? 0;
+              final bankFee = double.tryParse(bankFeeController.text) ?? 0;
+              final bonus = double.tryParse(bonusController.text) ?? 0;
+              final setting = Setting(
+                uuid.v4(),
+                widget.nbe24KaratRate,
+                tax,
+                bankFee / 100,
+                bonus / 100,
+              );
+              Navigator.of(context).pop(setting);
+            })
           ],
         ),
       ),
