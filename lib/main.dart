@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:nbe/screens/calculator.dart';
-import 'package:nbe/screens/report_screen.dart';
+import 'libs.dart';
 
 final ThemeData theme = ThemeData(
   // scaffoldBackgroundColor: const Color.fromARGB(255, 3, 37, 65),
@@ -31,6 +29,15 @@ final ThemeData theme = ThemeData(
 );
 
 void main() {
+  // Giving the constructor a list of tables to create.
+  NBEDatabase nbeDB = NBEDatabase.constructor([
+    SettingLocalProvider.createOrReplaceTableString(),
+    SellRecordLocalProvider.createOrReplaceTableString(),
+  ]);
+
+  final sellRecordProvider = SellRecordLocalProvider(nbeDB);
+  final settingProvider = SettingLocalProvider(nbeDB);
+
   runApp(const MyApp());
 }
 
