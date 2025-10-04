@@ -2,16 +2,18 @@ import 'package:nbe/libs.dart';
 
 class CalculationDetails extends StatefulWidget {
   final Transaction transaction;
-  const CalculationDetails({required this.transaction, super.key});
+  final Setting setting;
+  const CalculationDetails(
+      {required this.transaction, required this.setting, super.key});
   @override
   State<CalculationDetails> createState() => _CalculationDetailsState();
 }
 
 class _CalculationDetailsState extends State<CalculationDetails> {
   final _remainingController = TextEditingController();
-  final tax = 100;
-  final bonus = 0.1;
-  final bankFee = 0.0001;
+  late final double tax;
+  late final double bonus;
+  late final double bankFee;
   final immediatePayment = 0.95;
   bool isSaving = false;
 
@@ -37,10 +39,13 @@ class _CalculationDetailsState extends State<CalculationDetails> {
   }
 
   void onSaveTapped() async {
+    final db = NBEDatabase.constructor(
+        [SettingLocalProvider.createOrReplaceTableString()]);
     setState(() {
       isSaving = true;
     });
     await DataHandler.instance.addTransactionToDb(widget.transaction);
+    await SettingLocalProvider(db).insertSetting(widget.setting);
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -56,6 +61,9 @@ class _CalculationDetailsState extends State<CalculationDetails> {
 
   @override
   void initState() {
+    tax = widget.setting.taxPerGram;
+    bankFee = widget.setting.bankFeePercentage;
+    bonus = widget.setting.excludePercentage;
     calculateValues();
     super.initState();
   }

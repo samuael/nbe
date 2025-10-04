@@ -385,8 +385,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (ctx) =>
-                        CalculationDetails(transaction: transaction),
+                    builder: (ctx) => CalculationDetails(
+                      transaction: transaction,
+                      setting: _setting!,
+                    ),
                   ),
                 );
               },
