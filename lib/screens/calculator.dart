@@ -144,108 +144,184 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     super.dispose();
   }
 
+  final TextStyle _commonLabelStyle = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    color: Colors.black.withOpacity(.5),
+    overflow: TextOverflow.visible,
+  );
+
   @override
   Widget build(BuildContext context) {
+    final Container _tinyDivider = Container(
+      color: Colors.amber.withOpacity(.1),
+      width: MediaQuery.of(context).size.width * .5,
+      height: 0.5,
+    );
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gold Purchaser'),
-        actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
-        ],
+        title: const Text(
+          'Calculate',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(
-              height: 140,
-              width: double.infinity,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Today\'s National Bank Rate for\n 24 Karat Gold',
-                    softWrap: true,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 22,
-                      color: Colors.black,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    '${currencyFormatter(double.tryParse(pricesMap['24'] ?? '') ?? 0)} per gram ',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.amber,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
+            Container(
+              width: MediaQuery.of(context).size.width * .9,
+              decoration: BoxDecoration(
+                border: Border(
+                  left: const BorderSide(color: Colors.orange),
+                  right: const BorderSide(color: Colors.orange),
+                  bottom: BorderSide(color: Colors.black.withOpacity(.05)),
+                ),
+              ),
+              // padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              margin: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5),
+              child: TitledContainer(
+                'Today\'s National Bank Rate',
+                ["24", "23", "22", "21", "20", "19"].map<Column>((k) {
+                  return Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Text(
+                            '$k Karrat',
+                            textAlign: TextAlign.center,
+                            style: k == "24"
+                                ? TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.black.withOpacity(.8),
+                                    overflow: TextOverflow.visible,
+                                  )
+                                : _commonLabelStyle,
+                          ),
+                          Text(
+                            '${currencyFormatter(double.tryParse(pricesMap[k] ?? '') ?? 0)}/ ግራም ',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      _tinyDivider,
+                    ],
+                  );
+                }).toList(),
               ),
             ),
-            Padding(
+            Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  left: const BorderSide(color: Colors.orange),
+                  right: const BorderSide(color: Colors.orange),
+                  bottom: BorderSide(color: Colors.black.withOpacity(.05)),
+                ),
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              margin: const EdgeInsets.symmetric(horizontal: 20.0),
+              width: MediaQuery.of(context).size.width * .9,
+              height: MediaQuery.of(context).size.height * .15,
               child: Stack(
                 children: [
-                  const TitledContainer(
+                  TitledContainer(
                     "Settings",
                     [
                       Row(children: [
                         Expanded(
                           flex: 2,
                           child: Text(
-                            'Immediate Payment Amount: ',
+                            'Immediate Payment Amount ',
+                            style: _commonLabelStyle,
                           ),
                         ),
-                        Expanded(
+                        const Expanded(
                           flex: 1,
-                          child: Text('95%'),
+                          child: Text(
+                            '95%',
+                          ),
                         ),
                       ]),
                       Row(children: [
                         Expanded(
                           flex: 2,
-                          child: Text('Tax per gram'),
+                          child: Text('Tax per gram', style: _commonLabelStyle),
                         ),
                         Expanded(
                           flex: 1,
-                          child: Text('5000 EtB'),
+                          child: Text('5000 EtB', style: _commonLabelStyle),
                         ),
                       ]),
                       Row(children: [
                         Expanded(
                           flex: 2,
-                          child: Text('Bank Fee in percent:'),
+                          child: Text('Bank Fee in percent:',
+                              style: _commonLabelStyle),
                         ),
                         Expanded(
                           flex: 1,
-                          child: Text('0.01%'),
+                          child: Text('0.01%', style: _commonLabelStyle),
                         ),
                       ]),
                       Row(
                         children: [
-                          Expanded(flex: 2, child: Text('Bonus by NBE:')),
-                          Expanded(flex: 1, child: Text('10%'))
+                          Expanded(
+                              flex: 2,
+                              child: Text('Bonus by NBE:',
+                                  style: _commonLabelStyle)),
+                          const Expanded(flex: 1, child: Text('10%'))
                         ],
                       )
                     ],
                   ),
                   Positioned(
-                      right: 0,
-                      top: 0,
-                      child: IconButton(
-                        onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (ctx) => const SettingsScreen()));
-                        },
-                        icon: const Icon(Icons.edit),
-                      ))
+                    top: 2,
+                    right: 2,
+                    child: IconButton(
+                      onPressed: () {},
+                      splashColor: Theme.of(context).primaryColor,
+                      icon: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(
+                              color: Theme.of(context)
+                                  .primaryColor
+                                  .withOpacity(.5)),
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              "Edit",
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Icon(
+                              Icons.edit,
+                              color: Theme.of(context).primaryColor,
+                              size: 14,
+                            )
+                          ],
+                        ),
+                      ),
+                      color: Colors.blue,
+                    ),
+                  ),
                 ],
               ),
             ),
-            const Divider(),
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

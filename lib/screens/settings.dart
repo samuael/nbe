@@ -18,7 +18,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         child: Column(
-          spacing: 8,
           children: [
             CommonTextField(
                 label: 'Immediate Payment Amount',

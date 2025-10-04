@@ -41,7 +41,6 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          spacing: 0,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 12),
