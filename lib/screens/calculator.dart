@@ -8,7 +8,7 @@ import 'package:nbe/libs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
-final uuid = const Uuid();
+const uuid = Uuid();
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -23,7 +23,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       TextEditingController();
   Map<String, String> pricesMap = {};
   final url = 'https://api.nbe.gov.et/api/filter-gold-rates';
-  Setting _setting = Setting(uuid.v4(), 0, 5000, 0.01, 0.1);
+  Setting _setting = Setting(uuid.v4(), 0, 5000, 0.0001, 0.1);
+
   //to check if the day has changed
   bool areSameDates(DateTime day1, DateTime day2) {
     return day1.toIso8601String().substring(0, 10) ==
@@ -33,10 +34,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   // to get the rates either from cache or from api
   Future<void> _getPurchasingRate() async {
     final cached = await SharedPreferences.getInstance();
-    if (cached.getString('last_updated') != null) {
-      print('DATE');
-      print(cached.getString('last_updated'));
-    }
+    if (cached.getString('last_updated') != null) {}
     DateTime? lastUpdated = DateTime.tryParse(
       cached.getString('last_updated') ?? '',
     );
@@ -142,8 +140,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   void _getSettings() async {
-    final db = NBEDatabase.constructor(
-        [SettingLocalProvider.createOrReplaceTableString()]);
+    final db = NBEDatabase.constructor([
+      SettingLocalProvider.createOrReplaceTableString(),
+    ]);
     final recentSettings =
         await SettingLocalProvider(db).getRecentSettings(0, 10);
     if (recentSettings.isNotEmpty) {
@@ -153,7 +152,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     } else {
       setState(() {
         _setting = Setting(uuid.v4(),
-            double.tryParse(pricesMap['24'] ?? '') ?? 0, 5000, 0.01, 0.1);
+            double.tryParse(pricesMap['24'] ?? '') ?? 0, 5000, 0.0001, 0.1);
       });
     }
   }

@@ -39,11 +39,13 @@ class _CalculationDetailsState extends State<CalculationDetails> {
   }
 
   void onSaveTapped() async {
-    final db = NBEDatabase.constructor(
-        [SettingLocalProvider.createOrReplaceTableString()]);
+    final db = NBEDatabase.constructor([
+      SettingLocalProvider.createOrReplaceTableString(),
+    ]);
     setState(() {
       isSaving = true;
     });
+    await DataHandler.instance.ensureTableExists('Transactions');
     await DataHandler.instance.addTransactionToDb(widget.transaction);
     await SettingLocalProvider(db).insertSetting(widget.setting);
 
