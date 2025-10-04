@@ -17,6 +17,22 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
     color: Colors.black.withOpacity(0.6),
     overflow: TextOverflow.visible,
   );
+  Setting? setting;
+
+  @override
+  void initState() {
+    super.initState();
+    _getSetting(widget.transaction.settingId);
+  }
+
+  void _getSetting(String id) async {
+    final db = NBEDatabase.constructor(
+        [SettingLocalProvider.createOrReplaceTableString()]);
+    final newSetting = await SettingLocalProvider(db).getSettingByID(id);
+    setState(() {
+      setting = newSetting;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +173,7 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
             TitledContainer(
               "Settings",
               [
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
                 Row(children: [
@@ -187,7 +203,9 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                   Expanded(
                     flex: 1,
                     child: Text(
-                      '5000 EtB',
+                      setting != null
+                          ? (currencyFormatter(setting!.taxPerGram))
+                          : '5,000 ብር',
                       style: _labelStyle,
                     ),
                   ),
@@ -203,7 +221,9 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                   Expanded(
                     flex: 1,
                     child: Text(
-                      '0.01%',
+                      setting != null
+                          ? '${setting!.bankFeePercentage * 100} %'
+                          : '0.01%',
                       style: _labelStyle,
                     ),
                   ),
@@ -219,7 +239,9 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                     Expanded(
                         flex: 1,
                         child: Text(
-                          '10%',
+                          setting != null
+                              ? '${setting!.excludePercentage * 100} %'
+                              : '10%',
                           style: _labelStyle,
                         ))
                   ],

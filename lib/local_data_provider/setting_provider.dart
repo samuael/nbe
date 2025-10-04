@@ -37,7 +37,8 @@ class SettingLocalProvider {
     final db = await wrapper.database;
     final result = await db.query(
       tableName,
-      where: "$_idCol=$id",
+      where: "$_idCol= ?",
+      whereArgs: [id],
       limit: 1,
     );
     return result.isNotEmpty;
@@ -60,10 +61,8 @@ class SettingLocalProvider {
 
   Future<Setting?> getSettingByID(String id) async {
     final db = await wrapper.database;
-    final result = await db.query(
-      tableName,
-      where: "$_idCol=$id",
-    );
+    final result =
+        await db.query(tableName, where: "$_idCol= ?", whereArgs: [id]);
     if (result.isEmpty) {
       return null;
     }
