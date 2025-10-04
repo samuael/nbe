@@ -150,7 +150,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       appBar: AppBar(
         title: const Text('Gold Purchaser'),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.edit)),
           IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
         ],
       ),
@@ -186,49 +185,63 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ],
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.0),
-              child: TitledContainer(
-                "Settings",
-                [
-                  Row(children: [
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        'Immediate Payment Amount: ',
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Text('95%'),
-                    ),
-                  ]),
-                  Row(children: [
-                    Expanded(
-                      flex: 2,
-                      child: Text('Tax per gram'),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Text('5000 EtB'),
-                    ),
-                  ]),
-                  Row(children: [
-                    Expanded(
-                      flex: 2,
-                      child: Text('Bank Fee in percent:'),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Text('0.01%'),
-                    ),
-                  ]),
-                  Row(
-                    children: [
-                      Expanded(flex: 2, child: Text('Bonus by NBE:')),
-                      Expanded(flex: 1, child: Text('10%'))
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Stack(
+                children: [
+                  const TitledContainer(
+                    "Settings",
+                    [
+                      Row(children: [
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            'Immediate Payment Amount: ',
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Text('95%'),
+                        ),
+                      ]),
+                      Row(children: [
+                        Expanded(
+                          flex: 2,
+                          child: Text('Tax per gram'),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Text('5000 EtB'),
+                        ),
+                      ]),
+                      Row(children: [
+                        Expanded(
+                          flex: 2,
+                          child: Text('Bank Fee in percent:'),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Text('0.01%'),
+                        ),
+                      ]),
+                      Row(
+                        children: [
+                          Expanded(flex: 2, child: Text('Bonus by NBE:')),
+                          Expanded(flex: 1, child: Text('10%'))
+                        ],
+                      )
                     ],
-                  )
+                  ),
+                  Positioned(
+                      right: 0,
+                      top: 0,
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (ctx) => const SettingsScreen()));
+                        },
+                        icon: const Icon(Icons.edit),
+                      ))
                 ],
               ),
             ),
