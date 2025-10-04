@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nbe/libs.dart';
 import 'package:nbe/services/data_handler.dart';
 import 'package:intl/intl.dart';
 
@@ -45,6 +46,12 @@ class _ReportScreenState extends State<ReportScreen> {
                       bottom: BorderSide(
                           color: Color.fromARGB(160, 158, 158, 158)))),
               child: ListTile(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (ctx) => ReportDetailsScreen(
+                            transaction: transactions[index],
+                          )));
+                },
                 leading:
                     Text(DateFormat.MMMd().format(transactions[index].date)),
                 title: Text(
