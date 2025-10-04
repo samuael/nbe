@@ -11,19 +11,12 @@ class ReportDetailsScreen extends StatefulWidget {
 }
 
 class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
-  Widget _createListTile(String title, String trailing) {
-    return ListTile(
-      minVerticalPadding: 0,
-      title: Text(
-        title,
-        style: const TextStyle(fontSize: 16),
-      ),
-      trailing: Text(
-        trailing,
-        style: const TextStyle(fontSize: 14),
-      ),
-    );
-  }
+  final TextStyle _labelStyle = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+    color: Colors.black.withOpacity(0.6),
+    overflow: TextOverflow.visible,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +41,14 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                    "Date: ${DateFormat.yMMMd().format(widget.transaction.date)}"),
+                  "Date: ${DateFormat.yMMMd().format(widget.transaction.date)}",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                    overflow: TextOverflow.visible,
+                  ),
+                ),
                 Chip(
                   label: Text(
                       widget.transaction.isCompleted ? 'Completed' : 'Pending'),
@@ -63,79 +63,98 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
               ],
             ),
             const Divider(),
-            // _createListTile('Gold in Grams', '${widget.transaction.weight} g'),
-            // _createListTile(
-            //     'Specific Gravity', '${widget.transaction.specificGravity}'),
-            // _createListTile('Karat', 'K'),
-            // _createListTile('Purchasing Rate',
-            //     currencyFormatter(widget.transaction.todayRate)),
-
             Row(children: [
-              const Expanded(
+              Expanded(
                 flex: 2,
                 child: Text(
                   'Gold in Grams: ',
-                  style: TextStyle(fontSize: 16),
+                  style: _labelStyle,
                 ),
               ),
               Expanded(
                 flex: 1,
                 child: Text(
                   '${widget.transaction.weight} g',
-                  style: const TextStyle(fontSize: 16),
+                  style: _labelStyle,
                 ),
               ),
             ]),
             Row(children: [
-              const Expanded(
+              Expanded(
                 flex: 2,
                 child: Text(
                   'Specific Gravity:',
-                  style: TextStyle(fontSize: 16),
+                  style: _labelStyle,
                 ),
               ),
               Expanded(
                 flex: 1,
                 child: Text(
-                  '${widget.transaction.specificGravity}',
-                  style: const TextStyle(fontSize: 16),
+                  '${widget.transaction.specificGravity} cm^3',
+                  style: _labelStyle,
                 ),
               ),
             ]),
-            const Row(children: [
+            Row(children: [
               Expanded(
                 flex: 2,
                 child: Text(
                   'Karat:',
-                  style: TextStyle(fontSize: 16),
+                  style: _labelStyle,
                 ),
               ),
               Expanded(
                 flex: 1,
                 child: Text(
                   'K',
-                  style: TextStyle(fontSize: 16),
+                  style: _labelStyle,
                 ),
               ),
             ]),
             Row(
               children: [
-                const Expanded(
+                Expanded(
                     flex: 2,
                     child: Text(
-                      'Purchasing Rate',
-                      style: TextStyle(fontSize: 16),
+                      'Purchasing Rate:',
+                      style: _labelStyle,
                     )),
                 Expanded(
                     flex: 1,
                     child: Text(
                       currencyFormatter(widget.transaction.todayRate),
-                      style: const TextStyle(fontSize: 16),
+                      style: _labelStyle,
                     ))
               ],
             ),
+            Row(
+              children: [
+                const Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Total Amount:',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                        overflow: TextOverflow.visible,
+                      ),
+                    )),
+                Expanded(
+                  child: Text(
+                    currencyFormatter(widget.transaction.totalAmount),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                      overflow: TextOverflow.visible,
+                    ),
+                  ),
+                )
+              ],
+            ),
             const Divider(),
-            const TitledContainer(
+            TitledContainer(
               "Settings",
               [
                 SizedBox(
@@ -146,14 +165,14 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                     flex: 2,
                     child: Text(
                       'Immediate Payment Amount: ',
-                      style: TextStyle(fontSize: 16),
+                      style: _labelStyle,
                     ),
                   ),
                   Expanded(
                     flex: 1,
                     child: Text(
                       '95%',
-                      style: TextStyle(fontSize: 16),
+                      style: _labelStyle,
                     ),
                   ),
                 ]),
@@ -162,14 +181,14 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                     flex: 2,
                     child: Text(
                       'Tax per gram',
-                      style: TextStyle(fontSize: 16),
+                      style: _labelStyle,
                     ),
                   ),
                   Expanded(
                     flex: 1,
                     child: Text(
                       '5000 EtB',
-                      style: TextStyle(fontSize: 16),
+                      style: _labelStyle,
                     ),
                   ),
                 ]),
@@ -178,14 +197,14 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                     flex: 2,
                     child: Text(
                       'Bank Fee in percent:',
-                      style: TextStyle(fontSize: 16),
+                      style: _labelStyle,
                     ),
                   ),
                   Expanded(
                     flex: 1,
                     child: Text(
                       '0.01%',
-                      style: TextStyle(fontSize: 16),
+                      style: _labelStyle,
                     ),
                   ),
                 ]),
@@ -195,13 +214,13 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                         flex: 2,
                         child: Text(
                           'Bonus by NBE:',
-                          style: TextStyle(fontSize: 16),
+                          style: _labelStyle,
                         )),
                     Expanded(
                         flex: 1,
                         child: Text(
                           '10%',
-                          style: TextStyle(fontSize: 16),
+                          style: _labelStyle,
                         ))
                   ],
                 )

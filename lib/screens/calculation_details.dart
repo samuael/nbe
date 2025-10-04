@@ -70,30 +70,72 @@ class _CalculationDetailsState extends State<CalculationDetails> {
     super.initState();
   }
 
+  final TextStyle _labelStyle = const TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+    color: Colors.black,
+    overflow: TextOverflow.visible,
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Calculation Details')),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         child: SingleChildScrollView(
           child: Column(
+            spacing: 6,
             children: [
-              ListTile(
-                title: const Text('Total of 95%'),
-                trailing: Text(currencyFormatter(immediatePaymentValue)),
+              Row(
+                children: [
+                  Expanded(
+                      flex: 2, child: Text('Total of 95%', style: _labelStyle)),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      currencyFormatter(immediatePaymentValue),
+                      style: _labelStyle,
+                    ),
+                  )
+                ],
               ),
-              ListTile(
-                title: const Text('Bank Fee:'),
-                trailing: Text(currencyFormatter(bankFeeValue)),
+              Row(
+                children: [
+                  Expanded(
+                      flex: 2, child: Text('Bank Fee:', style: _labelStyle)),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      currencyFormatter(bankFeeValue),
+                      style: _labelStyle,
+                    ),
+                  )
+                ],
               ),
-              ListTile(
-                title: const Text('Tax:'),
-                trailing: Text(currencyFormatter(taxValue)),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Text('Tax:', style: _labelStyle)),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      currencyFormatter(taxValue),
+                      style: _labelStyle,
+                    ),
+                  )
+                ],
               ),
-              ListTile(
-                title: const Text('Net:'),
-                trailing: Text(currencyFormatter(netValue)),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Text('Net:', style: _labelStyle)),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      currencyFormatter(netValue),
+                      style: _labelStyle,
+                    ),
+                  )
+                ],
               ),
               const Divider(),
               Padding(
@@ -105,9 +147,25 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                   onChanged: (val) {},
                 ),
               ),
-              ListTile(
-                title: const Text('Net Complete:'),
-                trailing: Text(currencyFormatter(netCompleted)),
+              const SizedBox(
+                height: 20,
+              ),
+              Row(
+                children: [
+                  Expanded(
+                      flex: 2,
+                      child: Text('Net Completed:', style: _labelStyle)),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      currencyFormatter(netCompleted),
+                      style: _labelStyle,
+                    ),
+                  )
+                ],
+              ),
+              const SizedBox(
+                height: 12,
               ),
               ElevatedButton(
                 style: const ButtonStyle(

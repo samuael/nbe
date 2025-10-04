@@ -269,10 +269,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             style: _commonLabelStyle,
                           ),
                         ),
-                        const Expanded(
+                        Expanded(
                           flex: 1,
                           child: Text(
                             '95%',
+                            style: _commonLabelStyle,
                           ),
                         ),
                       ]),
@@ -306,9 +307,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               child: Text('Bonus by NBE:',
                                   style: _commonLabelStyle)),
                           Expanded(
-                              flex: 1,
-                              child:
-                                  Text('${_setting.excludePercentage * 100}%'))
+                            flex: 1,
+                            child: Text(
+                              '${_setting.excludePercentage * 100}%',
+                              style: _commonLabelStyle,
+                            ),
+                          )
                         ],
                       )
                     ],
