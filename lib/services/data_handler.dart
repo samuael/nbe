@@ -93,5 +93,5 @@ class Transaction {
 String currencyFormatter(double value) {
   final formatter = NumberFormat('#,##0.##');
   final formattedValue = formatter.format(value);
-  return '$formattedValue EtB';
+  return '$formattedValue ብር';
 }
