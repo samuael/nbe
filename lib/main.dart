@@ -119,6 +119,8 @@ class _NavigationControllerState extends State<NavigationController> {
         onTap: (value) {
           setState(() {
             _currentIndex = value;
+            //dispose the snackbar of one screen when moving to the next
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
           });
         },
       ),

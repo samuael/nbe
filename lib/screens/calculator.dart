@@ -42,24 +42,34 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     if (lastUpdated == null || !areSameDates(lastUpdated, latestDate)) {
       final parsed = Uri.parse(url);
-      final response = await http.get(parsed);
+      try {
+        final response = await http.get(parsed);
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> document = jsonDecode(response.body);
+        if (response.statusCode == 200) {
+          final Map<String, dynamic> document = jsonDecode(response.body);
 
-        try {
-          final List rates = document['data'];
-          cached.setString('last_updated', rates[0]['date'] as String);
-          for (var rate in rates) {
-            cached.setString(rate["gold_type"]["karat"], rate["price_birr"]);
-            pricesMap[rate["gold_type"]["karat"]] = rate["price_birr"];
+          try {
+            final List rates = document['data'];
+            cached.setString('last_updated', rates[0]['date'] as String);
+            for (var rate in rates) {
+              cached.setString(rate["gold_type"]["karat"], rate["price_birr"]);
+              pricesMap[rate["gold_type"]["karat"]] = rate["price_birr"];
+            }
+            setState(() {});
+          } catch (e) {
+            print('Something wrong in caching');
           }
-          setState(() {});
-        } catch (e) {
-          print('Something wrong in caching');
+        } else {
+          print('Failed to load page. Status Code:${response.statusCode}');
+          if (context.mounted) {
+            _showSnackBar(
+                'Failed to load the purchasing rates. Server error: ${response.statusCode}');
+          }
         }
-      } else {
-        print('Failed to load page. Status Code:${response.statusCode}');
+      } catch (e) {
+        if (context.mounted) {
+          _showSnackBar('Failed to load the purchasing rates');
+        }
       }
     } else {
       final keys = cached.getKeys();
@@ -71,6 +81,21 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       }
       setState(() {});
     }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(days: 1),
+        content: Text(message),
+        action: SnackBarAction(
+            label: 'Retry',
+            onPressed: () {
+              getPurchasingRate();
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            }),
+      ),
+    );
   }
 
   Transaction? calculate() {
@@ -115,6 +140,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -135,14 +165,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 // color: Colors.grey,
                 decoration: BoxDecoration(
                   // color: const Color.fromARGB(123, 0, 0, 0),
-                  image: DecorationImage(
-                    opacity: 0.5,
-                    fit: BoxFit.cover,
-                    image: Image.asset(
-                      'lib/assets/images/gold_pic.png',
-                      width: double.infinity,
-                    ).image,
-                  ),
+
                   // border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -251,6 +274,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 }
                 _specificGravityController.clear();
                 _weightController.clear();
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (ctx) =>
