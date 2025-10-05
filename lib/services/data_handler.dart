@@ -16,7 +16,8 @@ class DataHandler {
       specific_gravity REAL NOT NULL CHECK(specific_gravity > 0),
       total_amount REAL NOT NULL CHECK(total_amount >= 0),
       is_completed INTEGER NOT NULL CHECK(is_completed IN (0,1)),
-      setting_id TEXT NOT NULL
+      setting_id TEXT NOT NULL,
+      karat TEXT
     );
   ''';
 
@@ -55,6 +56,7 @@ class DataHandler {
         'total_amount': transaction.totalAmount,
         'is_completed': transaction.isCompleted ? 1 : 0,
         'setting_id': transaction.settingId,
+        'karat': transaction.karat,
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -79,6 +81,7 @@ class DataHandler {
         weight: (tran['weight'] as num).toDouble(),
         isCompleted: tran['is_completed'] as int == 1,
         settingId: tran['setting_id'] as String,
+        karat: tran['karat'] as String,
       );
       transactions.add(transaction);
       print('member ${transaction.id}');
@@ -88,6 +91,7 @@ class DataHandler {
 }
 
 class Transaction {
+  final String karat;
   final String id;
   final DateTime date;
   final double todayRate;
@@ -98,6 +102,7 @@ class Transaction {
   final String settingId;
 
   const Transaction({
+    required this.karat,
     required this.id,
     required this.date,
     required this.specificGravity,

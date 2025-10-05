@@ -136,6 +136,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       weight: weight,
       isCompleted: true,
       settingId: _setting.id,
+      karat: estimatedCarat.toString(),
     );
   }
 

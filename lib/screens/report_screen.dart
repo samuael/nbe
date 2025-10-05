@@ -193,8 +193,8 @@ class _ReportScreenState extends State<ReportScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             transaction.isCompleted
-                                ? Icon(Icons.check)
-                                : Icon(Icons.circle),
+                                ? const Icon(Icons.check)
+                                : const Icon(Icons.circle),
                             Text(
                               transaction.isCompleted ? 'Completed' : 'Pending',
                               textAlign: TextAlign.center,

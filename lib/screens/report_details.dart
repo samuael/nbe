@@ -122,7 +122,7 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
               Expanded(
                 flex: 1,
                 child: Text(
-                  'K',
+                  widget.transaction.karat,
                   style: _labelStyle,
                 ),
               ),
