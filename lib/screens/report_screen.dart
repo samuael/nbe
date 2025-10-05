@@ -10,6 +10,8 @@ class ReportScreen extends StatefulWidget {
 
 class _ReportScreenState extends State<ReportScreen> {
   final List<Transaction> transactions = [];
+  int selectedMonth = DateTime.now().month;
+  int selectedYear = DateTime.now().year;
 
   void _loadTransactions() async {
     final tran = await DataHandler.instance.loadAllTransactions();
@@ -18,6 +20,89 @@ class _ReportScreenState extends State<ReportScreen> {
     setState(() {
       transactions.addAll(tran.reversed);
     });
+  }
+
+  void _showPrintDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(builder: (context, setDialogState) {
+          return AlertDialog(
+            title: const Text("Select Month & Year"),
+            content: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButton<int>(
+                  value: selectedMonth,
+                  items: List.generate(12, (index) {
+                    final month = index + 1;
+                    return DropdownMenuItem(
+                      value: month,
+                      child: Text(DateFormat.MMMM().format(DateTime(0, month))),
+                    );
+                  }),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setDialogState(() {
+                        selectedMonth = value;
+                      });
+                    }
+                  },
+                ),
+                DropdownButton<int>(
+                  value: selectedYear,
+                  items: List.generate(10, (index) {
+                    final year = DateTime.now().year - 5 + index;
+                    return DropdownMenuItem(
+                      value: year,
+                      child: Text(year.toString()),
+                    );
+                  }),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setDialogState(() {
+                        selectedYear = value;
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                child: const Text("Cancel"),
+                onPressed: () => Navigator.pop(ctx),
+              ),
+              ElevatedButton(
+                child: const Text("Print"),
+                onPressed: () {
+                  final transactions = _getTransactionsForMonthYear(
+                    selectedMonth,
+                    selectedYear,
+                  );
+                  Navigator.pop(ctx);
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PrintPreviewScreen(
+                        transactions: transactions,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          );
+        });
+      },
+    );
+  }
+
+  List<Transaction> _getTransactionsForMonthYear(int month, int year) {
+    return transactions.where((t) {
+      return t.date.month == month && t.date.year == year;
+    }).toList();
   }
 
   @override
@@ -45,8 +130,11 @@ class _ReportScreenState extends State<ReportScreen> {
         actions: [
           Padding(
               padding: const EdgeInsetsGeometry.only(right: 4),
-              child:
-                  IconButton(onPressed: () {}, icon: const Icon(Icons.print)))
+              child: IconButton(
+                  onPressed: () {
+                    _showPrintDialog(context);
+                  },
+                  icon: const Icon(Icons.print)))
         ],
       ),
       body: ListView.builder(
