@@ -1,5 +1,6 @@
 import 'package:nbe/libs.dart';
 import 'package:intl/intl.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 class PrintPreviewScreen extends StatefulWidget {
   final List<Transaction> transactions;
@@ -173,7 +174,67 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
     setState(() {
       isSaving = true;
     });
-    final pdf = await _createPdf(context, title, transactions);
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return pw.Padding(
+            padding: const pw.EdgeInsets.all(8),
+            child: pw.Column(
+              children: [
+                pw.Text(title,
+                    style: pw.TextStyle(
+                        fontSize: 16,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.black)),
+                pw.SizedBox(height: 16),
+                pw.Expanded(
+                  child: pw.ListView.separated(
+                    itemCount: transactions.length,
+                    separatorBuilder: (_, __) => pw.Divider(),
+                    itemBuilder: (context, index) {
+                      final tx = transactions[index];
+                      return pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(
+                            DateFormat('dd MMM yyyy').format(tx.date),
+                            style: const pw.TextStyle(
+                                fontSize: 14, color: PdfColors.grey600),
+                          ),
+                          pw.Text(
+                            '${tx.karat} Karat',
+                            style: const pw.TextStyle(
+                                fontSize: 14, color: PdfColors.grey600),
+                          ),
+                          pw.Text(
+                            '${tx.weight.toStringAsFixed(2)}g',
+                            style: const pw.TextStyle(
+                                fontSize: 14, color: PdfColors.grey600),
+                          ),
+                          pw.Text(
+                            '${currencyFormatter(tx.totalAmount).substring(0, (currencyFormatter(tx.totalAmount).length - 3))} Birr',
+                            style: pw.TextStyle(
+                              fontSize: 14,
+                              fontWeight: pw.FontWeight.bold,
+                              color: PdfColors.black,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+                pw.SizedBox(height: 16),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
     try {
       //preview
       await Printing.layoutPdf(onLayout: (PdfPageFormat format) => pdf.save());
