@@ -110,7 +110,6 @@ class _NavigationControllerState extends State<NavigationController> {
     CalculatorScreen(),
     ReportScreen(),
     SettingsScreen(nbe24KaratRate: 23432),
-    SettingsScreen(nbe24KaratRate: 23432),
   ];
 
   @override
@@ -136,10 +135,6 @@ class _NavigationControllerState extends State<NavigationController> {
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
             label: 'Settings',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.grading_sharp),
-            label: 'Report',
           ),
         ],
         currentIndex: _currentIndex,

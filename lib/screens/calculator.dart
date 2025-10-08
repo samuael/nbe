@@ -399,6 +399,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               child: CommonTextField(
+                borderRadius: 5,
                 controller: _weightController,
                 label: "Weight in grams",
                 errorMessage: weightError,
@@ -409,6 +410,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               child: CommonTextField(
+                borderRadius: 5,
                 label: "Specific gravity in cm^3",
                 errorMessage: specificGravityErr,
                 onChanged: (val) {},

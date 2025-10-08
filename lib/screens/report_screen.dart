@@ -28,7 +28,13 @@ class _ReportScreenState extends State<ReportScreen> {
       builder: (ctx) {
         return StatefulBuilder(builder: (context, setDialogState) {
           return AlertDialog(
-            title: const Text("Select Month & Year"),
+            title: const Text(
+              "Select Month & Year",
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             content: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -81,7 +87,6 @@ class _ReportScreenState extends State<ReportScreen> {
                     selectedYear,
                   );
                   Navigator.pop(ctx);
-
                   Navigator.push(
                     context,
                     MaterialPageRoute(
