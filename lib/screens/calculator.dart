@@ -21,6 +21,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _specificGravityController =
       TextEditingController();
+
+  String weightError = "";
+  String specificGravityErr = "";
+
   Map<String, String> pricesMap = {};
   final url = 'https://api.nbe.gov.et/api/filter-gold-rates';
   Setting _setting = Setting(uuid.v4(), 0, 5000, 0.0001, 0.1);
@@ -64,7 +68,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             print('Something wrong in caching');
           }
         } else {
-          print('Failed to load page. Status Code:${response.statusCode}');
           if (context.mounted) {
             _showSnackBar(
                 'Failed to load the purchasing rates. Server error: ${response.statusCode}');
@@ -135,7 +138,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       totalAmount: totalAmount,
       weight: weight,
       isCompleted: true,
-      settingId: _setting.id,
+      settingId: "${_setting.id}",
       karat: estimatedCarat.toString(),
     );
   }
@@ -190,6 +193,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         title: const Text(
           'Calculate',
           style: TextStyle(
+            fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -229,14 +233,35 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                   )
                                 : _commonLabelStyle,
                           ),
-                          Text(
-                            '${currencyFormatter(double.tryParse(pricesMap[k] ?? '') ?? 0)}/ ግራም ',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          double.tryParse(pricesMap[k] ?? '') == null
+                              ? const ShimmerSkeleton(
+                                  width: 50,
+                                  height: 10,
+                                  borderRadius: 2,
+                                )
+                              : Row(
+                                  children: [
+                                    Text(
+                                      currencyFormatter(
+                                          double.tryParse(pricesMap[k] ?? '') ??
+                                              0),
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'ብር/ ግራም ',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black.withOpacity(.5)),
+                                    )
+                                  ],
+                                ),
                         ],
                       ),
                       _tinyDivider,
@@ -376,7 +401,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               child: CommonTextField(
                 controller: _weightController,
                 label: "Weight in grams",
-                errorMessage: "",
+                errorMessage: weightError,
                 onChanged: (val) {},
                 keyboardType: const TextInputType.numberWithOptions(),
               ),
@@ -385,7 +410,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               child: CommonTextField(
                 label: "Specific gravity in cm^3",
-                errorMessage: "",
+                errorMessage: specificGravityErr,
                 onChanged: (val) {},
                 controller: _specificGravityController,
                 keyboardType: const TextInputType.numberWithOptions(),
@@ -395,6 +420,21 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             FancyWideButton(
               "Calculate",
               () {
+                if (_weightController.text.isEmpty) {
+                  setState(() {
+                    weightError = "weight is required";
+                  });
+                  return;
+                } else if (_specificGravityController.text.isEmpty) {
+                  setState(() {
+                    specificGravityErr = "specific gravity is required";
+                  });
+                } else {
+                  setState(() {
+                    weightError = "";
+                    specificGravityErr = "";
+                  });
+                }
                 final transaction = _calculate();
                 if (transaction == null) {
                   return;

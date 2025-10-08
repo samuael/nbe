@@ -44,9 +44,8 @@ class DataHandler {
 
   Future<void> addTransactionToDb(Transaction transaction) async {
     final db = await _database;
-    print('Table created');
     await db.insert(
-      'Transactions',
+      'sell_record',
       {
         'id': transaction.id,
         'date': transaction.date.toIso8601String(),
@@ -65,9 +64,7 @@ class DataHandler {
   Future<List<Transaction>> loadAllTransactions() async {
     final db = await _database;
 
-    print('Database opened');
-    final transactionData = await db.query('Transactions');
-    print('data loaded');
+    final transactionData = await db.query('sell_record');
     final List<Transaction> transactions = [];
 
     for (var tran in transactionData) {
@@ -116,8 +113,7 @@ class Transaction {
 
 String currencyFormatter(double value) {
   final formatter = NumberFormat('#,##0.##');
-  final formattedValue = formatter.format(value);
-  return '$formattedValue ብር';
+  return formatter.format(value);
 }
 
 String currencyFormatterForPrint(double value) {

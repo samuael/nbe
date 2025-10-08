@@ -1,5 +1,4 @@
 // import 'package:nbe/screens/screens.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:nbe/libs.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -34,51 +33,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: const Text(
+          'Settings',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         child: Column(
-          // spacing: 9,
           children: [
-            CommonTextField(
-                borderRadius: 15,
-                prefix: const Padding(
-                  padding: EdgeInsets.fromLTRB(2, 0, 7, 0),
-                  child: Icon(
-                    FontAwesomeIcons.handHoldingDollar,
-                    size: 17,
-                  ),
-                ),
-                suffix: const Text('%'),
+            const NotificationMessage(
+                "Re-Configure your settings according to your calculation"),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 5),
+              child: CommonTextField(
+                borderRadius: 5,
+                prefix: const Text('%      '),
                 controller: immediatePaymentController,
                 label: 'Immediate Payment Amount',
                 onChanged: (val) {},
-                errorMessage: ''),
-            CommonTextField(
-                borderRadius: 15,
-                controller: taxController,
-                prefix: _createPrefixWidget(FontAwesomeIcons.sackDollar),
-                suffix: const Text('EtB'),
-                label: 'Tax per Gram',
-                onChanged: (val) {},
-                errorMessage: ''),
-            CommonTextField(
-                borderRadius: 15,
-                controller: bankFeeController,
-                prefix: _createPrefixWidget(FontAwesomeIcons.sackDollar),
-                suffix: const Text('%'),
-                label: 'Bank Fee in Percent',
-                onChanged: (val) {},
-                errorMessage: ''),
-            CommonTextField(
-                borderRadius: 15,
-                controller: bonusController,
-                prefix: _createPrefixWidget(FontAwesomeIcons.sackDollar),
-                suffix: const Text('%'),
-                label: 'Bonus by NBE',
-                onChanged: (val) {},
-                errorMessage: ''),
+                errorMessage: '',
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 5),
+              child: CommonTextField(
+                  borderRadius: 5,
+                  controller: taxController,
+                  prefix: const Text('BIRR '),
+                  label: 'Tax per Gram',
+                  onChanged: (val) {},
+                  errorMessage: ''),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 5),
+              child: CommonTextField(
+                  borderRadius: 5,
+                  controller: bankFeeController,
+                  prefix: const Text('%      '),
+                  label: 'Bank Fee in Percent',
+                  onChanged: (val) {},
+                  errorMessage: ''),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 5),
+              child: CommonTextField(
+                  borderRadius: 5,
+                  controller: bonusController,
+                  prefix: const Text('%      '),
+                  label: 'Bonus by NBE',
+                  onChanged: (val) {},
+                  errorMessage: ''),
+            ),
             const SizedBox(
               height: 24,
             ),

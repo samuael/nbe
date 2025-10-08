@@ -33,6 +33,16 @@ class SettingLocalProvider {
     );
   }
 
+  Future<SellRecord?> getSettingByDetail(Setting setting) async {
+    final db = await wrapper.database;
+    final result = await db.query(
+      tableName,
+      where:
+          "$_nbe24KaratRateCol: ${setting.nbe24KaratRate} and $_taxPerGramCol=${setting.taxPerGram} and $_bankFeePercentageCol=${setting.bankFeePercentage} and $_excludePercentageCol=${setting.excludePercentage}",
+    );
+    
+  }
+
   Future<bool> checkIfSettingExists(int id) async {
     final db = await wrapper.database;
     final result = await db.query(

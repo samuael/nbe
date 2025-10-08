@@ -1,8 +1,8 @@
 import 'package:nbe/libs.dart';
 
-class SettingBloc extends Bloc<SettingsEvent, SettingsState> {
+class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final SettingLocalProvider provider;
-  SettingBloc(this.provider) : super(SettingsInit()) {
+  SettingsBloc(this.provider) : super(SettingsInit()) {
     on<SettingsLoadEvent>((event, emit) async {
       int offset = 0;
       int limit = 0;

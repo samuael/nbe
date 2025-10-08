@@ -24,7 +24,7 @@ class Setting {
 
   Map<String, dynamic> toJson() {
     return {
-      "id": id,
+      if (id != "") "id": id,
       "nbe24KaratRate": nbe24KaratRate,
       "taxPerGram": taxPerGram,
       "bankFeePercentage": bankFeePercentage,

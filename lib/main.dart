@@ -1,3 +1,5 @@
+import 'package:nbe/local_data_provider/string_data_provider.dart';
+
 import 'libs.dart';
 
 final ThemeData theme = ThemeData(
@@ -33,18 +35,26 @@ void main() {
   NBEDatabase nbeDB = NBEDatabase.constructor([
     SettingLocalProvider.createOrReplaceTableString(),
     SellRecordLocalProvider.createOrReplaceTableString(),
+    StringDataProvider.createOrReplaceTableString(),
   ]);
 
   final sellRecordProvider = SellRecordLocalProvider(nbeDB);
   final settingProvider = SettingLocalProvider(nbeDB);
+  final stringProvider = StringDataProvider(nbeDB);
 
   runApp(MultiBlocProvider(
     providers: [
       BlocProvider<SettingsBloc>(create: (context) {
         return SettingsBloc(settingProvider);
       }),
+      BlocProvider<SellRecordsBloc>(create: (context) {
+        return SellRecordsBloc(sellRecordProvider);
+      }),
       BlocProvider<SellRecordBloc>(create: (context) {
         return SellRecordBloc(sellRecordProvider);
+      }),
+      BlocProvider<SettingBloc>(create: (context) {
+        return SettingBloc(settingProvider);
       })
     ],
     child: const MyApp(),
@@ -99,8 +109,8 @@ class _NavigationControllerState extends State<NavigationController> {
   static const List<Widget> widgetList = [
     CalculatorScreen(),
     ReportScreen(),
-    Center(child: Text('Index 2')),
-    Center(child: Text('Index 3')),
+    SettingsScreen(nbe24KaratRate: 23432),
+    SettingsScreen(nbe24KaratRate: 23432),
   ];
 
   @override

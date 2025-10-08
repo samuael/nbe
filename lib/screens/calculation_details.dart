@@ -24,6 +24,13 @@ class _CalculationDetailsState extends State<CalculationDetails> {
   double netValue = 0;
   double netCompleted = 0;
 
+  final TextStyle _commonLabelStyle = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    color: Colors.black.withOpacity(.5),
+    overflow: TextOverflow.visible,
+  );
+
   void calculateValues() {
     final tran = widget.transaction;
     setState(() {
@@ -45,7 +52,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
     setState(() {
       isSaving = true;
     });
-    await DataHandler.instance.ensureTableExists('Transactions');
+    await DataHandler.instance.ensureTableExists('setting');
     await DataHandler.instance.addTransactionToDb(widget.transaction);
     await SettingLocalProvider(db).insertSetting(widget.setting);
 
@@ -80,102 +87,206 @@ class _CalculationDetailsState extends State<CalculationDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Calculation Details')),
+      appBar: AppBar(
+        title: const Text(
+          'Calculation Details',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                      flex: 2, child: Text('Total of 95%', style: _labelStyle)),
-                  Expanded(
-                    flex: 1,
-                    child: Text(
-                      currencyFormatter(immediatePaymentValue),
-                      style: _labelStyle,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Total of ${immediatePayment * 100}%",
+                      textAlign: TextAlign.center,
+                      style: _commonLabelStyle,
                     ),
-                  )
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                      flex: 2, child: Text('Bank Fee:', style: _labelStyle)),
-                  Expanded(
-                    flex: 1,
-                    child: Text(
-                      currencyFormatter(bankFeeValue),
-                      style: _labelStyle,
+                    Row(
+                      children: [
+                        Text(
+                          currencyFormatter(immediatePaymentValue),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          "BIRR",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black.withOpacity(.5),
+                          ),
+                        )
+                      ],
                     ),
-                  )
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Text('Tax:', style: _labelStyle)),
-                  Expanded(
-                    flex: 1,
-                    child: Text(
-                      currencyFormatter(taxValue),
-                      style: _labelStyle,
-                    ),
-                  )
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Text('Net:', style: _labelStyle)),
-                  Expanded(
-                    flex: 1,
-                    child: Text(
-                      currencyFormatter(netValue),
-                      style: _labelStyle,
-                    ),
-                  )
-                ],
-              ),
-              const Divider(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: CommonTextField(
-                  controller: _remainingController,
-                  errorMessage: "",
-                  label: "Remaining",
-                  onChanged: (val) {},
+                  ],
                 ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Row(
-                children: [
-                  Expanded(
-                      flex: 2,
-                      child: Text('Net Completed:', style: _labelStyle)),
-                  Expanded(
-                    flex: 1,
-                    child: Text(
-                      currencyFormatter(netCompleted),
-                      style: _labelStyle,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Bank Fee',
+                      textAlign: TextAlign.center,
+                      style: _commonLabelStyle,
                     ),
-                  )
-                ],
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              ElevatedButton(
-                style: const ButtonStyle(
-                  minimumSize: WidgetStatePropertyAll(
-                    Size(double.infinity, 60),
+                    Row(
+                      children: [
+                        Text(
+                          currencyFormatter(bankFeeValue),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          "BIRR",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black.withOpacity(.5),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Tax',
+                      textAlign: TextAlign.center,
+                      style: _commonLabelStyle,
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          currencyFormatter(taxValue),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          "BIRR",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black.withOpacity(.5),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Net',
+                      textAlign: TextAlign.center,
+                      style: _commonLabelStyle,
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          currencyFormatter(netValue),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          "BIRR",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black.withOpacity(.5),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+                const Divider(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: CommonTextField(
+                    borderRadius: 5,
+                    controller: _remainingController,
+                    errorMessage: "",
+                    label: "Remaining",
+                    onChanged: (val) {},
                   ),
                 ),
-                onPressed: onSaveTapped,
-                child: const Text('Save'),
-              ),
-            ],
+                const SizedBox(
+                  height: 20,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Net Completed',
+                      textAlign: TextAlign.center,
+                      style: _commonLabelStyle,
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          currencyFormatter(netCompleted),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          "BIRR",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black.withOpacity(.5),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                FancyWideButton(
+                  "Save",
+                  onSaveTapped,
+                  animateOnClick: true,
+                ),
+              ],
+            ),
           ),
         ),
       ),
