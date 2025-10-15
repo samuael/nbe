@@ -7,13 +7,14 @@ class SellRecord {
   double subTotal;
   double remaining;
   double net;
-  int settingID;
+  String settingID;
   Setting? setting;
   late int createdAt;
+  bool isCompleted;
 
   SellRecord(this.id, this.gram, this.specificGravity, this.subTotal,
       this.remaining, this.net, this.settingID,
-      {this.setting}) {
+      {this.setting, this.isCompleted = false}) {
     createdAt =
         ((DateTime.now().microsecondsSinceEpoch / 1000).floor()).toInt();
   }
@@ -33,7 +34,7 @@ class SellRecord {
 
   Map<String, dynamic> toJson() {
     return {
-      "id": id,
+      if (id != 0) "id": id,
       "gram": gram,
       "specificGravity": specificGravity,
       "subTotal": subTotal,

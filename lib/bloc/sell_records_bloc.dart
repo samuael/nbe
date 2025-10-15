@@ -15,11 +15,13 @@ class SellRecordsBloc extends Bloc<SellRecordEvent, SellRecordState> {
         if (result != null) {
           if (state is SellRecordLoaded) {
             final records = (state as SellRecordLoaded).records;
-            result.forEach((el) {
-              records.putIfAbsent(el.id, () {
-                return el;
-              });
-            });
+            result.forEach(
+              (el) {
+                records.putIfAbsent(el.id, () {
+                  return el;
+                });
+              },
+            );
             emit(SellRecordLoaded(records));
           } else {
             emit(SellRecordLoaded(Map.fromIterable(
@@ -31,5 +33,20 @@ class SellRecordsBloc extends Bloc<SellRecordEvent, SellRecordState> {
         }
       },
     );
+
+    on<UpdateRecordEvent>((event, emit) {
+      if (state is SellRecordLoaded) {
+        final dmap = (state as SellRecordLoaded).records;
+        dmap[event.record.id] = event.record;
+        emit(SellRecordLoaded(dmap));
+      }
+    });
+  }
+
+  Future<bool> saveRecord(SellRecord record) async {
+    if (record.id == 0) {
+      return false;
+    }
+    return provider.saveRecord(record);
   }
 }

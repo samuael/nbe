@@ -1,5 +1,7 @@
 import 'dart:convert';
-
+// import 'package:nbe/database/database.dart';
+// import 'package:sqflite/sqflite.dart';
+import 'package:intl/intl.dart';
 // import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:nbe/libs.dart';
@@ -19,15 +21,19 @@ class CalculatorScreen extends StatefulWidget {
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
   final TextEditingController _weightController = TextEditingController();
+  final TextEditingController _volumeController = TextEditingController();
   final TextEditingController _specificGravityController =
       TextEditingController();
+  final TextEditingController _karatController = TextEditingController();
 
   String weightError = "";
+  String volumeErr = "";
   String specificGravityErr = "";
+  String karatErr = "";
 
   Map<String, String> pricesMap = {};
   final url = 'https://api.nbe.gov.et/api/filter-gold-rates';
-  Setting _setting = Setting(uuid.v4(), 0, 5000, 0.0001, 0.1);
+  Setting _setting = Setting(uuid.v4(), 0, 250, 0.01, 0.1);
 
   //to check if the day has changed
   bool areSameDates(DateTime day1, DateTime day2) {
@@ -69,13 +75,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           }
         } else {
           if (context.mounted) {
-            _showSnackBar(
+            showSnackBar(
                 'Failed to load the purchasing rates. Server error: ${response.statusCode}');
           }
         }
       } catch (e) {
         if (context.mounted) {
-          _showSnackBar('Failed to load the purchasing rates');
+          showSnackBar('Failed to load the purchasing rates');
         }
       }
     } else {
@@ -90,7 +96,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     }
   }
 
-  void _showSnackBar(String message) {
+  int index = 1;
+  double? karat;
+  double? specificGravity;
+  double? volume;
+  double? weight;
+
+  double? karat24AfterBonous;
+  bool showAllKaratValues = false;
+
+  void showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: const Duration(days: 1),
@@ -108,38 +123,39 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   Transaction? _calculate() {
     final weight = double.tryParse(_weightController.text);
-    final specificGravity = double.tryParse(_specificGravityController.text);
     if (weight == null || specificGravity == null) {
       return null;
     }
 
-    int estimatedCarat = 0;
-    if (specificGravity <= 19.51 && specificGravity > 19.13) {
-      estimatedCarat = 24;
-    } else if (specificGravity <= 19.13 && specificGravity > 18.24) {
-      estimatedCarat = 23;
-    } else if (specificGravity <= 18.24 && specificGravity > 17.45) {
-      estimatedCarat = 22;
-    } else if (specificGravity <= 17.45 && specificGravity > 17.11) {
-      estimatedCarat = 21;
-    } else if (specificGravity <= 17.11 && specificGravity > 16.03) {
-      estimatedCarat = 20;
-    } else if (specificGravity <= 16.03 && specificGravity > 15.2) {
-      estimatedCarat = 18;
-    }
+    // int estimatedCarat = 0;
+    // if (specificGravity! <= 19.51 && specificGravity! > 19.13) {
+    //   estimatedCarat = 24;
+    // } else if (specificGravity! <= 19.13 && specificGravity! > 18.24) {
+    //   estimatedCarat = 23;
+    // } else if (specificGravity! <= 18.24 && specificGravity! > 17.45) {
+    //   estimatedCarat = 22;
+    // } else if (specificGravity! <= 17.45 && specificGravity! > 17.11) {
+    //   estimatedCarat = 21;
+    // } else if (specificGravity! <= 17.11 && specificGravity! > 16.03) {
+    //   estimatedCarat = 20;
+    // } else if (specificGravity! <= 16.03 && specificGravity! > 15.2) {
+    //   estimatedCarat = 18;
+    // }
 
-    final rate = pricesMap[estimatedCarat.toString()];
-    final totalAmount = (double.tryParse(rate ?? '') ?? 0) * weight;
+    // final rate = pricesMap[estimatedCarat.toString()];
+    // final rate = pricesMap[estimatedCarat.toString()];
+    final rate = ((karat24AfterBonous! * karat!) / 24);
+    final totalAmount = rate * weight;
     return Transaction(
       id: uuid.v4(),
       date: DateTime.now(),
-      specificGravity: specificGravity,
-      todayRate: double.tryParse(rate ?? '') ?? 0,
+      specificGravity: specificGravity!,
+      todayRate: rate,
       totalAmount: totalAmount,
       weight: weight,
       isCompleted: true,
-      settingId: "${_setting.id}",
-      karat: estimatedCarat.toString(),
+      settingId: _setting.id,
+      karat: "${karat!}", // estimatedCarat.toString(),
     );
   }
 
@@ -147,18 +163,32 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final db = NBEDatabase.constructor([
       SettingLocalProvider.createOrReplaceTableString(),
     ]);
-    final recentSettings =
-        await SettingLocalProvider(db).getRecentSettings(0, 10);
-    if (recentSettings.isNotEmpty) {
-      setState(() {
-        _setting = recentSettings.last;
-      });
-    } else {
-      setState(() {
-        _setting = Setting(uuid.v4(),
-            double.tryParse(pricesMap['24'] ?? '') ?? 0, 5000, 0.0001, 0.1);
-      });
-    }
+    // final recentSettings =
+    //     await SettingLocalProvider(db).getRecentSettings(0, 10);
+    // if (recentSettings.isNotEmpty) {
+    //   setState(() {
+    //     _setting = recentSettings.last;
+    //   });
+    // } else {
+    setState(() {
+      _setting = Setting(uuid.v4(), double.tryParse(pricesMap['24'] ?? '') ?? 0,
+          250, 0.01, 0.1);
+    });
+    // }
+  }
+
+  void calculateValues() {
+    final weight = double.tryParse(_weightController.text);
+    volume = double.tryParse(_volumeController.text);
+    setState(() {
+      if (weight != null && volume != null) {
+        specificGravity = weight / volume!;
+        karat = ((specificGravity! - 10.51) * 52.838) /
+            (specificGravity! - (specificGravity! % 0.01));
+        karat = karat! - (karat! % 0.01);
+        volumeErr = "";
+      }
+    });
   }
 
   @override
@@ -182,6 +212,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // if (weight != null) {
+    //   _weightController.text = "$weight";
+    // }
+    karat24AfterBonous = double.tryParse(pricesMap["24"] ?? '');
+    if (karat24AfterBonous != null) {
+      karat24AfterBonous = karat24AfterBonous! + (karat24AfterBonous! * .15);
+    }
     final Container _tinyDivider = Container(
       color: Colors.amber.withOpacity(.1),
       width: MediaQuery.of(context).size.width * .5,
@@ -204,18 +241,22 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           children: [
             Container(
               width: MediaQuery.of(context).size.width * .9,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 border: Border(
-                  left: const BorderSide(color: Colors.orange),
-                  right: const BorderSide(color: Colors.orange),
-                  bottom: BorderSide(color: Colors.black.withOpacity(.05)),
+                  left: BorderSide(color: Colors.orange),
+                  right: BorderSide(color: Colors.orange),
                 ),
               ),
               // padding: const EdgeInsets.symmetric(horizontal: 10.0),
               margin: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5),
               child: TitledContainer(
                 'Today\'s National Bank Rate',
-                ["24", "23", "22", "21", "20", "19"].map<Column>((k) {
+                (showAllKaratValues
+                        ? ["24", "23", "22", "21", "20", "19", "18", "16"]
+                        : [
+                            "24",
+                          ])
+                    .map<Column>((k) {
                   return Column(
                     children: [
                       Row(
@@ -270,130 +311,84 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 }).toList(),
               ),
             ),
+            Row(
+              children: [
+                Checkbox(
+                    value: showAllKaratValues,
+                    onChanged: (val) {
+                      setState(() {
+                        showAllKaratValues = val ?? false;
+                      });
+                    }),
+                Text(
+                  "Show all karat prices",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black.withValues(alpha: .5),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
             Container(
-              decoration: BoxDecoration(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              margin: const EdgeInsets.symmetric(horizontal: 10.0),
+              decoration: const BoxDecoration(
                 border: Border(
-                  left: const BorderSide(color: Colors.orange),
-                  right: const BorderSide(color: Colors.orange),
-                  bottom: BorderSide(color: Colors.black.withOpacity(.05)),
+                  left: BorderSide(color: Colors.orange),
+                  right: BorderSide(color: Colors.orange),
                 ),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              margin: const EdgeInsets.symmetric(horizontal: 20.0),
-              width: MediaQuery.of(context).size.width * .9,
-              height: MediaQuery.of(context).size.height * .15,
-              child: Stack(
-                children: [
-                  TitledContainer(
-                    "Settings",
-                    [
-                      Row(children: [
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            'Immediate Payment Amount ',
-                            style: _commonLabelStyle,
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: Text(
-                            '95%',
-                            style: _commonLabelStyle,
-                          ),
-                        ),
-                      ]),
-                      Row(children: [
-                        Expanded(
-                          flex: 2,
-                          child: Text('Tax per gram', style: _commonLabelStyle),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: Text('${_setting.taxPerGram} EtB',
-                              style: _commonLabelStyle),
-                        ),
-                      ]),
-                      Row(children: [
-                        Expanded(
-                          flex: 2,
-                          child: Text('Bank Fee in percent:',
-                              style: _commonLabelStyle),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: Text('${_setting.bankFeePercentage * 100}%',
-                              style: _commonLabelStyle),
-                        ),
-                      ]),
-                      Row(
-                        children: [
-                          Expanded(
-                              flex: 2,
-                              child: Text('Bonus by NBE:',
-                                  style: _commonLabelStyle)),
-                          Expanded(
-                            flex: 1,
-                            child: Text(
-                              '${_setting.excludePercentage * 100}%',
-                              style: _commonLabelStyle,
-                            ),
-                          )
-                        ],
-                      )
-                    ],
-                  ),
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: IconButton(
-                      onPressed: () async {
-                        final Setting? newSetting = await Navigator.of(context)
-                            .push(MaterialPageRoute(
-                                builder: (ctx) => SettingsScreen(
-                                    nbe24KaratRate: double.tryParse(
-                                            pricesMap['24'] ?? '') ??
-                                        0)));
-
-                        if (newSetting != null) {
-                          setState(() {
-                            _setting = newSetting;
-                          });
-                        }
-                      },
-                      splashColor: Theme.of(context).primaryColor,
-                      icon: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                              color: Theme.of(context)
-                                  .primaryColor
-                                  .withOpacity(.5)),
-                        ),
-                        child: Row(
-                          children: [
-                            Text(
-                              "Edit",
-                              style: TextStyle(
-                                color: Theme.of(context).primaryColor,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(width: 5),
-                            Icon(
-                              Icons.edit,
-                              color: Theme.of(context).primaryColor,
-                              size: 14,
-                            )
-                          ],
-                        ),
-                      ),
-                      color: Colors.blue,
+              child: Row(children: [
+                const Expanded(
+                  flex: 2,
+                  child: Text(
+                    '24 Karat After 15% Bonus ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
                     ),
                   ),
-                ],
-              ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: karat24AfterBonous == null
+                      ? const ShimmerSkeleton(width: 100, height: 10)
+                      : Text(
+                          NumberFormat('#.##').format(karat24AfterBonous),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: Colors.black.withOpacity(.7)),
+                        ),
+                ),
+              ]),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                fancySelectOneWidget(context, 1, "Volume", (val) {
+                  setState(() {
+                    index = val;
+                  });
+                }, () {
+                  return index;
+                }, widthMultiplier: .5),
+                // fancySelectOneWidget(context, 2, "Specific Gravity", (val) {
+                //   setState(() {
+                //     index = val;
+                //   });
+                // }, () {
+                //   return index;
+                // }, widthMultiplier: .5),
+                fancySelectOneWidget(context, 2, "Karat", (val) {
+                  setState(() {
+                    index = val;
+                  });
+                }, () {
+                  return index;
+                }, widthMultiplier: .5),
+              ],
             ),
             const SizedBox(height: 20),
             Padding(
@@ -403,21 +398,182 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 controller: _weightController,
                 label: "Weight in grams",
                 errorMessage: weightError,
-                onChanged: (val) {},
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() {
+                      weight = double.tryParse(val);
+                    });
+                  }
+                  calculateValues();
+                },
                 keyboardType: const TextInputType.numberWithOptions(),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              child: CommonTextField(
-                borderRadius: 5,
-                label: "Specific gravity in cm^3",
-                errorMessage: specificGravityErr,
-                onChanged: (val) {},
-                controller: _specificGravityController,
-                keyboardType: const TextInputType.numberWithOptions(),
+            if (index == 2)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    left: BorderSide(color: Colors.orange),
+                    right: BorderSide(color: Colors.orange),
+                  ),
+                ),
+                child: Row(children: [
+                  const Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Volume in cm^3 ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: volume == null
+                        ? const ShimmerSkeleton(width: 100, height: 10)
+                        : Text(
+                            '$volume',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                              color: Colors.black.withValues(alpha: .7),
+                            ),
+                          ),
+                  ),
+                ]),
               ),
+            if (index == 1)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: CommonTextField(
+                  borderRadius: 5,
+                  label: "Volume in cm^3",
+                  errorMessage: volumeErr,
+                  onChanged: (val) {
+                    final value = double.tryParse(val);
+                    if (value == null) {
+                      setState(() {
+                        volumeErr = "invalid volume $val";
+                      });
+                      return;
+                    }
+                    calculateValues();
+                  },
+                  controller: _volumeController,
+                  keyboardType: const TextInputType.numberWithOptions(),
+                ),
+              ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              margin: const EdgeInsets.symmetric(horizontal: 10.0),
+              decoration: const BoxDecoration(
+                border: Border(
+                  left: BorderSide(color: Colors.orange),
+                  right: BorderSide(color: Colors.orange),
+                ),
+              ),
+              child: Row(children: [
+                const Expanded(
+                  flex: 2,
+                  child: Text(
+                    'Specific Gravity ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                /*String currencyFormatterForPrint(double value) {
+  final formatter = NumberFormat('#,##0.##');
+  final formattedValue = formatter.format(value);
+  return '$formattedValue Birr';
+}*/
+                Expanded(
+                  flex: 1,
+                  child: specificGravity == null
+                      ? const ShimmerSkeleton(width: 100, height: 10)
+                      : Text(
+                          NumberFormat('#.##').format(specificGravity),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: Colors.black.withOpacity(.7)),
+                        ),
+                ),
+              ]),
             ),
+            if (index == 2)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                child: CommonTextField(
+                  borderRadius: 5,
+                  label: "Karat",
+                  errorMessage: karatErr,
+                  onChanged: (val) {
+                    final value = double.tryParse(val);
+                    if (value == null) {
+                      setState(() {
+                        karatErr = "invalid karat $val";
+                      });
+                      return;
+                    }
+                    if (value < 18 || value > 24) {
+                      setState(() {
+                        karatErr = "karat must be between 18-24";
+                      });
+                      return;
+                    }
+                    setState(() {
+                      karat = value;
+                      karatErr = "";
+
+                      // weight = double.tryParse(_weightController.text);
+                    });
+                  },
+                  controller: _karatController,
+                  keyboardType: const TextInputType.numberWithOptions(),
+                ),
+              ),
+            if (index == 1)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                decoration: BoxDecoration(
+                  border: Border(
+                    left: const BorderSide(color: Colors.orange),
+                    right: const BorderSide(color: Colors.orange),
+                    bottom: BorderSide(color: Colors.black.withOpacity(.05)),
+                  ),
+                ),
+                child: Row(children: [
+                  const Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Karat ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: karat == null
+                        ? const ShimmerSkeleton(width: 100, height: 10)
+                        : Text(
+                            NumberFormat('#.##').format(karat),
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: Colors.black.withOpacity(.7)),
+                          ),
+                  ),
+                ]),
+              ),
             const SizedBox(height: 10),
             FancyWideButton(
               "Calculate",
@@ -427,7 +583,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     weightError = "weight is required";
                   });
                   return;
-                } else if (_specificGravityController.text.isEmpty) {
+                } else if (specificGravity == null) {
                   setState(() {
                     specificGravityErr = "specific gravity is required";
                   });
@@ -441,8 +597,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 if (transaction == null) {
                   return;
                 }
-                _specificGravityController.clear();
-                _weightController.clear();
+                // _specificGravityController.clear();
+                // _weightController.clear();
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 Navigator.of(context).push(
                   MaterialPageRoute(

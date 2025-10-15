@@ -4,3 +4,4 @@ export 'titled_container.dart';
 export 'notification_message.dart';
 export 'shimmer_skeleton.dart';
 export 'skeleton_widget.dart';
+export 'fancy_select_one.dart';

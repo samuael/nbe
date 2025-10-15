@@ -37,6 +37,11 @@ class SellRecordLocalProvider {
     );
   }
 
+  Future<bool> saveRecord(SellRecord rec) async {
+    final db = await wrapper.database;
+    return await db.update(tableName, rec.toJson()) != 0;
+  }
+
   Future<bool> checkIfSellRecordExists(int id) async {
     final db = await wrapper.database;
     final result = await db.query(

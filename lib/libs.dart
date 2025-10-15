@@ -1,5 +1,4 @@
 export 'widgets/wiwdgets.dart';
-export 'services/services.dart';
 export 'screens/screens.dart';
 export 'main.dart';
 export 'package:flutter/material.dart';
@@ -15,3 +14,4 @@ export 'package:permission_handler/permission_handler.dart';
 export 'package:flutter_bloc/flutter_bloc.dart';
 export 'states/states.dart';
 export 'bloc/bloc.dart';
+export 'services/services.dart';

@@ -9,18 +9,15 @@ class ReportScreen extends StatefulWidget {
 }
 
 class _ReportScreenState extends State<ReportScreen> {
-  final List<Transaction> transactions = [];
   int selectedMonth = DateTime.now().month;
   int selectedYear = DateTime.now().year;
 
-  void _loadTransactions() async {
-    final tran = await DataHandler.instance.loadAllTransactions();
-    print(tran.length);
-
-    setState(() {
-      transactions.addAll(tran.reversed);
-    });
-  }
+  // void _loadRecords() async {
+  //   final tran = await DataHandler.instance.loadAllTransactions();
+  //   setState(() {
+  //     // transactions.addAll(tran.reversed);
+  //   });
+  // }
 
   void _showPrintDialog(BuildContext context) {
     showDialog(
@@ -83,18 +80,19 @@ class _ReportScreenState extends State<ReportScreen> {
                 child: const Text("Print"),
                 onPressed: () {
                   final transactions = _getTransactionsForMonthYear(
+                    ctx,
                     selectedMonth,
                     selectedYear,
                   );
                   Navigator.pop(ctx);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => PrintPreviewScreen(
-                        transactions: transactions,
-                      ),
-                    ),
-                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (_) => PrintPreviewScreen(
+                  //       transactions: transactions,
+                  //     ),
+                  //   ),
+                  // );
                 },
               ),
             ],
@@ -104,23 +102,31 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  List<Transaction> _getTransactionsForMonthYear(int month, int year) {
-    return transactions.where((t) {
-      return t.date.month == month && t.date.year == year;
+  List<SellRecord> _getTransactionsForMonthYear(
+      BuildContext context, int month, int year) {
+    return (context.watch<SellRecordsBloc>().state as SellRecordLoaded)
+        .records
+        .values
+        .where((t) {
+      final dtime = DateTime.fromMillisecondsSinceEpoch(t.createdAt * 1000);
+      return dtime.month == month && dtime.year == year;
     }).toList();
   }
 
   @override
   void initState() {
-    _loadTransactions();
+    // _loadRecords();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, List<Transaction>> grouped = {};
-    for (var tran in transactions) {
-      final key = DateFormat.yMMMM().format(tran.date);
+    final Map<String, List<SellRecord>> grouped = {};
+    final records =
+        (context.watch<SellRecordBloc>().state as SellRecordLoaded).records;
+    for (var tran in records.values) {
+      final key = DateFormat.yMMMM()
+          .format(DateTime.fromMillisecondsSinceEpoch(tran.createdAt * 1000));
       grouped.putIfAbsent(key, () => []);
       grouped[key]!.add(tran);
     }
@@ -166,19 +172,23 @@ class _ReportScreenState extends State<ReportScreen> {
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     child: Container(
                       decoration: const BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(
-                                  color: Color.fromARGB(160, 158, 158, 158)))),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Color.fromARGB(160, 158, 158, 158),
+                          ),
+                        ),
+                      ),
                       child: ListTile(
                         onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (ctx) => ReportDetailsScreen(
-                                    transaction: transaction,
-                                  )));
+                          // Navigator.of(context).push(MaterialPageRoute(
+                          //     builder: (ctx) => ReportDetailsScreen(
+                          //           transaction: transaction,
+                          //         )));
                         },
                         leading: Text(
                           DateFormat.MMMd().format(
-                            transaction.date,
+                            DateTime.fromMillisecondsSinceEpoch(
+                                transaction.createdAt * 1000),
                           ),
                           textAlign: TextAlign.center,
                           style: const TextStyle(
@@ -187,7 +197,7 @@ class _ReportScreenState extends State<ReportScreen> {
                           ),
                         ),
                         title: Text(
-                          '${transaction.weight.toStringAsFixed(2)} gram',
+                          '${transaction.gram.toStringAsFixed(2)} gram',
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 15,
