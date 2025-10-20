@@ -1,4 +1,7 @@
-import 'package:nbe/local_data_provider/string_data_provider.dart';
+import 'dart:convert';
+
+import 'package:nbe/bloc/price_record_bloc.dart';
+import 'package:nbe/bloc/todays_price_record.dart';
 
 import 'libs.dart';
 
@@ -33,14 +36,22 @@ final ThemeData theme = ThemeData(
 void main() {
   // Giving the constructor a list of tables to create.
   NBEDatabase nbeDB = NBEDatabase.constructor([
+    StringDataProvider.createOrReplaceTableString(),
+    StringDataProvider.insertNBESettlementDuration(),
     SettingLocalProvider.createOrReplaceTableString(),
     SellRecordLocalProvider.createOrReplaceTableString(),
-    StringDataProvider.createOrReplaceTableString(),
+    PriceRecordProvider.createOrReplaceTableString(),
   ]);
 
   final sellRecordProvider = SellRecordLocalProvider(nbeDB);
   final settingProvider = SettingLocalProvider(nbeDB);
   final stringProvider = StringDataProvider(nbeDB);
+  final priceDataProvider = PriceRecordProvider(nbeDB);
+
+  final dataNetworkProvider = DataProvider(fullURL: 'https://api.nbe.gov.et');
+
+  final priceDataNetworkProvider =
+      PriceNetworkRecordProvider(dataNetworkProvider);
 
   runApp(MultiBlocProvider(
     providers: [
@@ -55,7 +66,14 @@ void main() {
       }),
       BlocProvider<SettingBloc>(create: (context) {
         return SettingBloc(settingProvider);
-      })
+      }),
+      BlocProvider<PriceRecordBloc>(create: (context) {
+        return PriceRecordBloc(
+            priceDataProvider, priceDataNetworkProvider, stringProvider);
+      }),
+      BlocProvider<TodaysPriceRecordBloc>(create: (context) {
+        return TodaysPriceRecordBloc(priceDataNetworkProvider);
+      }),
     ],
     child: const MyApp(),
   ));
@@ -84,6 +102,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final priceWatch = context.read<PriceRecordBloc>();
+    priceWatch.add(LoadPriceRecordsEvent());
+
+    final todaysPriceRecord = context.read<TodaysPriceRecordBloc>();
+    todaysPriceRecord.add(LoadTodaysPriceRecordsEvent());
+
     return MaterialApp(
       theme: ThemeData(
         primaryColorLight: const Color(0xFF1a87da),

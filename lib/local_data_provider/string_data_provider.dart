@@ -18,6 +18,10 @@ class StringDataProvider {
       )""";
   }
 
+  static String insertNBESettlementDuration() {
+    return """INSERT into $tableName($_idCol, $_payload) values(222, '30')""";
+  }
+
   Future<int> insertStringPayload(StringPayload payload) async {
     final db = await wrapper.database;
     return db.insert(tableName, {

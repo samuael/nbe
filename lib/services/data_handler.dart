@@ -111,9 +111,19 @@ class Transaction {
   });
 }
 
-String currencyFormatter(double value) {
-  final formatter = NumberFormat('#,##0.##');
+String currencyFormatter(double value, {int decimals = 4}) {
+  final formatter = NumberFormat('#,##0.${() {
+    String dfinal = "";
+    for (int i = 0; i < decimals; i++) {
+      dfinal += "#";
+    }
+    return dfinal;
+  }()}');
   return formatter.format(value);
+}
+
+String currencyFormatWith2DecimalValues(double value) {
+  return NumberFormat('#,##0.00').format(value - (value % 0.01));
 }
 
 String currencyFormatterForPrint(double value) {

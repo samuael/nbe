@@ -14,30 +14,29 @@ class CalculationDetails extends StatefulWidget {
 
 class _CalculationDetailsState extends State<CalculationDetails> {
   final _remainingController = TextEditingController();
-  late final double tax;
-  late final double bonus;
-  late final double bankFee;
-  final immediatePayment = 1;
-  bool isSaving = false;
-  // Setting _setting = Setting(uuid.v4(), 0, 250, 0.0001, 0.15);
+  late final double taxAmount;
+  late final double bonusPercentage;
+  late final double bankFeePercentage;
+  late final double karat24Price;
+  late final double immediatePercentage;
 
   double taxValue = 0;
-  double bonusValue = .15;
+  double bonusValue = 0;
   double bankFeeValue = 0;
   double immediatePaymentValue = 0;
+
   double netValue = 0;
   double netCompleted = 0;
 
   final TextStyle _commonLabelStyle = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w500,
-    color: Colors.black.withOpacity(.5),
+    color: Colors.black.withValues(alpha: .5),
     overflow: TextOverflow.visible,
   );
 
   Map<String, String> pricesMap = {};
   final url = 'https://api.nbe.gov.et/api/filter-gold-rates';
-  // Setting setting = Setting(uuid.v4(), 0, 5000, 0.0001, 0.1);
 
   //to check if the day has changed
   bool areSameDates(DateTime day1, DateTime day2) {
@@ -122,10 +121,10 @@ class _CalculationDetailsState extends State<CalculationDetails> {
     print(
         "widget.transaction.karat: ${widget.transaction.karat},widget.transaction.specificGravity: ${widget.transaction.specificGravity}, widget.transaction.weight: ${widget.transaction.weight}");
     setState(() {
-      immediatePaymentValue = immediatePayment * tran.totalAmount;
-      taxValue = tax * tran.weight;
-      bonusValue = bonus * tran.totalAmount;
-      bankFeeValue = bankFee * tran.totalAmount;
+      immediatePaymentValue = immediatePercentage * tran.totalAmount;
+      taxValue = taxAmount * tran.weight;
+      bonusValue = bonusPercentage * tran.totalAmount;
+      bankFeeValue = bankFeePercentage * tran.totalAmount;
       netValue =
           (immediatePaymentValue + bonusValue) - (taxValue + bankFeeValue);
       netCompleted =
@@ -137,9 +136,6 @@ class _CalculationDetailsState extends State<CalculationDetails> {
     final db = NBEDatabase.constructor([
       SettingLocalProvider.createOrReplaceTableString(),
     ]);
-    setState(() {
-      isSaving = true;
-    });
     await DataHandler.instance.ensureTableExists('setting');
     await DataHandler.instance.addTransactionToDb(widget.transaction);
     await SettingLocalProvider(db).insertSetting(widget.setting);
@@ -158,9 +154,11 @@ class _CalculationDetailsState extends State<CalculationDetails> {
 
   @override
   void initState() {
-    tax = widget.setting.taxPerGram;
-    bankFee = widget.setting.bankFeePercentage;
-    bonus = widget.setting.excludePercentage;
+    taxAmount = widget.setting.taxPerGram;
+    bankFeePercentage = widget.setting.bankFeePercentage;
+    bonusPercentage = widget.setting.excludePercentage;
+    karat24Price = widget.setting.nbe24KaratRate;
+    immediatePercentage = 1 - widget.setting.excludePercentage;
     calculateValues();
     super.initState();
   }
@@ -336,14 +334,15 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Total of ${immediatePayment * 100}%",
+                              "Total of ${immediatePercentage * 100}%",
                               textAlign: TextAlign.center,
                               style: _commonLabelStyle,
                             ),
                             Row(
                               children: [
                                 Text(
-                                  currencyFormatter(immediatePaymentValue),
+                                  currencyFormatWith2DecimalValues(
+                                      immediatePaymentValue),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -375,7 +374,8 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                             Row(
                               children: [
                                 Text(
-                                  currencyFormatter(bankFeeValue),
+                                  currencyFormatWith2DecimalValues(
+                                      bankFeeValue),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -407,7 +407,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                             Row(
                               children: [
                                 Text(
-                                  currencyFormatter(taxValue),
+                                  currencyFormatWith2DecimalValues(taxValue),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -439,7 +439,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                             Row(
                               children: [
                                 Text(
-                                  currencyFormatter(netValue),
+                                  currencyFormatWith2DecimalValues(netValue),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -485,7 +485,8 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                             Row(
                               children: [
                                 Text(
-                                  currencyFormatter(netCompleted),
+                                  currencyFormatWith2DecimalValues(
+                                      netCompleted),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -499,7 +500,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.black.withOpacity(.5),
+                                    color: Colors.black.withValues(alpha: .5),
                                   ),
                                 )
                               ],

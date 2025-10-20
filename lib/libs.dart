@@ -15,3 +15,4 @@ export 'package:flutter_bloc/flutter_bloc.dart';
 export 'states/states.dart';
 export 'bloc/bloc.dart';
 export 'services/services.dart';
+export 'network_provider/network_provider.dart';

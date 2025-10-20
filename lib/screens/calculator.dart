@@ -1,13 +1,5 @@
-import 'dart:convert';
-// import 'package:nbe/database/database.dart';
-// import 'package:sqflite/sqflite.dart';
 import 'package:intl/intl.dart';
-// import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:nbe/libs.dart';
-// import 'package:nbe/screens/calculation_details.dart';
-// import 'package:nbe/services/data_handler.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 const uuid = Uuid();
@@ -22,8 +14,8 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> {
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _volumeController = TextEditingController();
-  final TextEditingController _specificGravityController =
-      TextEditingController();
+  // final TextEditingController _specificGravityController =
+  //     TextEditingController();
   final TextEditingController _karatController = TextEditingController();
 
   String weightError = "";
@@ -31,69 +23,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String specificGravityErr = "";
   String karatErr = "";
 
-  Map<String, String> pricesMap = {};
-  final url = 'https://api.nbe.gov.et/api/filter-gold-rates';
-  Setting _setting = Setting(uuid.v4(), 0, 250, 0.01, 0.1);
+  Setting _setting = Setting(uuid.v4(), 0, 250, 0.01, 0.15);
 
-  //to check if the day has changed
+  // areSameDates to check if the day has changed
   bool areSameDates(DateTime day1, DateTime day2) {
     return day1.toIso8601String().substring(0, 10) ==
         day2.toIso8601String().substring(0, 10);
-  }
-
-  // to get the rates either from cache or from api
-  Future<void> _getPurchasingRate() async {
-    final cached = await SharedPreferences.getInstance();
-    if (cached.getString('last_updated') != null) {}
-    DateTime? lastUpdated = DateTime.tryParse(
-      cached.getString('last_updated') ?? '',
-    );
-    DateTime latestDate = DateTime.now();
-    if (latestDate.hour >= 0 && latestDate.hour < 8) {
-      latestDate = latestDate.subtract(const Duration(days: 1));
-    }
-
-    if (lastUpdated == null || !areSameDates(lastUpdated, latestDate)) {
-      final parsed = Uri.parse(url);
-      try {
-        final response = await http.get(parsed);
-
-        if (response.statusCode == 200) {
-          final Map<String, dynamic> document = jsonDecode(response.body);
-
-          try {
-            final List rates = document['data'];
-            cached.setString(
-                'last_updated', DateTime.now().toString().substring(0, 10));
-            for (var rate in rates) {
-              cached.setString(rate["gold_type"]["karat"], rate["price_birr"]);
-              pricesMap[rate["gold_type"]["karat"]] = rate["price_birr"];
-            }
-            setState(() {});
-          } catch (e) {
-            print('Something wrong in caching');
-          }
-        } else {
-          if (context.mounted) {
-            showSnackBar(
-                'Failed to load the purchasing rates. Server error: ${response.statusCode}');
-          }
-        }
-      } catch (e) {
-        if (context.mounted) {
-          showSnackBar('Failed to load the purchasing rates');
-        }
-      }
-    } else {
-      final keys = cached.getKeys();
-      for (var key in keys) {
-        final value = cached.get(key);
-        if (value != null) {
-          pricesMap[key] = value as String;
-        }
-      }
-      setState(() {});
-    }
   }
 
   int index = 1;
@@ -102,6 +37,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   double? volume;
   double? weight;
 
+  double? karat24Price;
   double? karat24AfterBonous;
   bool showAllKaratValues = false;
 
@@ -113,7 +49,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         action: SnackBarAction(
             label: 'Retry',
             onPressed: () {
-              _getPurchasingRate();
               _getSettings();
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
             }),
@@ -127,23 +62,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       return null;
     }
 
-    // int estimatedCarat = 0;
-    // if (specificGravity! <= 19.51 && specificGravity! > 19.13) {
-    //   estimatedCarat = 24;
-    // } else if (specificGravity! <= 19.13 && specificGravity! > 18.24) {
-    //   estimatedCarat = 23;
-    // } else if (specificGravity! <= 18.24 && specificGravity! > 17.45) {
-    //   estimatedCarat = 22;
-    // } else if (specificGravity! <= 17.45 && specificGravity! > 17.11) {
-    //   estimatedCarat = 21;
-    // } else if (specificGravity! <= 17.11 && specificGravity! > 16.03) {
-    //   estimatedCarat = 20;
-    // } else if (specificGravity! <= 16.03 && specificGravity! > 15.2) {
-    //   estimatedCarat = 18;
-    // }
-
-    // final rate = pricesMap[estimatedCarat.toString()];
-    // final rate = pricesMap[estimatedCarat.toString()];
     final rate = ((karat24AfterBonous! * karat!) / 24);
     final totalAmount = rate * weight;
     return Transaction(
@@ -160,21 +78,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   void _getSettings() async {
-    final db = NBEDatabase.constructor([
-      SettingLocalProvider.createOrReplaceTableString(),
-    ]);
-    // final recentSettings =
-    //     await SettingLocalProvider(db).getRecentSettings(0, 10);
-    // if (recentSettings.isNotEmpty) {
-    //   setState(() {
-    //     _setting = recentSettings.last;
-    //   });
-    // } else {
     setState(() {
-      _setting = Setting(uuid.v4(), double.tryParse(pricesMap['24'] ?? '') ?? 0,
-          250, 0.01, 0.1);
+      _setting = Setting(uuid.v4(), karat24Price ?? 0, 250, 0.001, 0.05);
     });
-    // }
   }
 
   void calculateValues() {
@@ -193,7 +99,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   @override
   void initState() {
-    _getPurchasingRate();
     _getSettings();
     super.initState();
   }
@@ -212,12 +117,32 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // if (weight != null) {
-    //   _weightController.text = "$weight";
-    // }
-    karat24AfterBonous = double.tryParse(pricesMap["24"] ?? '');
-    if (karat24AfterBonous != null) {
-      karat24AfterBonous = karat24AfterBonous! + (karat24AfterBonous! * .15);
+    final priceWatch = context.read<PriceRecordBloc>();
+    if (priceWatch.state is! PriceRecordsLoaded) {
+      priceWatch.add(LoadPriceRecordsEvent());
+    }
+
+    final todaysPriceRecord = context.read<TodaysPriceRecordBloc>();
+    final todayPriceLoad = context.watch<TodaysPriceRecordBloc>();
+    if (todayPriceLoad.state is! TodayPriceRecordsLoaded) {
+      todaysPriceRecord.add(LoadTodaysPriceRecordsEvent());
+    }
+
+    if (todayPriceLoad.state is TodayPriceRecordsLoaded) {
+      final karat24PriceString =
+          (todayPriceLoad.state as TodayPriceRecordsLoaded)
+              .response
+              .data!
+              .firstWhere((el) {
+        return el.goldType!.karat == "24";
+      }).priceBirr;
+
+      karat24Price = double.tryParse(karat24PriceString ?? '');
+
+      karat24AfterBonous = karat24Price;
+      if (karat24AfterBonous != null) {
+        karat24AfterBonous = karat24AfterBonous! + (karat24AfterBonous! * .15);
+      }
     }
     final Container _tinyDivider = Container(
       color: Colors.amber.withOpacity(.1),
@@ -239,6 +164,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            if (todayPriceLoad.state is! TodayPriceRecordsLoaded)
+              const NotificationMessage(
+                "Loading today's natioinal bank rate; please wait\n ...",
+                isErrorMessage: true,
+              ),
             Container(
               width: MediaQuery.of(context).size.width * .9,
               decoration: const BoxDecoration(
@@ -274,7 +204,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                   )
                                 : _commonLabelStyle,
                           ),
-                          double.tryParse(pricesMap[k] ?? '') == null
+                          (context.watch<TodaysPriceRecordBloc>().state
+                                  is! TodayPriceRecordsLoaded)
                               ? const ShimmerSkeleton(
                                   width: 50,
                                   height: 10,
@@ -283,9 +214,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               : Row(
                                   children: [
                                     Text(
-                                      currencyFormatter(
-                                          double.tryParse(pricesMap[k] ?? '') ??
-                                              0),
+                                      currencyFormatter(double.tryParse((context
+                                                          .watch<
+                                                              TodaysPriceRecordBloc>()
+                                                          .state
+                                                      as TodayPriceRecordsLoaded)
+                                                  .response
+                                                  .data!
+                                                  .firstWhere((el) {
+                                                return el.goldType!.karat == k;
+                                              }).priceBirr ??
+                                              "") ??
+                                          0),
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         fontSize: 13,
@@ -355,7 +295,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   child: karat24AfterBonous == null
                       ? const ShimmerSkeleton(width: 100, height: 10)
                       : Text(
-                          NumberFormat('#.##').format(karat24AfterBonous),
+                          NumberFormat('#.####').format(karat24AfterBonous),
                           style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
@@ -367,20 +307,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                fancySelectOneWidget(context, 1, "Volume", (val) {
-                  setState(() {
-                    index = val;
-                  });
-                }, () {
-                  return index;
-                }, widthMultiplier: .5),
-                // fancySelectOneWidget(context, 2, "Specific Gravity", (val) {
-                //   setState(() {
-                //     index = val;
-                //   });
-                // }, () {
-                //   return index;
-                // }, widthMultiplier: .5),
+                fancySelectOneWidget(
+                  context,
+                  1,
+                  "Volume",
+                  (val) {
+                    setState(() {
+                      index = val;
+                    });
+                  },
+                  () {
+                    return index;
+                  },
+                  widthMultiplier: .5,
+                ),
                 fancySelectOneWidget(context, 2, "Karat", (val) {
                   setState(() {
                     index = val;
@@ -407,6 +347,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   calculateValues();
                 },
                 keyboardType: const TextInputType.numberWithOptions(),
+                enabled: (todayPriceLoad.state is TodayPriceRecordsLoaded),
               ),
             ),
             if (index == 2)
@@ -465,6 +406,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                   controller: _volumeController,
                   keyboardType: const TextInputType.numberWithOptions(),
+                  enabled: (todayPriceLoad.state is TodayPriceRecordsLoaded),
                 ),
               ),
             Container(
@@ -536,6 +478,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   },
                   controller: _karatController,
                   keyboardType: const TextInputType.numberWithOptions(),
+                  enabled: (todayPriceLoad.state is TodayPriceRecordsLoaded),
                 ),
               ),
             if (index == 1)
