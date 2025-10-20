@@ -14,7 +14,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
   bool isSaving = false;
   bool isSharing = false;
   final List<Setting> settings = [];
-  final Setting defaultSeting = Setting('id', 0, 5000, 0.0001, 0.1);
+  final Setting defaultSeting = Setting('id', 250, 0.0001, 0.1);
 
   String getMonthYear(DateTime date) {
     return DateFormat.yMMMM().format(date);
@@ -137,8 +137,8 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                                       tx.weight * setting.taxPerGram),
                                   style: commonStyle),
                               pw.Text(
-                                  currencyFormatterForPrint(tx.totalAmount *
-                                      setting.excludePercentage),
+                                  currencyFormatterForPrint(
+                                      tx.totalAmount * setting.holdPercentage),
                                   style: commonStyle),
                               pw.Text(
                                   currencyFormatterForPrint(

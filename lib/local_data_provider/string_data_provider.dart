@@ -18,8 +18,8 @@ class StringDataProvider {
       )""";
   }
 
-  static String insertNBESettlementDuration() {
-    return """INSERT into $tableName($_idCol, $_payload) values(222, '30')""";
+  static String insertNBEConstants(int id, String days) {
+    return """INSERT into $tableName($_idCol, $_payload) values($id, $days)""";
   }
 
   Future<int> insertStringPayload(StringPayload payload) async {

@@ -23,7 +23,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String specificGravityErr = "";
   String karatErr = "";
 
-  Setting _setting = Setting(uuid.v4(), 0, 250, 0.01, 0.15);
+  Setting _setting = Setting(uuid.v4(), 250, 0.01, 0.15);
 
   // areSameDates to check if the day has changed
   bool areSameDates(DateTime day1, DateTime day2) {
@@ -79,7 +79,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   void _getSettings() async {
     setState(() {
-      _setting = Setting(uuid.v4(), karat24Price ?? 0, 250, 0.001, 0.05);
+      _setting = Setting(uuid.v4(), 250, 0.001, 0.05);
     });
   }
 

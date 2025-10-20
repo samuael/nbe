@@ -240,7 +240,7 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                         flex: 1,
                         child: Text(
                           setting != null
-                              ? '${setting!.excludePercentage * 100} %'
+                              ? '${setting!.holdPercentage * 100} %'
                               : '10%',
                           style: _labelStyle,
                         ))

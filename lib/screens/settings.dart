@@ -97,7 +97,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               final bonus = double.tryParse(bonusController.text) ?? 0;
               final setting = Setting(
                 uuid.v4(),
-                widget.nbe24KaratRate,
+                // widget.nbe24KaratRate,
                 tax,
                 bankFee / 100,
                 bonus / 100,

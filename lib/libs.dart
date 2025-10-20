@@ -16,3 +16,4 @@ export 'states/states.dart';
 export 'bloc/bloc.dart';
 export 'services/services.dart';
 export 'network_provider/network_provider.dart';
+export 'constants.dart';

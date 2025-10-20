@@ -1,15 +1,16 @@
 class Setting {
   String id;
-  double nbe24KaratRate;
   double taxPerGram;
   double bankFeePercentage;
-  double excludePercentage;
-  late int createdAt;
+  double holdPercentage;
+  int createdAt;
 
-  Setting(this.id, this.nbe24KaratRate, this.taxPerGram, this.bankFeePercentage,
-      this.excludePercentage) {
-    createdAt =
-        ((DateTime.now().microsecondsSinceEpoch / 1000).floor()).toInt();
+  Setting(this.id, this.taxPerGram, this.bankFeePercentage, this.holdPercentage,
+      {this.createdAt = 0}) {
+    if (createdAt == 0) {
+      createdAt =
+          ((DateTime.now().microsecondsSinceEpoch / 1000).floor()).toInt();
+    }
   }
 
   factory Setting.fromJson(Map<String, dynamic> data) {
@@ -17,18 +18,17 @@ class Setting {
       data["id"],
       data["nbe24KaratRate"],
       data["taxPerGram"],
-      data["bankFeePercentage"],
-      data["excludePercentage"],
+      data["holdPercentage"],
+      createdAt: data["createdAt"],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       if (id != "") "id": id,
-      "nbe24KaratRate": nbe24KaratRate,
       "taxPerGram": taxPerGram,
       "bankFeePercentage": bankFeePercentage,
-      "excludePercentage": excludePercentage,
+      "holdPercentage": holdPercentage,
       "createdAt": createdAt,
     };
   }

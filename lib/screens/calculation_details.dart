@@ -156,9 +156,9 @@ class _CalculationDetailsState extends State<CalculationDetails> {
   void initState() {
     taxAmount = widget.setting.taxPerGram;
     bankFeePercentage = widget.setting.bankFeePercentage;
-    bonusPercentage = widget.setting.excludePercentage;
-    karat24Price = widget.setting.nbe24KaratRate;
-    immediatePercentage = 1 - widget.setting.excludePercentage;
+    bonusPercentage = widget.setting.holdPercentage;
+    // karat24Price = widget.setting.nbe24KaratRate;
+    immediatePercentage = 1 - widget.setting.holdPercentage;
     calculateValues();
     super.initState();
   }
@@ -262,7 +262,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                                   Expanded(
                                     flex: 1,
                                     child: Text(
-                                      '${widget.setting.excludePercentage * 100}%',
+                                      '${widget.setting.holdPercentage * 100}%',
                                       style: _commonLabelStyle,
                                     ),
                                   )

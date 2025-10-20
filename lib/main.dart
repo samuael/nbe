@@ -1,8 +1,5 @@
 import 'dart:convert';
 
-import 'package:nbe/bloc/price_record_bloc.dart';
-import 'package:nbe/bloc/todays_price_record.dart';
-
 import 'libs.dart';
 
 final ThemeData theme = ThemeData(
@@ -20,11 +17,7 @@ final ThemeData theme = ThemeData(
     ),
   ),
   elevatedButtonTheme: const ElevatedButtonThemeData(
-    style: ButtonStyle(
-        // foregroundColor: WidgetStatePropertyAll(
-        //   Color.fromARGB(255, 3, 48, 85),
-        // ),
-        ),
+    style: ButtonStyle(),
   ),
   appBarTheme: const AppBarTheme(
     // backgroundColor: Color.fromARGB(255, 3, 37, 65),
@@ -35,10 +28,15 @@ final ThemeData theme = ThemeData(
 
 void main() {
   // Giving the constructor a list of tables to create.
+  final Setting setting = Setting(uuid.v6(), 250, 0.001, 5);
   NBEDatabase nbeDB = NBEDatabase.constructor([
-    StringDataProvider.createOrReplaceTableString(),
-    StringDataProvider.insertNBESettlementDuration(),
     SettingLocalProvider.createOrReplaceTableString(),
+    SettingLocalProvider.insertDefaultSetting(setting),
+    StringDataProvider.createOrReplaceTableString(),
+    StringDataProvider.insertNBEConstants(
+        StaticConstant.MAX_HOLD_DURATION_ID, "30"),
+    StringDataProvider.insertNBEConstants(
+        StaticConstant.LAST_SETTING_ID, setting.id),
     SellRecordLocalProvider.createOrReplaceTableString(),
     PriceRecordProvider.createOrReplaceTableString(),
   ]);
@@ -155,6 +153,8 @@ class _NavigationControllerState extends State<NavigationController> {
             icon: Icon(Icons.calculate),
             label: 'Calculator',
           ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.timer_outlined), label: 'Price History'),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
