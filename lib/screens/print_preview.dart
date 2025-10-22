@@ -14,7 +14,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
   bool isSaving = false;
   bool isSharing = false;
   final List<Setting> settings = [];
-  final Setting defaultSeting = Setting('id', 250, 0.0001, 0.1);
+  final Setting defaultSeting = Setting('id', 250, 0.01, 5, 15);
 
   String getMonthYear(DateTime date) {
     return DateFormat.yMMMM().format(date);
@@ -109,7 +109,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                         itemBuilder: (context, index) {
                           final tx = transactions[index];
                           final setting = settings.firstWhere(
-                            (setting) => tx.settingId == setting.id,
+                            (setting) => tx.settingID == setting.id,
                             orElse: () => defaultSeting,
                           );
                           final commonStyle = pw.TextStyle(
@@ -121,7 +121,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                                 pw.MainAxisAlignment.spaceBetween,
                             children: [
                               pw.Text(
-                                DateFormat('dd MMM yyyy').format(tx.date),
+                                tx.date,
                                 style: commonStyle,
                               ),
                               pw.Text(
@@ -129,27 +129,27 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                                 style: commonStyle,
                               ),
                               pw.Text(
-                                '${tx.weight.toStringAsFixed(2)}g',
+                                '${tx.gram.toStringAsFixed(2)}g',
                                 style: commonStyle,
                               ),
                               pw.Text(
                                   currencyFormatterForPrint(
-                                      tx.weight * setting.taxPerGram),
+                                      tx.gram * setting.taxPerGram),
                                   style: commonStyle),
+                              // pw.Text(
+                              //     currencyFormatterForPrint(
+                              //         tx.initialFreeValue),
+                              // style: commonStyle),
                               pw.Text(
-                                  currencyFormatterForPrint(
-                                      tx.totalAmount * setting.holdPercentage),
+                                  currencyFormatterForPrint(tx.bankFeeValue),
                                   style: commonStyle),
-                              pw.Text(
-                                  currencyFormatterForPrint(
-                                      setting.bankFeePercentage *
-                                          tx.totalAmount),
-                                  style: commonStyle),
-                              pw.Text(currencyFormatterForPrint(tx.totalAmount),
-                                  style: pw.TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: pw.FontWeight.bold,
-                                      color: PdfColors.black)),
+                              // pw.Text(
+                              //     currencyFormatterForPrint(
+                              //         tx.initialFreeValue + tx.holdValue),
+                              //     style: pw.TextStyle(
+                              //         fontSize: 13,
+                              //         fontWeight: pw.FontWeight.bold,
+                              //         color: PdfColors.black)),
                               pw.Text(tx.isCompleted ? 'Completed' : 'Pending',
                                   style: commonStyle),
                             ],
@@ -200,7 +200,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
                           pw.Text(
-                            DateFormat('dd MMM yyyy').format(tx.date),
+                            tx.date,
                             style: const pw.TextStyle(
                                 fontSize: 14, color: PdfColors.grey600),
                           ),
@@ -210,18 +210,18 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                                 fontSize: 14, color: PdfColors.grey600),
                           ),
                           pw.Text(
-                            '${tx.weight.toStringAsFixed(2)}g',
+                            '${tx.gram.toStringAsFixed(2)} gram',
                             style: const pw.TextStyle(
                                 fontSize: 14, color: PdfColors.grey600),
                           ),
-                          pw.Text(
-                            '${currencyFormatter(tx.totalAmount).substring(0, (currencyFormatter(tx.totalAmount).length - 3))} Birr',
-                            style: pw.TextStyle(
-                              fontSize: 14,
-                              fontWeight: pw.FontWeight.bold,
-                              color: PdfColors.black,
-                            ),
-                          ),
+                          // pw.Text(
+                          //   '${currencyFormatter(tx.initialFreeValue + tx.holdValue).substring(0, (currencyFormatter(tx.initialFreeValue + tx.holdValue).length - 3))} Birr',
+                          //   style: pw.TextStyle(
+                          //     fontSize: 14,
+                          //     fontWeight: pw.FontWeight.bold,
+                          //     color: PdfColors.black,
+                          //   ),
+                          // ),
                         ],
                       );
                     },
@@ -280,7 +280,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
     }
 
     final firstDate = widget.transactions.first.date;
-    final title = getMonthYear(firstDate);
+    final title = firstDate;
     final TextStyle commonLabelStyle = TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.w500,
@@ -312,7 +312,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        DateFormat('dd MMM yyyy').format(tx.date),
+                        tx.date,
                         style: commonLabelStyle,
                       ),
                       Text(
@@ -320,10 +320,10 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                         style: commonLabelStyle,
                       ),
                       Text(
-                        '${tx.weight.toStringAsFixed(2)}g',
+                        '${tx.gram.toStringAsFixed(2)}g',
                         style: commonLabelStyle,
                       ),
-                      Text(currencyFormatter(tx.totalAmount),
+                      Text(currencyFormatter(tx.net),
                           style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,

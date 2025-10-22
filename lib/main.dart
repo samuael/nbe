@@ -28,7 +28,8 @@ final ThemeData theme = ThemeData(
 
 void main() {
   // Giving the constructor a list of tables to create.
-  final Setting setting = Setting(uuid.v6(), 250, 0.001, 5);
+  final Setting setting =
+      Setting("${DateTime.now().millisecondsSinceEpoch}", 250, 0.001, 5, 15);
   NBEDatabase nbeDB = NBEDatabase.constructor([
     SettingLocalProvider.createOrReplaceTableString(),
     SettingLocalProvider.insertDefaultSetting(setting),
@@ -37,11 +38,11 @@ void main() {
         StaticConstant.MAX_HOLD_DURATION_ID, "30"),
     StringDataProvider.insertNBEConstants(
         StaticConstant.LAST_SETTING_ID, setting.id),
-    SellRecordLocalProvider.createOrReplaceTableString(),
+    TransactionsLocalProvider.createOrReplaceTableString(),
     PriceRecordProvider.createOrReplaceTableString(),
   ]);
 
-  final sellRecordProvider = SellRecordLocalProvider(nbeDB);
+  final sellRecordProvider = TransactionsLocalProvider(nbeDB);
   final settingProvider = SettingLocalProvider(nbeDB);
   final stringProvider = StringDataProvider(nbeDB);
   final priceDataProvider = PriceRecordProvider(nbeDB);
@@ -56,21 +57,22 @@ void main() {
       BlocProvider<SettingsBloc>(create: (context) {
         return SettingsBloc(settingProvider);
       }),
-      BlocProvider<SellRecordsBloc>(create: (context) {
-        return SellRecordsBloc(sellRecordProvider);
+      BlocProvider<TransactionBloc>(create: (context) {
+        return TransactionBloc(sellRecordProvider);
       }),
       BlocProvider<SellRecordBloc>(create: (context) {
         return SellRecordBloc(sellRecordProvider);
       }),
       BlocProvider<SettingBloc>(create: (context) {
-        return SettingBloc(settingProvider);
+        return SettingBloc(settingProvider, stringProvider);
       }),
       BlocProvider<PriceRecordBloc>(create: (context) {
         return PriceRecordBloc(
             priceDataProvider, priceDataNetworkProvider, stringProvider);
       }),
       BlocProvider<TodaysPriceRecordBloc>(create: (context) {
-        return TodaysPriceRecordBloc(priceDataNetworkProvider);
+        return TodaysPriceRecordBloc(
+            priceDataProvider, priceDataNetworkProvider, stringProvider);
       }),
     ],
     child: const MyApp(),
@@ -106,6 +108,9 @@ class MyApp extends StatelessWidget {
     final todaysPriceRecord = context.read<TodaysPriceRecordBloc>();
     todaysPriceRecord.add(LoadTodaysPriceRecordsEvent());
 
+    final settingRead = context.read<SettingBloc>();
+    settingRead.add(LoadLastSettingEvent());
+
     return MaterialApp(
       theme: ThemeData(
         primaryColorLight: const Color(0xFF1a87da),
@@ -128,10 +133,11 @@ class NavigationController extends StatefulWidget {
 
 class _NavigationControllerState extends State<NavigationController> {
   int _currentIndex = 0;
-  static const List<Widget> widgetList = [
-    CalculatorScreen(),
-    ReportScreen(),
-    SettingsScreen(nbe24KaratRate: 23432),
+  static List<Widget> widgetList = [
+    const CalculatorScreen(),
+    const PriceHistoryScreen(),
+    const ReportScreen(),
+    const SettingsScreen(nbe24KaratRate: 23432),
   ];
 
   @override

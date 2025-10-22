@@ -1,4 +1,5 @@
 import 'package:nbe/libs.dart';
+import 'package:sqflite/sqflite.dart';
 
 class StringDataProvider {
   static const String tableName = "strings";
@@ -24,10 +25,14 @@ class StringDataProvider {
 
   Future<int> insertStringPayload(StringPayload payload) async {
     final db = await wrapper.database;
-    return db.insert(tableName, {
-      _idCol: payload.id,
-      _payload: payload.payload,
-    });
+    return db.insert(
+      tableName,
+      {
+        _idCol: payload.id,
+        _payload: payload.payload,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<StringPayload?> getStringPayloadByID(int id) async {

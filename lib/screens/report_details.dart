@@ -1,6 +1,5 @@
 import 'package:intl/intl.dart';
 import 'package:nbe/libs.dart';
-import 'package:nbe/screens/screens.dart';
 
 class ReportDetailsScreen extends StatefulWidget {
   final Transaction transaction;
@@ -14,7 +13,7 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
   final TextStyle _labelStyle = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w500,
-    color: Colors.black.withOpacity(0.6),
+    color: Colors.black.withValues(alpha: 0.6),
     overflow: TextOverflow.visible,
   );
   Setting? setting;
@@ -22,7 +21,7 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    _getSetting(widget.transaction.settingId);
+    _getSetting(widget.transaction.settingID);
   }
 
   void _getSetting(String id) async {
@@ -57,7 +56,7 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Date: ${DateFormat.yMMMd().format(widget.transaction.date)}",
+                  "Date: ${widget.transaction.date}",
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -90,7 +89,7 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
               Expanded(
                 flex: 1,
                 child: Text(
-                  '${widget.transaction.weight} g',
+                  '${widget.transaction.gram} g',
                   style: _labelStyle,
                 ),
               ),
@@ -122,7 +121,7 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
               Expanded(
                 flex: 1,
                 child: Text(
-                  widget.transaction.karat,
+                  "${widget.transaction.karat}",
                   style: _labelStyle,
                 ),
               ),
@@ -138,7 +137,7 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                 Expanded(
                     flex: 1,
                     child: Text(
-                      currencyFormatter(widget.transaction.todayRate),
+                      currencyFormatter(widget.transaction.initialPrice),
                       style: _labelStyle,
                     ))
               ],
@@ -158,7 +157,7 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
                     )),
                 Expanded(
                   child: Text(
-                    currencyFormatter(widget.transaction.totalAmount),
+                    currencyFormatter(widget.transaction.net),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,

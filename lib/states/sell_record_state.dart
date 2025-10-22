@@ -1,11 +1,11 @@
-import 'package:nbe/types/sell_types.dart';
+import 'package:nbe/libs.dart';
 
-class SellRecordState {}
+class TransactionState {}
 
-class SellRecordInit extends SellRecordState {}
+class TransactionInit extends TransactionState {}
 
-class SellRecordLoaded extends SellRecordState {
-  Map<int, SellRecord> records;
+class TransactionLoaded extends TransactionState {
+  Map<String, Transaction> records;
 
-  SellRecordLoaded(this.records);
+  TransactionLoaded(this.records);
 }

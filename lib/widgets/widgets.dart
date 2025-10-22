@@ -5,3 +5,8 @@ export 'notification_message.dart';
 export 'shimmer_skeleton.dart';
 export 'skeleton_widget.dart';
 export 'fancy_select_one.dart';
+export 'settings_page.dart';
+export 'telegram_navigator.dart';
+export "current_setting_page.dart";
+export 'setting_preview.dart';
+export 'price_history_item.dart';

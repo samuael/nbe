@@ -1,27 +1,72 @@
+import 'dart:convert';
+
 import 'package:nbe/libs.dart';
 import 'package:intl/intl.dart';
 
 class TodaysPriceRecordBloc
     extends Bloc<TodayPriceRecordsEvent, TodayPriceRecordState> {
   final PriceNetworkRecordProvider networkProvider;
+  final PriceRecordProvider provider;
+  final StringDataProvider stringProvider;
 
-  TodaysPriceRecordBloc(this.networkProvider) : super(TodayPriceRecordsInit()) {
+  TodaysPriceRecordBloc(
+      this.provider, this.networkProvider, this.stringProvider)
+      : super(TodayPriceRecordsInit()) {
     on<LoadTodaysPriceRecordsEvent>((event, emit) async {
       if (state is TodayPriceRecordsLoaded &&
           (state as TodayPriceRecordsLoaded)
               .date
-              .isBefore(DateTime.now().add(const Duration(hours: -1)))) {
+              .isAfter(DateTime.now().add(const Duration(hours: -1)))) {
         return;
       }
-      final today = DateTime.now();
-      final dateFormat = DateFormat('yyyy-MM-dd');
-      final response =
-          await networkProvider.getPriceRecordByDate(dateFormat.format(today));
-      if (response.success ?? false) {
-        emit(TodayPriceRecordsLoaded(response, today));
-      } else {
-        emit(TodayPriceRecordLoadFailed());
+      var lastDate = DateTime.now();
+      var dateString = DateFormat('yyyy-MM-dd').format(lastDate);
+      try {
+        var response = await getLastPriceRecordResponse();
+        if (response != null &&
+            response.data!.isNotEmpty &&
+            response.data![0].date == dateString) {
+          emit(TodayPriceRecordsLoaded(response, lastDate));
+          return;
+        }
+      } catch (e, a) {
+        print(e.toString());
+        print(a.toString());
+      }
+
+      for (int i = 0; i < 7; i++) {
+        dateString = DateFormat('yyyy-MM-dd').format(lastDate);
+        var response = await networkProvider.getPriceRecordByDate(dateString);
+        if (response.success == true && response.data!.isNotEmpty) {
+          // save the last price record record to the database.
+          print("Saved String: ${jsonEncode(response.toJson())}");
+          stringProvider.insertStringPayload(StringPayload(
+              StaticConstant.LAST_PRICE_RECORD_JSON,
+              jsonEncode(response.toJson()),
+              (DateTime.now().millisecondsSinceEpoch / 1000).toInt()));
+
+          // emit the data.
+          emit(TodayPriceRecordsLoaded(response, lastDate));
+          return;
+        } else if (response.success == true) {
+          // if the response is a success but the data is not filled, meaning todays rate is not yet released.
+          lastDate = lastDate.add(const Duration(days: -1));
+          continue;
+        } else {
+          emit(TodayPriceRecordLoadFailed());
+          return;
+        }
       }
     });
+  }
+
+  Future<PriceRecordResponse?> getLastPriceRecordResponse() async {
+    final result = await stringProvider
+        .getStringPayloadByID(StaticConstant.LAST_PRICE_RECORD_JSON);
+    if (result != null) {
+      print("Payload is ${{result.payload}}");
+      return PriceRecordResponse.fromJson(jsonDecode(result.payload));
+    }
+    return null;
   }
 }

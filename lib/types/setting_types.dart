@@ -3,9 +3,11 @@ class Setting {
   double taxPerGram;
   double bankFeePercentage;
   double holdPercentage;
+  double bonusByNBEInPercentage;
   int createdAt;
 
   Setting(this.id, this.taxPerGram, this.bankFeePercentage, this.holdPercentage,
+      this.bonusByNBEInPercentage,
       {this.createdAt = 0}) {
     if (createdAt == 0) {
       createdAt =
@@ -16,9 +18,10 @@ class Setting {
   factory Setting.fromJson(Map<String, dynamic> data) {
     return Setting(
       data["id"],
-      data["nbe24KaratRate"],
       data["taxPerGram"],
+      data["bankFeePercentage"],
       data["holdPercentage"],
+      data["bonusByNBEInPercentage"],
       createdAt: data["createdAt"],
     );
   }
@@ -28,6 +31,7 @@ class Setting {
       if (id != "") "id": id,
       "taxPerGram": taxPerGram,
       "bankFeePercentage": bankFeePercentage,
+      "bonusByNBEInPercentage": bonusByNBEInPercentage,
       "holdPercentage": holdPercentage,
       "createdAt": createdAt,
     };

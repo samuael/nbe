@@ -5,6 +5,6 @@ class SellRecordEvent {}
 class SellRecordLoad extends SellRecordEvent {}
 
 class UpdateRecordEvent extends SellRecordEvent {
-  SellRecord record;
+  Transaction record;
   UpdateRecordEvent(this.record);
 }

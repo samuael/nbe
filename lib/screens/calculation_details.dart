@@ -1,24 +1,22 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:nbe/libs.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CalculationDetails extends StatefulWidget {
   final Transaction transaction;
-  Setting setting;
-  CalculationDetails(
-      {required this.transaction, required this.setting, super.key});
+  Setting? setting;
+  CalculationDetails({required this.transaction, this.setting, super.key});
   @override
   State<CalculationDetails> createState() => _CalculationDetailsState();
 }
 
 class _CalculationDetailsState extends State<CalculationDetails> {
   final _remainingController = TextEditingController();
-  late final double taxAmount;
-  late final double bonusPercentage;
-  late final double bankFeePercentage;
-  late final double karat24Price;
-  late final double immediatePercentage;
+
+  double? taxPerGram;
+  double? bonusPercentage;
+  double? bankFeePercentage;
+  double? karat24Price;
+  double? immediatePercentage;
 
   double taxValue = 0;
   double bonusValue = 0;
@@ -35,9 +33,6 @@ class _CalculationDetailsState extends State<CalculationDetails> {
     overflow: TextOverflow.visible,
   );
 
-  Map<String, String> pricesMap = {};
-  final url = 'https://api.nbe.gov.et/api/filter-gold-rates';
-
   //to check if the day has changed
   bool areSameDates(DateTime day1, DateTime day2) {
     return day1.toIso8601String().substring(0, 10) ==
@@ -52,7 +47,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
         action: SnackBarAction(
             label: 'Retry',
             onPressed: () {
-              _getPurchasingRate();
+              // _getPurchasingRate();
               // _getSettings();
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
             }),
@@ -60,86 +55,25 @@ class _CalculationDetailsState extends State<CalculationDetails> {
     );
   }
 
-  // to get the rates either from cache or from api
-  Future<void> _getPurchasingRate() async {
-    final cached = await SharedPreferences.getInstance();
-    if (cached.getString('last_updated') != null) {}
-    DateTime? lastUpdated = DateTime.tryParse(
-      cached.getString('last_updated') ?? '',
-    );
-    DateTime latestDate = DateTime.now();
-    if (latestDate.hour >= 0 && latestDate.hour < 8) {
-      latestDate = latestDate.subtract(const Duration(days: 1));
-    }
-
-    if (lastUpdated == null || !areSameDates(lastUpdated, latestDate)) {
-      final parsed = Uri.parse(url);
-      try {
-        final response = await http.get(parsed);
-
-        if (response.statusCode == 200) {
-          final Map<String, dynamic> document = jsonDecode(response.body);
-
-          try {
-            final List rates = document['data'];
-            cached.setString(
-                'last_updated', DateTime.now().toString().substring(0, 10));
-            for (var rate in rates) {
-              cached.setString(rate["gold_type"]["karat"], rate["price_birr"]);
-              pricesMap[rate["gold_type"]["karat"]] = rate["price_birr"];
-            }
-            setState(() {});
-          } catch (e) {
-            print('Something wrong in caching');
-          }
-        } else {
-          if (context.mounted) {
-            showSnackBar(
-                'Failed to load the purchasing rates. Server error: ${response.statusCode}');
-          }
-        }
-      } catch (e) {
-        if (context.mounted) {
-          showSnackBar('Failed to load the purchasing rates');
-        }
-      }
-    } else {
-      final keys = cached.getKeys();
-      for (var key in keys) {
-        final value = cached.get(key);
-        if (value != null) {
-          pricesMap[key] = value as String;
-        }
-      }
-      setState(() {});
-    }
-  }
-
   void calculateValues() {
     final tran = widget.transaction;
-    // print("Setting: ${widget.transaction.toString()}");
-    print(
-        "widget.transaction.karat: ${widget.transaction.karat},widget.transaction.specificGravity: ${widget.transaction.specificGravity}, widget.transaction.weight: ${widget.transaction.weight}");
     setState(() {
-      immediatePaymentValue = immediatePercentage * tran.totalAmount;
-      taxValue = taxAmount * tran.weight;
-      bonusValue = bonusPercentage * tran.totalAmount;
-      bankFeeValue = bankFeePercentage * tran.totalAmount;
-      netValue =
-          (immediatePaymentValue + bonusValue) - (taxValue + bankFeeValue);
-      netCompleted =
-          (tran.totalAmount + bonusValue) - (taxValue + bankFeeValue);
+      // immediatePaymentValue = immediatePercentage * tran.totalAmount;
+      // taxValue = taxPerGram * tran.weight;
+      // bonusValue = bonusPercentage * tran.totalAmount;
+      // bankFeeValue = bankFeePercentage * tran.totalAmount;
+      // netValue =
+      //     (immediatePaymentValue + bonusValue) - (taxValue + bankFeeValue);
+      // netCompleted =
+      //     (tran.totalAmount + bonusValue) - (taxValue + bankFeeValue);
     });
   }
 
-  void onSaveTapped() async {
-    final db = NBEDatabase.constructor([
-      SettingLocalProvider.createOrReplaceTableString(),
-    ]);
-    await DataHandler.instance.ensureTableExists('setting');
-    await DataHandler.instance.addTransactionToDb(widget.transaction);
-    await SettingLocalProvider(db).insertSetting(widget.setting);
-
+  void onSaveTapped(BuildContext context) async {
+    if (widget.setting != null) {
+      return;
+    }
+    context.read<SettingBloc>().add(UpdateSettingEvent(widget.setting!));
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -148,18 +82,12 @@ class _CalculationDetailsState extends State<CalculationDetails> {
           duration: Duration(seconds: 3),
         ),
       );
-      Navigator.of(context).pop();
     }
   }
 
   @override
   void initState() {
-    taxAmount = widget.setting.taxPerGram;
-    bankFeePercentage = widget.setting.bankFeePercentage;
-    bonusPercentage = widget.setting.holdPercentage;
-    // karat24Price = widget.setting.nbe24KaratRate;
-    immediatePercentage = 1 - widget.setting.holdPercentage;
-    calculateValues();
+    // calculateValues();
     super.initState();
   }
 
@@ -172,6 +100,21 @@ class _CalculationDetailsState extends State<CalculationDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final settingLoad = context.watch<SettingBloc>();
+    if (widget.setting == null && (settingLoad.state is SettingLoaded)) {
+      widget.setting = (settingLoad.state as SettingLoaded).setting;
+    }
+
+    // todaysPrice
+    // final settingCall = context.watch<SettingBloc>();
+
+    if (widget.setting != null) {
+      taxPerGram = widget.setting!.taxPerGram;
+      bankFeePercentage = widget.setting!.bankFeePercentage;
+      bonusPercentage = widget.setting!.bonusByNBEInPercentage;
+      immediatePercentage = 1 - widget.setting!.holdPercentage;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -198,8 +141,9 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                         border: Border(
                           left: const BorderSide(color: Colors.orange),
                           right: const BorderSide(color: Colors.orange),
-                          bottom:
-                              BorderSide(color: Colors.black.withOpacity(.05)),
+                          bottom: BorderSide(
+                            color: Colors.black.withValues(alpha: .05),
+                          ),
                         ),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -208,68 +152,23 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                       height: MediaQuery.of(context).size.height * .15,
                       child: Stack(
                         children: [
-                          TitledContainer(
-                            "Settings",
-                            [
-                              Row(children: [
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
-                                    'Immediate Payment Amount ',
-                                    style: _commonLabelStyle,
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 1,
-                                  child: Text(
-                                    '95%',
-                                    style: _commonLabelStyle,
-                                  ),
-                                ),
-                              ]),
-                              Row(children: [
-                                Expanded(
-                                  flex: 2,
-                                  child: Text('Tax per gram',
-                                      style: _commonLabelStyle),
-                                ),
-                                Expanded(
-                                  flex: 1,
-                                  child: Text(
-                                      '${widget.setting.taxPerGram} EtB',
-                                      style: _commonLabelStyle),
-                                ),
-                              ]),
-                              Row(children: [
-                                Expanded(
-                                  flex: 2,
-                                  child: Text('Bank Fee in percent:',
-                                      style: _commonLabelStyle),
-                                ),
-                                Expanded(
-                                  flex: 1,
-                                  child: Text(
-                                      '${widget.setting.bankFeePercentage * 100}%',
-                                      style: _commonLabelStyle),
-                                ),
-                              ]),
-                              Row(
+                          if (settingLoad.state is SettingLoaded)
+                            TitledContainer("Settings", [
+                              SettingItem(
+                                  (settingLoad.state as SettingLoaded).setting),
+                            ]),
+                          if (settingLoad.state is! SettingLoaded)
+                            SizedBox(
+                              child: Column(
                                 children: [
-                                  Expanded(
-                                      flex: 2,
-                                      child: Text('Bonus by NBE:',
-                                          style: _commonLabelStyle)),
-                                  Expanded(
-                                    flex: 1,
-                                    child: Text(
-                                      '${widget.setting.holdPercentage * 100}%',
-                                      style: _commonLabelStyle,
-                                    ),
-                                  )
+                                  const NotificationMessage(
+                                      "Setting being loaded"),
+                                  SpinKitWanderingCubes(
+                                    color: Theme.of(context).primaryColor,
+                                  ),
                                 ],
-                              )
-                            ],
-                          ),
+                              ),
+                            ),
                           Positioned(
                             top: 0,
                             right: 0,
@@ -278,10 +177,10 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                                 final Setting? newSetting = await Navigator.of(
                                         context)
                                     .push(MaterialPageRoute(
-                                        builder: (ctx) => SettingsScreen(
-                                            nbe24KaratRate: double.tryParse(
-                                                    pricesMap['24'] ?? '') ??
-                                                0)));
+                                        builder: (ctx) => const SettingsScreen(
+                                            // nbe24KaratRate: double.tryParse(
+                                            //         pricesMap['24'] ?? '') ??
+                                            nbe24KaratRate: 0)));
 
                                 if (newSetting != null) {
                                   setState(() {
@@ -298,7 +197,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                                   border: Border.all(
                                       color: Theme.of(context)
                                           .primaryColor
-                                          .withOpacity(.5)),
+                                          .withValues(alpha: .5)),
                                 ),
                                 child: Row(
                                   children: [
@@ -334,7 +233,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Total of ${immediatePercentage * 100}%",
+                              "Total of $immediatePercentage %",
                               textAlign: TextAlign.center,
                               style: _commonLabelStyle,
                             ),
@@ -356,7 +255,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.black.withOpacity(.5),
+                                    color: Colors.black.withValues(alpha: .5),
                                   ),
                                 )
                               ],
@@ -389,7 +288,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.black.withOpacity(.5),
+                                    color: Colors.black.withValues(alpha: .5),
                                   ),
                                 )
                               ],
@@ -421,7 +320,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.black.withOpacity(.5),
+                                    color: Colors.black.withValues(alpha: .5),
                                   ),
                                 )
                               ],
@@ -453,7 +352,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.black.withOpacity(.5),
+                                    color: Colors.black.withValues(alpha: .5),
                                   ),
                                 )
                               ],

@@ -23,6 +23,15 @@ class TodayPriceRecordsLoaded extends TodayPriceRecordState {
   PriceRecordResponse response;
   DateTime date;
   TodayPriceRecordsLoaded(this.response, this.date);
+
+  PriceRecord? getPriceRecordByGoldKarat(String karat) {
+    for (var pr in response.data!) {
+      if (pr.goldType!.karat == karat) {
+        return pr;
+      }
+    }
+    return null;
+  }
 }
 
 class TodayPriceRecordsInit extends TodayPriceRecordState {}

@@ -1,4 +1,4 @@
-export 'widgets/wiwdgets.dart';
+export 'widgets/widgets.dart';
 export 'screens/screens.dart';
 export 'main.dart';
 export 'package:flutter/material.dart';

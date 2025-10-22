@@ -1,3 +1,4 @@
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:nbe/libs.dart';
 import 'package:uuid/uuid.dart';
@@ -23,7 +24,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String specificGravityErr = "";
   String karatErr = "";
 
-  Setting _setting = Setting(uuid.v4(), 250, 0.01, 0.15);
+  Setting _setting =
+      Setting("${DateTime.now().millisecondsSinceEpoch}", 250, 0.01, 5, 15);
 
   // areSameDates to check if the day has changed
   bool areSameDates(DateTime day1, DateTime day2) {
@@ -62,24 +64,24 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       return null;
     }
 
-    final rate = ((karat24AfterBonous! * karat!) / 24);
-    final totalAmount = rate * weight;
+    // final rate = ((karat24AfterBonous! * karat!) / 24);
+    // final totalAmount = rate * weight;
     return Transaction(
-      id: uuid.v4(),
-      date: DateTime.now(),
+      "${DateTime.now().millisecondsSinceEpoch}",
+      DateFormat('yyyy-MM-dd').format(DateTime.now()),
+      weight,
+      karat!,
+      _setting.id,
+      karat24AfterBonous!,
+      athPrice: karat24AfterBonous!,
       specificGravity: specificGravity!,
-      todayRate: rate,
-      totalAmount: totalAmount,
-      weight: weight,
-      isCompleted: true,
-      settingId: _setting.id,
-      karat: "${karat!}", // estimatedCarat.toString(),
     );
   }
 
   void _getSettings() async {
     setState(() {
-      _setting = Setting(uuid.v4(), 250, 0.001, 0.05);
+      _setting =
+          Setting("${DateTime.now().millisecondsSinceEpoch}", 250, 0.01, 5, 15);
     });
   }
 
@@ -111,7 +113,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   final TextStyle _commonLabelStyle = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w500,
-    color: Colors.black.withOpacity(.5),
+    color: Colors.black.withValues(alpha: .5),
     overflow: TextOverflow.visible,
   );
 
@@ -134,6 +136,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               .response
               .data!
               .firstWhere((el) {
+        print(el.goldType!.karat);
         return el.goldType!.karat == "24";
       }).priceBirr;
 
@@ -145,7 +148,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       }
     }
     final Container _tinyDivider = Container(
-      color: Colors.amber.withOpacity(.1),
+      color: Colors.amber.withValues(alpha: .1),
       width: MediaQuery.of(context).size.width * .5,
       height: 0.5,
     );
@@ -164,11 +167,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            if (todayPriceLoad.state is! TodayPriceRecordsLoaded)
-              const NotificationMessage(
-                "Loading today's natioinal bank rate; please wait\n ...",
-                isErrorMessage: true,
-              ),
             Container(
               width: MediaQuery.of(context).size.width * .9,
               decoration: const BoxDecoration(
@@ -199,7 +197,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                 ? TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w800,
-                                    color: Colors.black.withOpacity(.8),
+                                    color: Colors.black.withValues(alpha: .8),
                                     overflow: TextOverflow.visible,
                                   )
                                 : _commonLabelStyle,
@@ -219,11 +217,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                                               TodaysPriceRecordBloc>()
                                                           .state
                                                       as TodayPriceRecordsLoaded)
-                                                  .response
-                                                  .data!
-                                                  .firstWhere((el) {
-                                                return el.goldType!.karat == k;
-                                              }).priceBirr ??
+                                                  .getPriceRecordByGoldKarat(k)
+                                                  ?.priceBirr ??
                                               "") ??
                                           0),
                                       textAlign: TextAlign.center,
@@ -237,9 +232,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                       'ብር/ ግራም ',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black.withOpacity(.5)),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color:
+                                            Colors.black.withValues(alpha: .5),
+                                      ),
                                     )
                                   ],
                                 ),
@@ -297,9 +294,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       : Text(
                           NumberFormat('#.####').format(karat24AfterBonous),
                           style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              color: Colors.black.withOpacity(.7)),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: Colors.black.withValues(alpha: .7),
+                          ),
                         ),
                 ),
               ]),
@@ -441,9 +439,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       : Text(
                           NumberFormat('#.##').format(specificGravity),
                           style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              color: Colors.black.withOpacity(.7)),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: Colors.black.withValues(alpha: .7),
+                          ),
                         ),
                 ),
               ]),
@@ -489,33 +488,38 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   border: Border(
                     left: const BorderSide(color: Colors.orange),
                     right: const BorderSide(color: Colors.orange),
-                    bottom: BorderSide(color: Colors.black.withOpacity(.05)),
-                  ),
-                ),
-                child: Row(children: [
-                  const Expanded(
-                    flex: 2,
-                    child: Text(
-                      'Karat ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
+                    bottom: BorderSide(
+                      color: Colors.black.withValues(alpha: .05),
                     ),
                   ),
-                  Expanded(
-                    flex: 1,
-                    child: karat == null
-                        ? const ShimmerSkeleton(width: 100, height: 10)
-                        : Text(
-                            NumberFormat('#.##').format(karat),
-                            style: TextStyle(
+                ),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      flex: 2,
+                      child: Text(
+                        'Karat ',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: karat == null
+                          ? const ShimmerSkeleton(width: 100, height: 10)
+                          : Text(
+                              NumberFormat('#.##').format(karat),
+                              style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
-                                color: Colors.black.withOpacity(.7)),
-                          ),
-                  ),
-                ]),
+                                color: Colors.black.withValues(alpha: .7),
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
               ),
             const SizedBox(height: 10),
             FancyWideButton(

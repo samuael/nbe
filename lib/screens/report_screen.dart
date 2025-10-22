@@ -102,9 +102,9 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  List<SellRecord> _getTransactionsForMonthYear(
+  List<Transaction> _getTransactionsForMonthYear(
       BuildContext context, int month, int year) {
-    return (context.watch<SellRecordsBloc>().state as SellRecordLoaded)
+    return (context.watch<TransactionBloc>().state as TransactionLoaded)
         .records
         .values
         .where((t) {
@@ -121,9 +121,9 @@ class _ReportScreenState extends State<ReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, List<SellRecord>> grouped = {};
+    final Map<String, List<Transaction>> grouped = {};
     final records =
-        (context.watch<SellRecordBloc>().state as SellRecordLoaded).records;
+        (context.watch<SellRecordBloc>().state as TransactionLoaded).records;
     for (var tran in records.values) {
       final key = DateFormat.yMMMM()
           .format(DateTime.fromMillisecondsSinceEpoch(tran.createdAt * 1000));

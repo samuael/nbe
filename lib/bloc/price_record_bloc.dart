@@ -16,7 +16,7 @@ class PriceRecordBloc extends Bloc<PriceRecordEvent, PriceRecordState> {
         if (state is PriceRecordsLoaded &&
             (state as PriceRecordsLoaded)
                 .lastLoaded
-                .isBefore(DateTime.now().add(const Duration(hours: -1)))) {
+                .isAfter(DateTime.now().add(const Duration(hours: -1)))) {
           return;
         }
         DateTime last = DateTime.now();
@@ -75,8 +75,9 @@ class PriceRecordBloc extends Bloc<PriceRecordEvent, PriceRecordState> {
         }
 
         for (int i = 0; i < foundPrices.length; i++) {
+          final vall = DateTime.parse(foundPrices[i].date!);
           print(
-              "Found price date: ${foundPrices[i].date} ${foundPrices[i].priceBirr}");
+              "Found price date: ${vall.toString()} ${foundPrices[i].date} ${foundPrices[i].priceBirr}");
         }
 
         final now = DateTime.now();
