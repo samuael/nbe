@@ -166,64 +166,68 @@ class _ReportScreenState extends State<ReportScreen> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                ...transactions.map((transaction) {
-                  return Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Color.fromARGB(160, 158, 158, 158),
+                ...transactions.map(
+                  (transaction) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Color.fromARGB(160, 158, 158, 158),
+                            ),
+                          ),
+                        ),
+                        child: ListTile(
+                          onTap: () {
+                            // Navigator.of(context).push(MaterialPageRoute(
+                            //     builder: (ctx) => ReportDetailsScreen(
+                            //           transaction: transaction,
+                            //         )));
+                          },
+                          leading: Text(
+                            DateFormat.MMMd().format(
+                              DateTime.fromMillisecondsSinceEpoch(
+                                  transaction.createdAt * 1000),
+                            ),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          title: Text(
+                            '${transaction.gram.toStringAsFixed(2)} gram',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              transaction.isCompleted
+                                  ? const Icon(Icons.check)
+                                  : const Icon(Icons.circle),
+                              Text(
+                                transaction.isCompleted
+                                    ? 'Completed'
+                                    : 'Pending',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              )
+                            ],
                           ),
                         ),
                       ),
-                      child: ListTile(
-                        onTap: () {
-                          // Navigator.of(context).push(MaterialPageRoute(
-                          //     builder: (ctx) => ReportDetailsScreen(
-                          //           transaction: transaction,
-                          //         )));
-                        },
-                        leading: Text(
-                          DateFormat.MMMd().format(
-                            DateTime.fromMillisecondsSinceEpoch(
-                                transaction.createdAt * 1000),
-                          ),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        title: Text(
-                          '${transaction.gram.toStringAsFixed(2)} gram',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            transaction.isCompleted
-                                ? const Icon(Icons.check)
-                                : const Icon(Icons.circle),
-                            Text(
-                              transaction.isCompleted ? 'Completed' : 'Pending',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                })
+                    );
+                  },
+                )
               ],
             ),
           );

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'libs.dart';
 
 final ThemeData theme = ThemeData(
@@ -74,6 +72,13 @@ void main() {
         return TodaysPriceRecordBloc(
             priceDataProvider, priceDataNetworkProvider, stringProvider);
       }),
+      BlocProvider<SelectedDatePriceRecordBloc>(create: (context) {
+        return SelectedDatePriceRecordBloc(priceDataProvider, priceDataNetworkProvider, stringProvider);
+      }),
+      BlocProvider<SelectedTransactionBloc>(create: (context) {
+        return SelectedTransactionBloc(
+            priceDataProvider, priceDataNetworkProvider, stringProvider);
+      }),
     ],
     child: const MyApp(),
   ));
@@ -111,6 +116,10 @@ class MyApp extends StatelessWidget {
     final settingRead = context.read<SettingBloc>();
     settingRead.add(LoadLastSettingEvent());
 
+    final selectedDatePriceRecord = context.read<SelectedDatePriceRecordBloc>();
+    selectedDatePriceRecord
+        .add(SelectOtherDatePriceRecordEvent(DateTime.now()));
+
     return MaterialApp(
       theme: ThemeData(
         primaryColorLight: const Color(0xFF1a87da),
@@ -134,6 +143,7 @@ class NavigationController extends StatefulWidget {
 class _NavigationControllerState extends State<NavigationController> {
   int _currentIndex = 0;
   static List<Widget> widgetList = [
+    const BalanceScreen(),
     const CalculatorScreen(),
     const PriceHistoryScreen(),
     const ReportScreen(),
@@ -152,9 +162,13 @@ class _NavigationControllerState extends State<NavigationController> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         unselectedItemColor: Colors.grey,
-        fixedColor: Colors.amber,
+        fixedColor: Theme.of(context).primaryColor,
         // backgroundColor: const Color.fromARGB(255, 1, 28, 49),
         items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calculate),
             label: 'Calculator',

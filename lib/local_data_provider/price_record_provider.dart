@@ -14,7 +14,7 @@ class PriceRecordProvider {
 
   static String createOrReplaceTableString() {
     return """CREATE TABLE IF NOT EXISTS $tableName(
-        $_idCol ${SQLLiteTypes.intType} PRIMARY KEY,
+        $_idCol ${SQLLiteTypes.stringType} PRIMARY KEY,
         $_priceBirrCol ${SQLLiteTypes.stringType} NOT NULL,
         $_priceUSDCol ${SQLLiteTypes.stringType} NOT NULL,
         $_dateCol ${SQLLiteTypes.stringType} UNIQUE NOT NULL
@@ -50,15 +50,19 @@ class PriceRecordProvider {
     }).toList();
   }
 
-  Future<bool> deletePriceRecordsByID(List<String> recordsID) async {
+  Future<bool> deletePriceRecordsByID(List<String> recordsDates) async {
     final db = await wrapper.database;
-    for (String id in recordsID) {
-      final result = await db.delete(tableName, where: "$_idCol=$id");
-      if (result == 0) {
-        // throw Exception("price record by id $id not found");
-        return false;
-      }
+    final placeholders = List.filled(recordsDates.length, '?').join(', ');
+    final result = await db.delete(
+      tableName,
+      where: "$_dateCol IN ($placeholders)",
+      whereArgs: recordsDates,
+    );
+    if (result == 0) {
+      // throw Exception("price record by id $id not found");
+      return false;
     }
+    // }
     return true;
   }
 }

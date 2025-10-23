@@ -37,7 +37,7 @@ class TransactionsLocalProvider {
         $_bankFeeValue ${SQLLiteTypes.doubleType} NOT NULL,
         $_dateCol ${SQLLiteTypes.stringType} TEXT NOT NULL,
         $_createdAtCol ${SQLLiteTypes.intType} NOT NULL,
-        $_isCompleted ${SQLLiteTypes.intType} NOT NULL CHECK(is_completed IN (0,1))
+        $_isCompleted ${SQLLiteTypes.intType} NOT NULL CHECK($_isCompleted IN (0,1))
       )""";
   }
 

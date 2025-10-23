@@ -11,6 +11,11 @@ class PriceHistoryScreen extends StatefulWidget {
 class _PriceHistoryScreenState extends State<PriceHistoryScreen> {
   @override
   Widget build(BuildContext context) {
+    context.read<PriceRecordBloc>().add(LoadPriceRecordsEvent());
+
+    final setting =
+        (context.watch<SettingBloc>().state as SettingLoaded).setting;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -26,31 +31,37 @@ class _PriceHistoryScreenState extends State<PriceHistoryScreen> {
         switch (state.runtimeType) {
           case PriceRecordsLoaded:
             double highest = 0.0;
-            String highestString = "";
             for (var el in (state as PriceRecordsLoaded).records) {
-              final val = double.parse(el.priceBirr!);
+              final val = el.priceBirr!;
               if (val > highest) {
                 highest = val;
-                highestString = el.priceBirr!;
               }
             }
-            return Column(
-                children: (state as PriceRecordsLoaded).records.map((el) {
-              return PriceItemPreview(
-                el,
-                highestPrice: el.priceBirr == highestString,
-              );
-            }).toList());
+            return SizedBox(
+              height: MediaQuery.of(context).size.height,
+              child: SingleChildScrollView(
+                child: Column(
+                    children: state.records.map((el) {
+                  return PriceItemPreview(
+                    el,
+                    highestPrice: el.priceBirr == highest,
+                    bonusPercentage: setting.bonusByNBEInPercentage,
+                  );
+                }).toList()),
+              ),
+            );
           case PriceRecordsLoadFailed:
             return priceRecordsLoadingWasNotSuccesful(context);
           default:
-            return Column(
-              children: [
-                PriceItemPreview.skeleton(),
-                PriceItemPreview.skeleton(),
-                PriceItemPreview.skeleton(),
-                PriceItemPreview.skeleton(),
-              ],
+            return SizedBox(
+              height: MediaQuery.of(context).size.height,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: List.generate(16, (el) {
+                    return const PriceItemPreviewSkeleton();
+                  }),
+                ),
+              ),
             );
         }
       }),

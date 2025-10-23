@@ -8,7 +8,7 @@ class PriceRecordBloc extends Bloc<PriceRecordEvent, PriceRecordState> {
 
   final dateFormat = DateFormat('yyyy-MM-dd');
 
-// generate dates.
+  // generate dates
   PriceRecordBloc(this.provider, this.networkProvider, this.stringProvider)
       : super(PriceRecordsInit()) {
     on<LoadPriceRecordsEvent>(
@@ -16,73 +16,92 @@ class PriceRecordBloc extends Bloc<PriceRecordEvent, PriceRecordState> {
         if (state is PriceRecordsLoaded &&
             (state as PriceRecordsLoaded)
                 .lastLoaded
-                .isAfter(DateTime.now().add(const Duration(hours: -1)))) {
+                .isAfter(DateTime.now().subtract(const Duration(hours: 1)))) {
           return;
         }
         DateTime last = DateTime.now();
-        final priceRecords = [dateFormat.format(last)];
+        final Set<String> priceRecords = {dateFormat.format(last)};
 
         final payload = await stringProvider.getStringPayloadByID(222) ??
             StringPayload(222, "30", 0);
         final maxPriceRecords = int.tryParse(payload.payload) ?? 0;
 
         for (int i = 1; i < maxPriceRecords; i++) {
-          last = last.add(const Duration(days: -1));
+          last = last.subtract(const Duration(days: 1));
           priceRecords.add(dateFormat.format(last));
         }
 
         final savedPriceRecords = await provider.getPriceRecords();
 
-        final List<PriceRecord> foundPrices = [];
+        final Map<String, PriceRecord> foundPrices = {};
         final List<String> expiredPrices = [];
 
         for (int i = 0; i < savedPriceRecords.length; i++) {
           if (priceRecords.contains(savedPriceRecords[i]!.date)) {
-            foundPrices.add(savedPriceRecords[i]!);
+            foundPrices[savedPriceRecords[i]!.date!] = savedPriceRecords[i]!;
+            priceRecords.remove(savedPriceRecords[i]!.date);
           } else {
             expiredPrices.add(savedPriceRecords[i]!.date!);
           }
         }
 
-        final success = await provider.deletePriceRecordsByID(expiredPrices);
-        if (!success) {
-          emit(PriceRecordsLoadFailed("deleting records was not succesful"));
-          return;
-        }
-
-        for (int j = 0; j < foundPrices.length; j++) {
-          if (priceRecords.contains(foundPrices[j].date)) {
-            priceRecords.remove(foundPrices[j].date);
-          }
-        }
+        // final success = await provider.deletePriceRecordsByID(expiredPrices);
+        // if (!success) {
+        //   throw Exception("deleting records was not succesful");
+        //   emit(PriceRecordsLoadFailed("deleting records was not succesful"));
+        //   return;
+        // }
 
         try {
+          Set<String> fetched = {};
           // load and check the missing dates.
           for (int i = 0; i < priceRecords.length; i++) {
-            final response =
-                await networkProvider.getPriceRecordByDate(priceRecords[i]);
-            if (response.success ?? false) {
+            final response = await networkProvider
+                .getPriceRecordByDate(priceRecords.toList()[i]);
+            if (response.success == true) {
               final karat24Value = response.get24KaratRecord();
               if (karat24Value != null) {
-                priceRecords.remove(priceRecords[i]);
-                foundPrices.add(karat24Value);
+                fetched.add(priceRecords.toList()[i]);
+                // priceRecords.remove(priceRecords.toList()[i]);
+                foundPrices[karat24Value.date!] = karat24Value;
+                await provider.insertOrUpdatePriceRecord(karat24Value);
               }
             }
           }
+          for (int l = 0; l < fetched.length; l++) {
+            priceRecords.remove(fetched.elementAt(l));
+          }
         } catch (e, a) {
+          print(e.toString());
+          print(a.toString());
           emit(PriceRecordsLoadFailed("loading prices was not succesful"));
           return;
         }
 
-        for (int i = 0; i < foundPrices.length; i++) {
-          final vall = DateTime.parse(foundPrices[i].date!);
-          print(
-              "Found price date: ${vall.toString()} ${foundPrices[i].date} ${foundPrices[i].priceBirr}");
-        }
-
-        final now = DateTime.now();
-        emit(PriceRecordsLoaded(foundPrices, now));
+        emit(PriceRecordsLoaded(foundPrices.values.toList(), DateTime.now()));
       },
     );
+  }
+
+  PriceRecord? getATHPriceRecord(String date) {
+    if (state is! PriceRecordsLoaded) {
+      return null;
+    }
+    final dateTime = DateTime.parse(date);
+    if (dateTime.isBefore(DateTime.now().subtract(const Duration(days: 30)))) {
+      return null;
+    }
+    final priceRecords = (state as PriceRecordsLoaded).records;
+    double highest = 0;
+    PriceRecord? highestRecord;
+    for (var pr in priceRecords) {
+      final theDateTime = DateTime.parse(pr.date!);
+      if (theDateTime.isBefore(dateTime) || pr.priceBirr! <= highest) {
+        continue;
+      }
+      highest = pr.priceBirr!;
+      highestRecord = pr;
+    }
+    return highestRecord;
   }
 }

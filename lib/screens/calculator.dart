@@ -1,6 +1,7 @@
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:nbe/libs.dart';
+import 'package:nbe/states/selected_transaction_event.dart';
 import 'package:uuid/uuid.dart';
 
 const uuid = Uuid();
@@ -58,25 +59,25 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  Transaction? _calculate() {
-    final weight = double.tryParse(_weightController.text);
-    if (weight == null || specificGravity == null) {
-      return null;
-    }
+  // Transaction? _calculate() {
+  //   final weight = double.tryParse(_weightController.text);
+  //   if (weight == null || specificGravity == null) {
+  //     return null;
+  //   }
 
-    // final rate = ((karat24AfterBonous! * karat!) / 24);
-    // final totalAmount = rate * weight;
-    return Transaction(
-      "${DateTime.now().millisecondsSinceEpoch}",
-      DateFormat('yyyy-MM-dd').format(DateTime.now()),
-      weight,
-      karat!,
-      _setting.id,
-      karat24AfterBonous!,
-      athPrice: karat24AfterBonous!,
-      specificGravity: specificGravity!,
-    );
-  }
+  //   // final rate = ((karat24AfterBonous! * karat!) / 24);
+  //   // final totalAmount = rate * weight;
+  //   return Transaction(
+  //     "${DateTime.now().millisecondsSinceEpoch}",
+  //     DateFormat('yyyy-MM-dd').format(DateTime.now()),
+  //     weight,
+  //     karat!,
+  //     _setting.id,
+  //     karat24AfterBonous!,
+  //     athPrice: karat24AfterBonous!,
+  //     specificGravity: specificGravity!,
+  //   );
+  // }
 
   void _getSettings() async {
     setState(() {
@@ -110,15 +111,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     super.dispose();
   }
 
-  final TextStyle _commonLabelStyle = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-    color: Colors.black.withValues(alpha: .5),
-    overflow: TextOverflow.visible,
-  );
+  DateTime? selectedDate;
 
   @override
   Widget build(BuildContext context) {
+    selectedDate ??= DateTime.now();
+
     final priceWatch = context.read<PriceRecordBloc>();
     if (priceWatch.state is! PriceRecordsLoaded) {
       priceWatch.add(LoadPriceRecordsEvent());
@@ -129,29 +127,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     if (todayPriceLoad.state is! TodayPriceRecordsLoaded) {
       todaysPriceRecord.add(LoadTodaysPriceRecordsEvent());
     }
-
-    if (todayPriceLoad.state is TodayPriceRecordsLoaded) {
-      final karat24PriceString =
-          (todayPriceLoad.state as TodayPriceRecordsLoaded)
-              .response
-              .data!
-              .firstWhere((el) {
-        print(el.goldType!.karat);
-        return el.goldType!.karat == "24";
-      }).priceBirr;
-
-      karat24Price = double.tryParse(karat24PriceString ?? '');
-
-      karat24AfterBonous = karat24Price;
-      if (karat24AfterBonous != null) {
-        karat24AfterBonous = karat24AfterBonous! + (karat24AfterBonous! * .15);
-      }
-    }
-    final Container _tinyDivider = Container(
-      color: Colors.amber.withValues(alpha: .1),
-      width: MediaQuery.of(context).size.width * .5,
-      height: 0.5,
-    );
 
     return Scaffold(
       appBar: AppBar(
@@ -166,167 +141,196 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       ),
       body: SingleChildScrollView(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Container(
-              width: MediaQuery.of(context).size.width * .9,
-              decoration: const BoxDecoration(
-                border: Border(
-                  left: BorderSide(color: Colors.orange),
-                  right: BorderSide(color: Colors.orange),
-                ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  fancySelectOneWidget(
+                    context,
+                    1,
+                    "Volume",
+                    (val) {
+                      setState(() {
+                        index = val;
+                      });
+                    },
+                    () {
+                      return index;
+                    },
+                    enableCheck: false,
+                    widthMultiplier: 2,
+                  ),
+                  fancySelectOneWidget(
+                    context,
+                    2,
+                    "Karat",
+                    (val) {
+                      setState(() {
+                        index = val;
+                      });
+                    },
+                    () {
+                      return index;
+                    },
+                    enableCheck: false,
+                    widthMultiplier: 2,
+                  ),
+                ],
               ),
-              // padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              margin: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5),
-              child: TitledContainer(
-                'Today\'s National Bank Rate',
-                (showAllKaratValues
-                        ? ["24", "23", "22", "21", "20", "19", "18", "16"]
-                        : [
-                            "24",
-                          ])
-                    .map<Column>((k) {
-                  return Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+            ),
+            GestureDetector(
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime.now().add(const Duration(days: -50)),
+                  lastDate: DateTime.now(),
+                  barrierColor:
+                      Theme.of(context).primaryColorLight.withValues(alpha: .3),
+                );
+                if (picked != null) {
+                  setState(() => selectedDate = picked);
+                  context
+                      .read<SelectedDatePriceRecordBloc>()
+                      .add(SelectOtherDatePriceRecordEvent(selectedDate!));
+                }
+              },
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 12),
+                    // if (selectedDate != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .primaryColor
+                            .withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: theme.primaryColor.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            '$k Karrat',
-                            textAlign: TextAlign.center,
-                            style: k == "24"
-                                ? TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.black.withValues(alpha: .8),
-                                    overflow: TextOverflow.visible,
-                                  )
-                                : _commonLabelStyle,
+                          Icon(
+                            Icons.calendar_today,
+                            size: 16,
+                            color: Theme.of(context).primaryColor,
                           ),
-                          (context.watch<TodaysPriceRecordBloc>().state
-                                  is! TodayPriceRecordsLoaded)
-                              ? const ShimmerSkeleton(
-                                  width: 50,
-                                  height: 10,
-                                  borderRadius: 2,
-                                )
-                              : Row(
-                                  children: [
-                                    Text(
-                                      currencyFormatter(double.tryParse((context
-                                                          .watch<
-                                                              TodaysPriceRecordBloc>()
-                                                          .state
-                                                      as TodayPriceRecordsLoaded)
-                                                  .getPriceRecordByGoldKarat(k)
-                                                  ?.priceBirr ??
-                                              "") ??
-                                          0),
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Column(children: [
+                              Text(
+                                'Select Transaction Date: ${DateFormat.yMMMMd().format(selectedDate!)}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context).primaryColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10.0),
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 10.0),
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    left: BorderSide(color: Colors.orange),
+                                    right: BorderSide(color: Colors.orange),
+                                  ),
+                                ),
+                                child: Row(children: [
+                                  const Expanded(
+                                    flex: 2,
+                                    child: Text(
+                                      'Calculating rate ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w800,
                                         fontSize: 13,
-                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
-                                    const SizedBox(width: 10),
-                                    Text(
-                                      'ብር/ ግራም ',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color:
-                                            Colors.black.withValues(alpha: .5),
-                                      ),
-                                    )
-                                  ],
-                                ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: BlocBuilder<
+                                        SelectedDatePriceRecordBloc,
+                                        SelectedDatePriceRecordState>(
+                                      builder: (context, state) {
+                                        switch (state.runtimeType) {
+                                          case SelectedDatePriceRecordInit:
+                                            return const ShimmerSkeleton(
+                                                width: 100, height: 10);
+                                          case SelectedDatePriceRecordLoaded:
+                                            return Text(
+                                              NumberFormat('#.####').format((state
+                                                      as SelectedDatePriceRecordLoaded)
+                                                  .record
+                                                  .get24KaratRecord()!
+                                                  .priceBirr!),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 14,
+                                                color: Colors.black
+                                                    .withValues(alpha: .7),
+                                              ),
+                                            );
+                                          default:
+                                            return Stack(
+                                              children: [
+                                                const ShimmerSkeleton(
+                                                    width: 100, height: 10),
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    context
+                                                        .read<
+                                                            SelectedDatePriceRecordBloc>()
+                                                        .add(
+                                                            SelectOtherDatePriceRecordEvent(
+                                                                DateTime
+                                                                    .now()));
+                                                  },
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(
+                                                          Icons.replay_outlined,
+                                                          color: Colors.black
+                                                              .withValues(
+                                                                  alpha: .5)),
+                                                      const Text(
+                                                        "Reload",
+                                                      )
+                                                    ],
+                                                  ),
+                                                )
+                                              ],
+                                            );
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ]),
+                              ),
+                            ]),
+                          ),
                         ],
                       ),
-                      _tinyDivider,
-                    ],
-                  );
-                }).toList(),
-              ),
-            ),
-            Row(
-              children: [
-                Checkbox(
-                    value: showAllKaratValues,
-                    onChanged: (val) {
-                      setState(() {
-                        showAllKaratValues = val ?? false;
-                      });
-                    }),
-                Text(
-                  "Show all karat prices",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black.withValues(alpha: .5),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              margin: const EdgeInsets.symmetric(horizontal: 10.0),
-              decoration: const BoxDecoration(
-                border: Border(
-                  left: BorderSide(color: Colors.orange),
-                  right: BorderSide(color: Colors.orange),
-                ),
-              ),
-              child: Row(children: [
-                const Expanded(
-                  flex: 2,
-                  child: Text(
-                    '24 Karat After 15% Bonus ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 13,
                     ),
-                  ),
+                  ],
                 ),
-                Expanded(
-                  flex: 1,
-                  child: karat24AfterBonous == null
-                      ? const ShimmerSkeleton(width: 100, height: 10)
-                      : Text(
-                          NumberFormat('#.####').format(karat24AfterBonous),
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                            color: Colors.black.withValues(alpha: .7),
-                          ),
-                        ),
-                ),
-              ]),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                fancySelectOneWidget(
-                  context,
-                  1,
-                  "Volume",
-                  (val) {
-                    setState(() {
-                      index = val;
-                    });
-                  },
-                  () {
-                    return index;
-                  },
-                  widthMultiplier: .5,
-                ),
-                fancySelectOneWidget(context, 2, "Karat", (val) {
-                  setState(() {
-                    index = val;
-                  });
-                }, () {
-                  return index;
-                }, widthMultiplier: .5),
-              ],
+              ),
             ),
             const SizedBox(height: 20),
             Padding(
@@ -348,65 +352,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 enabled: (todayPriceLoad.state is TodayPriceRecordsLoaded),
               ),
             ),
-            if (index == 2)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                decoration: const BoxDecoration(
-                  border: Border(
-                    left: BorderSide(color: Colors.orange),
-                    right: BorderSide(color: Colors.orange),
-                  ),
-                ),
-                child: Row(children: [
-                  const Expanded(
-                    flex: 2,
-                    child: Text(
-                      'Volume in cm^3 ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: volume == null
-                        ? const ShimmerSkeleton(width: 100, height: 10)
-                        : Text(
-                            '$volume',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 13,
-                              color: Colors.black.withValues(alpha: .7),
-                            ),
-                          ),
-                  ),
-                ]),
-              ),
-            if (index == 1)
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: CommonTextField(
-                  borderRadius: 5,
-                  label: "Volume in cm^3",
-                  errorMessage: volumeErr,
-                  onChanged: (val) {
-                    final value = double.tryParse(val);
-                    if (value == null) {
-                      setState(() {
-                        volumeErr = "invalid volume $val";
-                      });
-                      return;
-                    }
-                    calculateValues();
-                  },
-                  controller: _volumeController,
-                  keyboardType: const TextInputType.numberWithOptions(),
-                  enabled: (todayPriceLoad.state is TodayPriceRecordsLoaded),
-                ),
-              ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
               margin: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -428,10 +373,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
                 ),
                 /*String currencyFormatterForPrint(double value) {
-  final formatter = NumberFormat('#,##0.##');
-  final formattedValue = formatter.format(value);
-  return '$formattedValue Birr';
-}*/
+                  final formatter = NumberFormat('#,##0.##');
+                  final formattedValue = formatter.format(value);
+                  return '$formattedValue Birr';
+                }*/
                 Expanded(
                   flex: 1,
                   child: specificGravity == null
@@ -521,10 +466,69 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ],
                 ),
               ),
+            if (index == 2)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    left: BorderSide(color: Colors.orange),
+                    right: BorderSide(color: Colors.orange),
+                  ),
+                ),
+                child: Row(children: [
+                  const Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Volume in cm^3 ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: volume == null
+                        ? const ShimmerSkeleton(width: 100, height: 10)
+                        : Text(
+                            '$volume',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                              color: Colors.black.withValues(alpha: .7),
+                            ),
+                          ),
+                  ),
+                ]),
+              ),
+            if (index == 1)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: CommonTextField(
+                  borderRadius: 5,
+                  label: "Volume in cm^3",
+                  errorMessage: volumeErr,
+                  onChanged: (val) {
+                    final value = double.tryParse(val);
+                    if (value == null) {
+                      setState(() {
+                        volumeErr = "invalid volume $val";
+                      });
+                      return;
+                    }
+                    calculateValues();
+                  },
+                  controller: _volumeController,
+                  keyboardType: const TextInputType.numberWithOptions(),
+                  enabled: (todayPriceLoad.state is TodayPriceRecordsLoaded),
+                ),
+              ),
             const SizedBox(height: 10),
             FancyWideButton(
               "Calculate",
-              () {
+              () => (BuildContext context) async {
                 if (_weightController.text.isEmpty) {
                   setState(() {
                     weightError = "weight is required";
@@ -540,22 +544,41 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     specificGravityErr = "";
                   });
                 }
-                final transaction = _calculate();
-                if (transaction == null) {
-                  return;
-                }
-                // _specificGravityController.clear();
-                // _weightController.clear();
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (ctx) => CalculationDetails(
-                      transaction: transaction,
-                      setting: _setting,
+                // final transaction = _calculate();
+                // if (transaction == null) {
+                //   return;
+                // }
+                try {
+                  context.read<SelectedTransactionBloc>().add(
+                        SelectTransaction(
+                          Transaction(
+                            "${DateTime.now().millisecondsSinceEpoch / 1000}",
+                            DateFormat('yyyy-MM-dd').format(selectedDate!),
+                            weight!,
+                            karat!,
+                            "",
+                            0,
+                            athPrice: 0,
+                            // currentPrice,
+                            // athPrice: currentPrice,
+                            specificGravity: specificGravity,
+                          ),
+                        ),
+                      );
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (ctx) => CalculationDetails(
+                          // transaction: transaction,
+                          // setting: _setting,
+                          ),
                     ),
-                  ),
-                );
-              },
+                  );
+                } catch (e, a) {
+                  print(e.toString());
+                  print(a.toString());
+                }
+                //
+              }(context),
             ),
           ],
         ),

@@ -1,30 +1,14 @@
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:nbe/libs.dart';
+import 'package:intl/intl.dart';
 
 class CalculationDetails extends StatefulWidget {
-  final Transaction transaction;
-  Setting? setting;
-  CalculationDetails({required this.transaction, this.setting, super.key});
+  CalculationDetails({super.key});
   @override
   State<CalculationDetails> createState() => _CalculationDetailsState();
 }
 
 class _CalculationDetailsState extends State<CalculationDetails> {
   final _remainingController = TextEditingController();
-
-  double? taxPerGram;
-  double? bonusPercentage;
-  double? bankFeePercentage;
-  double? karat24Price;
-  double? immediatePercentage;
-
-  double taxValue = 0;
-  double bonusValue = 0;
-  double bankFeeValue = 0;
-  double immediatePaymentValue = 0;
-
-  double netValue = 0;
-  double netCompleted = 0;
 
   final TextStyle _commonLabelStyle = TextStyle(
     fontSize: 14,
@@ -55,41 +39,15 @@ class _CalculationDetailsState extends State<CalculationDetails> {
     );
   }
 
-  void calculateValues() {
-    final tran = widget.transaction;
-    setState(() {
-      // immediatePaymentValue = immediatePercentage * tran.totalAmount;
-      // taxValue = taxPerGram * tran.weight;
-      // bonusValue = bonusPercentage * tran.totalAmount;
-      // bankFeeValue = bankFeePercentage * tran.totalAmount;
-      // netValue =
-      //     (immediatePaymentValue + bonusValue) - (taxValue + bankFeeValue);
-      // netCompleted =
-      //     (tran.totalAmount + bonusValue) - (taxValue + bankFeeValue);
-    });
-  }
-
-  void onSaveTapped(BuildContext context) async {
-    if (widget.setting != null) {
-      return;
-    }
-    context.read<SettingBloc>().add(UpdateSettingEvent(widget.setting!));
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: Colors.green,
-          content: Text('Saved Successfully'),
-          duration: Duration(seconds: 3),
-        ),
-      );
-    }
-  }
-
   @override
   void initState() {
     // calculateValues();
     super.initState();
   }
+
+  late Transaction transaction;
+  late Setting setting;
+  late PriceRecord selectedDatePriceRecord;
 
   final TextStyle _labelStyle = const TextStyle(
     fontSize: 16,
@@ -100,20 +58,34 @@ class _CalculationDetailsState extends State<CalculationDetails> {
 
   @override
   Widget build(BuildContext context) {
-    final settingLoad = context.watch<SettingBloc>();
-    if (widget.setting == null && (settingLoad.state is SettingLoaded)) {
-      widget.setting = (settingLoad.state as SettingLoaded).setting;
+    if (context.watch<SelectedTransactionBloc>().state
+        is! TransactionSelected) {
+      throw Exception("transaction not found");
     }
+
+    transaction =
+        (context.watch<SelectedTransactionBloc>().state as TransactionSelected)
+            .transaction;
+
+    setting = (context.watch<SettingBloc>().state as SettingLoaded).setting;
+
+    selectedDatePriceRecord = (context
+            .watch<SelectedDatePriceRecordBloc>()
+            .state as SelectedDatePriceRecordLoaded)
+        .record
+        .get24KaratRecord()!;
+
+    // final settingLoad = context.watch<SettingBloc>();
+    // if (widget.setting == null && (settingLoad.state is SettingLoaded)) {
+    //   widget.setting = (settingLoad.state as SettingLoaded).setting;
+    // }
 
     // todaysPrice
     // final settingCall = context.watch<SettingBloc>();
 
-    if (widget.setting != null) {
-      taxPerGram = widget.setting!.taxPerGram;
-      bankFeePercentage = widget.setting!.bankFeePercentage;
-      bonusPercentage = widget.setting!.bonusByNBEInPercentage;
-      immediatePercentage = 1 - widget.setting!.holdPercentage;
-    }
+    final athPriceRecord = context
+        .watch<PriceRecordBloc>()
+        .getATHPriceRecord(selectedDatePriceRecord.date!);
 
     return Scaffold(
       appBar: AppBar(
@@ -152,23 +124,47 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                       height: MediaQuery.of(context).size.height * .15,
                       child: Stack(
                         children: [
-                          if (settingLoad.state is SettingLoaded)
-                            TitledContainer("Settings", [
-                              SettingItem(
-                                  (settingLoad.state as SettingLoaded).setting),
+                          // if (settingLoad.state is SettingLoaded)
+                          SingleChildScrollView(
+                            child: TitledContainer("Settings", [
+                              SettingItem(setting),
                             ]),
-                          if (settingLoad.state is! SettingLoaded)
-                            SizedBox(
-                              child: Column(
-                                children: [
-                                  const NotificationMessage(
-                                      "Setting being loaded"),
-                                  SpinKitWanderingCubes(
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                ],
-                              ),
-                            ),
+                          ),
+                          // if (settingLoad.state is SettingInit)
+                          //   SizedBox(
+                          //     child: Column(
+                          //       children: [
+                          //         SpinKitWanderingCubes(
+                          //           color: Theme.of(context).primaryColor,
+                          //         ),
+                          //         const Text(
+                          //           "Setting Loading ... ",
+                          //           style: TextStyle(
+                          //             fontWeight: FontWeight.w800,
+                          //             fontSize: 12,
+                          //           ),
+                          //         ),
+                          //       ],
+                          //     ),
+                          //   ),
+                          // if (settingLoad.state is SettingLoadFailed)
+                          //   SizedBox(
+                          //     child: Column(
+                          //       children: [
+                          //         const Text(
+                          //           "Setting Loading ... ",
+                          //           style: TextStyle(
+                          //             fontWeight: FontWeight.w800,
+                          //             fontSize: 12,
+                          //           ),
+                          //         ),
+                          //         SpinKitWanderingCubes(
+                          //           color: Theme.of(context).primaryColor,
+                          //         ),
+                          //       ],
+                          //     ),
+                          //   ),
+                          // if (settingLoad.state is SettingLoaded)
                           Positioned(
                             top: 0,
                             right: 0,
@@ -184,7 +180,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
 
                                 if (newSetting != null) {
                                   setState(() {
-                                    widget.setting = newSetting;
+                                    setting = newSetting;
                                   });
                                 }
                               },
@@ -229,11 +225,56 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                     flex: 8,
                     child: Column(
                       children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .primaryColor
+                                .withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: theme.primaryColor.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.calendar_today,
+                                size: 16,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Column(children: [
+                                  (context
+                                          .watch<SelectedDatePriceRecordBloc>()
+                                          .state is SelectedDatePriceRecordLoaded)
+                                      ? Text(
+                                          'Date: ${DateFormat.yMMMMd().format((context.watch<SelectedDatePriceRecordBloc>().state as SelectedDatePriceRecordLoaded).dateTime)}',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                color: Theme.of(context)
+                                                    .primaryColor,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                          overflow: TextOverflow.ellipsis,
+                                        )
+                                      : const Skeleton(width: 100, height: 10),
+                                ]),
+                              ),
+                            ],
+                          ),
+                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Total of $immediatePercentage %",
+                              "Initial Price",
                               textAlign: TextAlign.center,
                               style: _commonLabelStyle,
                             ),
@@ -241,7 +282,10 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                               children: [
                                 Text(
                                   currencyFormatWith2DecimalValues(
-                                      immediatePaymentValue),
+                                      selectedDatePriceRecord.priceBirr! *
+                                          (1 +
+                                              (setting.bonusByNBEInPercentage /
+                                                  100))),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -266,15 +310,24 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Bank Fee',
+                              "All Time Hight Price",
                               textAlign: TextAlign.center,
                               style: _commonLabelStyle,
                             ),
                             Row(
                               children: [
                                 Text(
-                                  currencyFormatWith2DecimalValues(
-                                      bankFeeValue),
+                                  athPriceRecord != null
+                                      ? currencyFormatWith2DecimalValues(
+                                          athPriceRecord.priceBirr! *
+                                              (1 +
+                                                  (setting.bonusByNBEInPercentage /
+                                                      100)))
+                                      : currencyFormatWith2DecimalValues(
+                                          selectedDatePriceRecord.priceBirr! *
+                                              (1 +
+                                                  (setting.bonusByNBEInPercentage /
+                                                      100))),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -299,14 +352,196 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Tax',
+                              "Total of ${100 - setting.holdPercentage} %",
                               textAlign: TextAlign.center,
                               style: _commonLabelStyle,
                             ),
                             Row(
                               children: [
                                 Text(
-                                  currencyFormatWith2DecimalValues(taxValue),
+                                  currencyFormatWith2DecimalValues(
+                                      (selectedDatePriceRecord.priceBirr! *
+                                              (1 +
+                                                  (setting.bonusByNBEInPercentage /
+                                                      100))) *
+                                          (transaction.karat / 24) *
+                                          transaction.gram *
+                                          ((100 - setting.holdPercentage) /
+                                              100)),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  "BIRR",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black.withValues(alpha: .5),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Total of ${setting.holdPercentage} %",
+                              textAlign: TextAlign.center,
+                              style: _commonLabelStyle,
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  currencyFormatWith2DecimalValues(
+                                      (selectedDatePriceRecord.priceBirr! *
+                                              (transaction.karat / 24) *
+                                              (1 +
+                                                  (setting.bonusByNBEInPercentage /
+                                                      100))) *
+                                          transaction.gram *
+                                          (setting.holdPercentage / 100)),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  "BIRR",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black.withValues(alpha: .5),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Bank Fee of ${100 - setting.holdPercentage} %',
+                              textAlign: TextAlign.center,
+                              style: _commonLabelStyle,
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  currencyFormatWith2DecimalValues(
+                                      ((selectedDatePriceRecord.priceBirr! *
+                                                  (1 +
+                                                      (setting.bonusByNBEInPercentage /
+                                                          100))) *
+                                              (transaction.karat / 24) *
+                                              transaction.gram *
+                                              (1 -
+                                                  (setting.holdPercentage /
+                                                      100))) *
+                                          setting.bankFeePercentage),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  "BIRR",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black.withValues(alpha: .5),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Tax of ${transaction.gram} gram',
+                              textAlign: TextAlign.center,
+                              style: _commonLabelStyle,
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  NumberFormat('#,##0').format(
+                                      transaction.gram * setting.taxPerGram),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  "BIRR",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black.withValues(alpha: .5),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Increase',
+                              textAlign: TextAlign.center,
+                              style: _commonLabelStyle,
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  currencyFormatWith2DecimalValues(((athPriceRecord!
+                                                  .priceBirr! *
+                                              (1 +
+                                                  (setting.bonusByNBEInPercentage /
+                                                      100)) *
+                                              (transaction.karat / 24) *
+                                              transaction.gram)
+
+                                          // Tax Deduction
+
+                                          -
+                                          (transaction.gram *
+                                              setting.taxPerGram))
+
+                                      // Initial
+
+                                      -
+                                      ((selectedDatePriceRecord.priceBirr! *
+                                              (transaction.karat / 24) *
+                                              (1 +
+                                                  (setting.bonusByNBEInPercentage /
+                                                      100)) *
+                                              transaction.gram)
+
+                                          // Tax Deduction
+
+                                          -
+                                          (transaction.gram *
+                                              setting.taxPerGram))),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -338,7 +573,34 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                             Row(
                               children: [
                                 Text(
-                                  currencyFormatWith2DecimalValues(netValue),
+                                  currencyFormatWith2DecimalValues(
+                                      ((selectedDatePriceRecord.priceBirr! *
+                                                  (1 +
+                                                      (setting.bonusByNBEInPercentage /
+                                                          100))) *
+                                              (transaction.karat / 24) *
+                                              transaction.gram *
+                                              ((100 - setting.holdPercentage) /
+                                                  100))
+
+                                          // Bank Fee
+                                          -
+                                          (((selectedDatePriceRecord
+                                                          .priceBirr! *
+                                                      (1 +
+                                                          (setting.bonusByNBEInPercentage /
+                                                              100))) *
+                                                  (transaction.karat / 24) *
+                                                  transaction.gram *
+                                                  (1 -
+                                                      (setting.holdPercentage /
+                                                          100))) *
+                                              setting.bankFeePercentage)
+                                          // Tax Deduction
+
+                                          -
+                                          (transaction.gram *
+                                              setting.taxPerGram)),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -359,6 +621,55 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                             ),
                           ],
                         ),
+                        const Divider(),
+                        if (athPriceRecord != null)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Remaining',
+                                textAlign: TextAlign.center,
+                                style: _commonLabelStyle,
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    // Increase
+                                    currencyFormatWith2DecimalValues(((athPriceRecord
+                                                    .priceBirr! *
+                                                (1 +
+                                                    (setting.bonusByNBEInPercentage /
+                                                        100))) *
+                                            (transaction.karat / 24) *
+                                            transaction.gram) -
+                                        ((selectedDatePriceRecord.priceBirr! *
+                                                (1 +
+                                                    (setting.bonusByNBEInPercentage /
+                                                        100))) *
+                                            (transaction.karat / 24) *
+                                            transaction.gram *
+                                            ((100 - setting.holdPercentage) /
+                                                100))),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    "BIRR",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black.withValues(alpha: .5),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
                         const Divider(),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -385,7 +696,12 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                               children: [
                                 Text(
                                   currencyFormatWith2DecimalValues(
-                                      netCompleted),
+                                      ((selectedDatePriceRecord.priceBirr! *
+                                                  (1 +
+                                                      setting
+                                                          .bonusByNBEInPercentage)) *
+                                              transaction.gram) *
+                                          (setting.bankFeePercentage / 100)),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -411,7 +727,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                         ),
                         FancyWideButton(
                           "Save",
-                          onSaveTapped,
+                          () {}, //onSaveTapped,
                           animateOnClick: true,
                         ),
                       ],

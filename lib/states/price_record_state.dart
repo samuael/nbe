@@ -37,3 +37,19 @@ class TodayPriceRecordsLoaded extends TodayPriceRecordState {
 class TodayPriceRecordsInit extends TodayPriceRecordState {}
 
 class TodayPriceRecordLoadFailed extends TodayPriceRecordState {}
+
+// ----------------------------------------
+
+class SelectedDatePriceRecordState {}
+
+class SelectedDatePriceRecordInit extends SelectedDatePriceRecordState {}
+
+class SelectedDatePriceRecordLoaded extends SelectedDatePriceRecordState {
+  PriceRecordResponse record;
+  DateTime dateTime;
+  SelectedDatePriceRecordLoaded(this.record, this.dateTime);
+}
+
+class SelectedDatePriceRecordLoadFailed extends SelectedDatePriceRecordState {
+  SelectedDatePriceRecordLoadFailed();
+}

@@ -26,7 +26,7 @@ class SettingLocalProvider {
 
   static String insertDefaultSetting(Setting setting) {
     return """ INSERT INTO $tableName($_idCol,$_taxPerGramCol,$_bankFeePercentageCol,$_holdPercentageCol,$_bonusByNBEInPercentage,$_createdAtCol)
-      values(${setting.id}, ${setting.taxPerGram}, ${setting.bankFeePercentage}, ${setting.holdPercentage}, ${setting.bonusByNBEInPercentage} ${setting.createdAt})
+      values(${setting.id}, ${setting.taxPerGram}, ${setting.bankFeePercentage}, ${setting.holdPercentage}, ${setting.bonusByNBEInPercentage}, ${setting.createdAt})
     """;
   }
 
@@ -41,10 +41,8 @@ class SettingLocalProvider {
 
   Future<Setting?> getSettingByID(String id) async {
     final db = await wrapper.database;
-    final result = await db.query(
-      tableName,
-      where: "$_idCol=$id",
-    );
+    final result =
+        await db.query(tableName); //, where: "$_idCol=?", whereArgs: [id]);
     if (result.isEmpty) {
       return null;
     }

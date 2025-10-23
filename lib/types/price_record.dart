@@ -45,7 +45,7 @@ class PriceRecord {
   String? id;
   String? goldTypeId;
   String? priceUsd;
-  String? priceBirr;
+  double? priceBirr;
   String? date;
   GoldType? goldType;
 
@@ -61,20 +61,21 @@ class PriceRecord {
     id = json['id'];
     goldTypeId = json['gold_type_id'];
     priceUsd = json['price_usd'];
-    priceBirr = json['price_birr'];
+    priceBirr = double.parse(json['price_birr'] ?? "0");
     date = json['date'];
-    goldType =
-        json['gold_type'] != null ? GoldType.fromJson(json['gold_type']) : null;
+    goldType = json['gold_type'] != null
+        ? GoldType.fromJson(json['gold_type'])
+        : GoldType(karat: "24");
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'gold_type_id': goldTypeId,
+      // 'gold_type_id': goldTypeId,
       'price_usd': priceUsd,
-      'price_birr': priceBirr,
+      'price_birr': priceBirr != null ? "$priceBirr" : "",
       'date': date,
-      if (goldType != null) 'gold_type': goldType!.toJson(),
+      // if (goldType != null) 'gold_type': goldType!.toJson(),
     };
   }
 }

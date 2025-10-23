@@ -9,17 +9,20 @@ class Transaction {
 
   late int createdAt;
   String settingID;
+  Setting? setting;
+
   String date;
+  DateTime? dateTime;
   double karat;
 
   int extraDays;
 
   double initialPrice; // r
+  PriceRecord? initialPriceRecord;
   double athPrice; // r
 
   double taxValue; // r
   double bankFeeValue;
-  Setting? setting;
 
   bool isCompleted;
 
