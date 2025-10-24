@@ -37,20 +37,17 @@ class PriceRecordBloc extends Bloc<PriceRecordEvent, PriceRecordState> {
         final List<String> expiredPrices = [];
 
         for (int i = 0; i < savedPriceRecords.length; i++) {
-          if (priceRecords.contains(savedPriceRecords[i]!.date)) {
-            foundPrices[savedPriceRecords[i]!.date!] = savedPriceRecords[i]!;
-            priceRecords.remove(savedPriceRecords[i]!.date);
+          print(
+              "dateFormat.format(savedPriceRecords[i]!.date!): ${dateFormat.format(savedPriceRecords[i]!.date!)}");
+          if (priceRecords
+              .contains(dateFormat.format(savedPriceRecords[i]!.date!))) {
+            foundPrices[dateFormat.format(savedPriceRecords[i]!.date!)] =
+                savedPriceRecords[i]!;
+            priceRecords.remove(dateFormat.format(savedPriceRecords[i]!.date!));
           } else {
-            expiredPrices.add(savedPriceRecords[i]!.date!);
+            expiredPrices.add(dateFormat.format(savedPriceRecords[i]!.date!));
           }
         }
-
-        // final success = await provider.deletePriceRecordsByID(expiredPrices);
-        // if (!success) {
-        //   throw Exception("deleting records was not succesful");
-        //   emit(PriceRecordsLoadFailed("deleting records was not succesful"));
-        //   return;
-        // }
 
         try {
           Set<String> fetched = {};
@@ -62,8 +59,8 @@ class PriceRecordBloc extends Bloc<PriceRecordEvent, PriceRecordState> {
               final karat24Value = response.get24KaratRecord();
               if (karat24Value != null) {
                 fetched.add(priceRecords.toList()[i]);
-                // priceRecords.remove(priceRecords.toList()[i]);
-                foundPrices[karat24Value.date!] = karat24Value;
+                foundPrices[dateFormat.format(karat24Value.date!)] =
+                    karat24Value;
                 await provider.insertOrUpdatePriceRecord(karat24Value);
               }
             }
@@ -81,13 +78,20 @@ class PriceRecordBloc extends Bloc<PriceRecordEvent, PriceRecordState> {
         emit(PriceRecordsLoaded(foundPrices.values.toList(), DateTime.now()));
       },
     );
+
+    on<ShowTheLoadedEvent>((event, emit) async {
+      final savedPriceRecords = await provider.getPriceRecords();
+      for (int i = 0; i < savedPriceRecords.length; i++) {
+        print(savedPriceRecords[i]!.date);
+      }
+    });
   }
 
-  PriceRecord? getATHPriceRecord(String date) {
+  PriceRecord? getATHPriceRecord(DateTime date) {
     if (state is! PriceRecordsLoaded) {
       return null;
     }
-    final dateTime = DateTime.parse(date);
+    final dateTime = date;
     if (dateTime.isBefore(DateTime.now().subtract(const Duration(days: 30)))) {
       return null;
     }
@@ -95,7 +99,7 @@ class PriceRecordBloc extends Bloc<PriceRecordEvent, PriceRecordState> {
     double highest = 0;
     PriceRecord? highestRecord;
     for (var pr in priceRecords) {
-      final theDateTime = DateTime.parse(pr.date!);
+      final theDateTime = pr.date!;
       if (theDateTime.isBefore(dateTime) || pr.priceBirr! <= highest) {
         continue;
       }

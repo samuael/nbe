@@ -55,11 +55,8 @@ void main() {
       BlocProvider<SettingsBloc>(create: (context) {
         return SettingsBloc(settingProvider);
       }),
-      BlocProvider<TransactionBloc>(create: (context) {
-        return TransactionBloc(sellRecordProvider);
-      }),
-      BlocProvider<SellRecordBloc>(create: (context) {
-        return SellRecordBloc(sellRecordProvider);
+      BlocProvider<TransactionsBloc>(create: (context) {
+        return TransactionsBloc(sellRecordProvider);
       }),
       BlocProvider<SettingBloc>(create: (context) {
         return SettingBloc(settingProvider, stringProvider);
@@ -73,7 +70,8 @@ void main() {
             priceDataProvider, priceDataNetworkProvider, stringProvider);
       }),
       BlocProvider<SelectedDatePriceRecordBloc>(create: (context) {
-        return SelectedDatePriceRecordBloc(priceDataProvider, priceDataNetworkProvider, stringProvider);
+        return SelectedDatePriceRecordBloc(
+            priceDataProvider, priceDataNetworkProvider, stringProvider);
       }),
       BlocProvider<SelectedTransactionBloc>(create: (context) {
         return SelectedTransactionBloc(
@@ -107,18 +105,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final priceWatch = context.read<PriceRecordBloc>();
-    priceWatch.add(LoadPriceRecordsEvent());
-
-    final todaysPriceRecord = context.read<TodaysPriceRecordBloc>();
-    todaysPriceRecord.add(LoadTodaysPriceRecordsEvent());
-
-    final settingRead = context.read<SettingBloc>();
-    settingRead.add(LoadLastSettingEvent());
-
-    final selectedDatePriceRecord = context.read<SelectedDatePriceRecordBloc>();
-    selectedDatePriceRecord
+    context.read<PriceRecordBloc>().add(LoadPriceRecordsEvent());
+    context.read<TodaysPriceRecordBloc>().add(LoadTodaysPriceRecordsEvent());
+    context.read<SettingBloc>().add(LoadLastSettingEvent());
+    context
+        .read<SelectedDatePriceRecordBloc>()
         .add(SelectOtherDatePriceRecordEvent(DateTime.now()));
+    context.read<TransactionsBloc>().add(LoadTransactions());
 
     return MaterialApp(
       theme: ThemeData(

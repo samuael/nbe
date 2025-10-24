@@ -11,11 +11,10 @@ class Transaction {
   String settingID;
   Setting? setting;
 
-  String date;
-  DateTime? dateTime;
-  double karat;
+  DateTime date;
+  DateTime? endDate;
 
-  int extraDays;
+  double karat;
 
   double initialPrice; // r
   PriceRecord? initialPriceRecord;
@@ -37,7 +36,7 @@ class Transaction {
     required this.specificGravity,
     this.net = 0,
     this.setting,
-    this.extraDays = 0,
+    this.endDate,
     this.taxValue = 0,
     this.bankFeeValue = 0,
     this.createdAt = 0,
@@ -51,14 +50,14 @@ class Transaction {
   factory Transaction.fromJson(Map<String, dynamic> data) {
     return Transaction(
       data["id"],
-      data["date"],
+      DateTime.parse(data["date"]),
       data["gram"],
       data["karat"],
       data["settingID"],
       data["initialPrice"],
       specificGravity: data["specificGravity"],
       createdAt: data["createdAt"],
-      extraDays: data["extraDays"],
+      endDate: data["endDate"] != null ? DateTime.parse(data["endDate"]) : null,
       athPrice: data["athPrice"],
       taxValue: data["taxValue"],
       bankFeeValue: data["bankFeeValue"],
@@ -74,9 +73,10 @@ class Transaction {
       "specificGravity": specificGravity,
       "createdAt": createdAt,
       "settingID": settingID,
-      "date": date,
+      "date": DateFormat('yyyy-MM-dd').format(date),
       "karat": karat,
-      "extraDays": extraDays,
+      "endDate":
+          endDate != null ? DateFormat('yyyy-MM-dd').format(endDate!) : "",
       "athPrice": athPrice,
       "initialPrice": initialPrice,
       "taxValue": taxValue,

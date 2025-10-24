@@ -1,9 +1,9 @@
 import 'package:nbe/libs.dart';
 
-class TransactionBloc extends Bloc<SellRecordEvent, TransactionState> {
+class TransactionsBloc extends Bloc<TransactionEvent, TransactionState> {
   final TransactionsLocalProvider provider;
-  TransactionBloc(this.provider) : super(TransactionInit()) {
-    on<SellRecordLoad>(
+  TransactionsBloc(this.provider) : super(TransactionInit()) {
+    on<LoadTransactions>(
       (event, emit) async {
         int offset = 0;
         int limit = 0;
@@ -28,19 +28,26 @@ class TransactionBloc extends Bloc<SellRecordEvent, TransactionState> {
       },
     );
 
-    // on<UpdateRecordEvent>((event, emit) {
-    //   if (state is TransactionLoaded) {
-    //     final dmap = (state as TransactionLoaded).records;
-    //     dmap[event.record.id] = event.record;
-    //     emit(TransactionLoaded(dmap));
-    //   }
-    // });
-  }
+    on<GetSeeTransactionsEvent>((event, emit) async {
+      final results = await provider.getRecentTransactions(0, 1000);
+      for (var val in results!) {
+        print("${val.date} ${val.gram} \n");
+      }
+    });
 
-  Future<bool> saveRecord(Transaction record) async {
-    if (record.id == 0) {
-      return false;
-    }
-    return provider.saveRecord(record);
+    on<SaveTransactionEvent>((event, emit) async {
+      final result = await provider.insertTransaction(event.transaction);
+      if (result == 0) {
+        emit(TransactionActionFailed("insertion was not succesful"));
+        return;
+      }
+      if (state is TransactionLoaded) {
+        (state as TransactionLoaded).records[event.transaction.id] =
+            event.transaction;
+        emit((state as TransactionLoaded).clone());
+        return;
+      }
+      emit(TransactionLoaded({event.transaction.id: event.transaction}));
+    });
   }
 }

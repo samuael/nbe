@@ -1,10 +1,17 @@
 import 'package:nbe/libs.dart';
 
-class SellRecordEvent {}
+class TransactionEvent {}
 
-class SellRecordLoad extends SellRecordEvent {}
+class LoadTransactions extends TransactionEvent {}
 
-class UpdateRecordEvent extends SellRecordEvent {
+class UpdateTransactionEvent extends TransactionEvent {
   Transaction record;
-  UpdateRecordEvent(this.record);
+  UpdateTransactionEvent(this.record);
 }
+
+class SaveTransactionEvent extends TransactionEvent {
+  Transaction transaction;
+  SaveTransactionEvent(this.transaction);
+}
+
+class GetSeeTransactionsEvent extends TransactionEvent {}

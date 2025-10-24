@@ -15,7 +15,7 @@ class PriceItemPreview extends StatefulWidget {
 class _PriceItemPreviewState extends State<PriceItemPreview> {
   @override
   Widget build(BuildContext context) {
-    final theDate = DateTime.parse(widget.record.date!);
+    final theDate = widget.record.date!;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),

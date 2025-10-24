@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class PriceRecordResponse {
   bool? success;
   String? message;
@@ -46,7 +48,7 @@ class PriceRecord {
   String? goldTypeId;
   String? priceUsd;
   double? priceBirr;
-  String? date;
+  DateTime? date;
   GoldType? goldType;
 
   PriceRecord(
@@ -58,11 +60,17 @@ class PriceRecord {
       this.goldType});
 
   PriceRecord.fromJson(Map<String, dynamic> json) {
+    // if (json['date'] is int) {
+    //   print(
+    //       "DateFormat('yyyy-MM-dd').format(json['date']): ${DateFormat('yyyy-MM-dd').format(DateTime.fromMillisecondsSinceEpoch(json['date']))}\n");
+    // }
     id = json['id'];
     goldTypeId = json['gold_type_id'];
     priceUsd = json['price_usd'];
     priceBirr = double.parse(json['price_birr'] ?? "0");
-    date = json['date'];
+    date = (json['date'] is int)
+        ? DateTime.fromMillisecondsSinceEpoch((json['date'] * 1000))
+        : DateTime.parse(json['date']);
     goldType = json['gold_type'] != null
         ? GoldType.fromJson(json['gold_type'])
         : GoldType(karat: "24");
@@ -74,7 +82,7 @@ class PriceRecord {
       // 'gold_type_id': goldTypeId,
       'price_usd': priceUsd,
       'price_birr': priceBirr != null ? "$priceBirr" : "",
-      'date': date,
+      'date': (date!.millisecondsSinceEpoch / 1000).toInt(),
       // if (goldType != null) 'gold_type': goldType!.toJson(),
     };
   }

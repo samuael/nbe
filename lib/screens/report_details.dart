@@ -42,7 +42,9 @@ class _ReportDetailsScreenState extends State<ReportDetailsScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.print),
-            onPressed: () {},
+            onPressed: () {
+              context.read<TransactionsBloc>().add(GetSeeTransactionsEvent());
+            },
           )
         ],
       ),

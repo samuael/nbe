@@ -17,7 +17,7 @@ class PriceRecordProvider {
         $_idCol ${SQLLiteTypes.stringType} PRIMARY KEY,
         $_priceBirrCol ${SQLLiteTypes.stringType} NOT NULL,
         $_priceUSDCol ${SQLLiteTypes.stringType} NOT NULL,
-        $_dateCol ${SQLLiteTypes.stringType} UNIQUE NOT NULL
+        $_dateCol ${SQLLiteTypes.intType} UNIQUE NOT NULL
       )""";
   }
 
@@ -46,7 +46,7 @@ class PriceRecordProvider {
       return [];
     }
     return result.map<PriceRecord>((e) {
-      return PriceRecord.fromJson(result[0]);
+      return PriceRecord.fromJson(e);
     }).toList();
   }
 

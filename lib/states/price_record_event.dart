@@ -2,6 +2,8 @@ class PriceRecordEvent {}
 
 class LoadPriceRecordsEvent extends PriceRecordEvent {}
 
+class ShowTheLoadedEvent extends PriceRecordEvent {}
+
 // ---------------------------------
 
 class TodayPriceRecordsEvent {}

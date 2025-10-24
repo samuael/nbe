@@ -553,7 +553,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         SelectTransaction(
                           Transaction(
                             "${DateTime.now().millisecondsSinceEpoch / 1000}",
-                            DateFormat('yyyy-MM-dd').format(selectedDate!),
+                            selectedDate!,
                             weight!,
                             karat!,
                             "",

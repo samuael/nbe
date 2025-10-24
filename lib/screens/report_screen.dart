@@ -104,7 +104,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
   List<Transaction> _getTransactionsForMonthYear(
       BuildContext context, int month, int year) {
-    return (context.watch<TransactionBloc>().state as TransactionLoaded)
+    return (context.watch<TransactionsBloc>().state as TransactionLoaded)
         .records
         .values
         .where((t) {
@@ -119,16 +119,22 @@ class _ReportScreenState extends State<ReportScreen> {
     super.initState();
   }
 
+  Map<String, Transaction>? records;
+
   @override
   Widget build(BuildContext context) {
     final Map<String, List<Transaction>> grouped = {};
-    final records =
-        (context.watch<SellRecordBloc>().state as TransactionLoaded).records;
-    for (var tran in records.values) {
-      final key = DateFormat.yMMMM()
-          .format(DateTime.fromMillisecondsSinceEpoch(tran.createdAt * 1000));
-      grouped.putIfAbsent(key, () => []);
-      grouped[key]!.add(tran);
+
+    if (context.watch<TransactionsBloc>().state is TransactionLoaded) {
+      records = (context.watch<TransactionsBloc>().state as TransactionLoaded)
+          .records;
+
+      for (var tran in records!.values) {
+        final key = DateFormat.yMMMM()
+            .format(DateTime.fromMillisecondsSinceEpoch(tran.createdAt * 1000));
+        grouped.putIfAbsent(key, () => []);
+        grouped[key]!.add(tran);
+      }
     }
 
     final months = grouped.keys.toList();
@@ -139,6 +145,11 @@ class _ReportScreenState extends State<ReportScreen> {
           children: [Icon(Icons.history), SizedBox(width: 10), Text('History')],
         ),
         actions: [
+          IconButton(
+              onPressed: () {
+                context.read<TransactionsBloc>().add(GetSeeTransactionsEvent());
+              },
+              icon: Icon(Icons.restore_from_trash_rounded)),
           Padding(
               padding: const EdgeInsets.only(right: 4),
               child: IconButton(

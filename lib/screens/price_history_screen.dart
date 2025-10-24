@@ -25,6 +25,17 @@ class _PriceHistoryScreenState extends State<PriceHistoryScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.read<PriceRecordBloc>().add(ShowTheLoadedEvent());
+            },
+            icon: Icon(
+              Icons.replay_outlined,
+              color: Colors.black.withValues(alpha: .8),
+            ),
+          )
+        ],
       ),
       body: BlocBuilder<PriceRecordBloc, PriceRecordState>(
           builder: (context, state) {

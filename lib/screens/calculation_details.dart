@@ -75,17 +75,36 @@ class _CalculationDetailsState extends State<CalculationDetails> {
         .record
         .get24KaratRecord()!;
 
-    // final settingLoad = context.watch<SettingBloc>();
-    // if (widget.setting == null && (settingLoad.state is SettingLoaded)) {
-    //   widget.setting = (settingLoad.state as SettingLoaded).setting;
-    // }
-
-    // todaysPrice
-    // final settingCall = context.watch<SettingBloc>();
-
     final athPriceRecord = context
         .watch<PriceRecordBloc>()
         .getATHPriceRecord(selectedDatePriceRecord.date!);
+
+    transaction.initialPrice = selectedDatePriceRecord.priceBirr!;
+    transaction.athPrice = athPriceRecord!.priceBirr!;
+    transaction.settingID = setting.id;
+    transaction.setting = setting;
+    transaction.initialPriceRecord = selectedDatePriceRecord;
+
+    final holdRate = (setting.holdPercentage / 100);
+    final karatRate = (transaction.karat / 24);
+    final bonusRate = (1 + (setting.bonusByNBEInPercentage / 100));
+
+    final totalOf95Percent = (transaction.initialPrice * bonusRate) *
+        karatRate *
+        transaction.gram *
+        (1 - holdRate);
+
+    final totalOfInitialHold =
+        (transaction.initialPrice * karatRate * bonusRate) *
+            transaction.gram *
+            holdRate;
+
+    final bankFeeof95Percent = totalOf95Percent * setting.bankFeePercentage;
+
+    final increase = ((((transaction.athPrice - transaction.initialPrice) *
+        bonusRate *
+        karatRate *
+        transaction.gram)));
 
     return Scaffold(
       appBar: AppBar(
@@ -130,41 +149,6 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                               SettingItem(setting),
                             ]),
                           ),
-                          // if (settingLoad.state is SettingInit)
-                          //   SizedBox(
-                          //     child: Column(
-                          //       children: [
-                          //         SpinKitWanderingCubes(
-                          //           color: Theme.of(context).primaryColor,
-                          //         ),
-                          //         const Text(
-                          //           "Setting Loading ... ",
-                          //           style: TextStyle(
-                          //             fontWeight: FontWeight.w800,
-                          //             fontSize: 12,
-                          //           ),
-                          //         ),
-                          //       ],
-                          //     ),
-                          //   ),
-                          // if (settingLoad.state is SettingLoadFailed)
-                          //   SizedBox(
-                          //     child: Column(
-                          //       children: [
-                          //         const Text(
-                          //           "Setting Loading ... ",
-                          //           style: TextStyle(
-                          //             fontWeight: FontWeight.w800,
-                          //             fontSize: 12,
-                          //           ),
-                          //         ),
-                          //         SpinKitWanderingCubes(
-                          //           color: Theme.of(context).primaryColor,
-                          //         ),
-                          //       ],
-                          //     ),
-                          //   ),
-                          // if (settingLoad.state is SettingLoaded)
                           Positioned(
                             top: 0,
                             right: 0,
@@ -274,6 +258,70 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
+                              "Weight",
+                              textAlign: TextAlign.center,
+                              style: _commonLabelStyle,
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  "${transaction.gram}",
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  "Gram",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black.withValues(alpha: .5),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Karat",
+                              textAlign: TextAlign.center,
+                              style: _commonLabelStyle,
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  "${transaction.karat}",
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  "Karat",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black.withValues(alpha: .5),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
                               "Initial Price",
                               textAlign: TextAlign.center,
                               style: _commonLabelStyle,
@@ -282,10 +330,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                               children: [
                                 Text(
                                   currencyFormatWith2DecimalValues(
-                                      selectedDatePriceRecord.priceBirr! *
-                                          (1 +
-                                              (setting.bonusByNBEInPercentage /
-                                                  100))),
+                                      transaction.initialPrice),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -317,17 +362,8 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                             Row(
                               children: [
                                 Text(
-                                  athPriceRecord != null
-                                      ? currencyFormatWith2DecimalValues(
-                                          athPriceRecord.priceBirr! *
-                                              (1 +
-                                                  (setting.bonusByNBEInPercentage /
-                                                      100)))
-                                      : currencyFormatWith2DecimalValues(
-                                          selectedDatePriceRecord.priceBirr! *
-                                              (1 +
-                                                  (setting.bonusByNBEInPercentage /
-                                                      100))),
+                                  currencyFormatWith2DecimalValues(
+                                      transaction.athPrice),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -360,14 +396,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                               children: [
                                 Text(
                                   currencyFormatWith2DecimalValues(
-                                      (selectedDatePriceRecord.priceBirr! *
-                                              (1 +
-                                                  (setting.bonusByNBEInPercentage /
-                                                      100))) *
-                                          (transaction.karat / 24) *
-                                          transaction.gram *
-                                          ((100 - setting.holdPercentage) /
-                                              100)),
+                                      totalOf95Percent),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -400,13 +429,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                               children: [
                                 Text(
                                   currencyFormatWith2DecimalValues(
-                                      (selectedDatePriceRecord.priceBirr! *
-                                              (transaction.karat / 24) *
-                                              (1 +
-                                                  (setting.bonusByNBEInPercentage /
-                                                      100))) *
-                                          transaction.gram *
-                                          (setting.holdPercentage / 100)),
+                                      totalOfInitialHold),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -439,16 +462,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                               children: [
                                 Text(
                                   currencyFormatWith2DecimalValues(
-                                      ((selectedDatePriceRecord.priceBirr! *
-                                                  (1 +
-                                                      (setting.bonusByNBEInPercentage /
-                                                          100))) *
-                                              (transaction.karat / 24) *
-                                              transaction.gram *
-                                              (1 -
-                                                  (setting.holdPercentage /
-                                                      100))) *
-                                          setting.bankFeePercentage),
+                                      bankFeeof95Percent),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -513,35 +527,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                             Row(
                               children: [
                                 Text(
-                                  currencyFormatWith2DecimalValues(((athPriceRecord!
-                                                  .priceBirr! *
-                                              (1 +
-                                                  (setting.bonusByNBEInPercentage /
-                                                      100)) *
-                                              (transaction.karat / 24) *
-                                              transaction.gram)
-
-                                          // Tax Deduction
-
-                                          -
-                                          (transaction.gram *
-                                              setting.taxPerGram))
-
-                                      // Initial
-
-                                      -
-                                      ((selectedDatePriceRecord.priceBirr! *
-                                              (transaction.karat / 24) *
-                                              (1 +
-                                                  (setting.bonusByNBEInPercentage /
-                                                      100)) *
-                                              transaction.gram)
-
-                                          // Tax Deduction
-
-                                          -
-                                          (transaction.gram *
-                                              setting.taxPerGram))),
+                                  currencyFormatWith2DecimalValues(increase),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -671,63 +657,16 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                             ],
                           ),
                         const Divider(),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          child: CommonTextField(
-                            borderRadius: 5,
-                            controller: _remainingController,
-                            errorMessage: "",
-                            label: "Remaining",
-                            onChanged: (val) {},
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Net Completed',
-                              textAlign: TextAlign.center,
-                              style: _commonLabelStyle,
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  currencyFormatWith2DecimalValues(
-                                      ((selectedDatePriceRecord.priceBirr! *
-                                                  (1 +
-                                                      setting
-                                                          .bonusByNBEInPercentage)) *
-                                              transaction.gram) *
-                                          (setting.bankFeePercentage / 100)),
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  "BIRR",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black.withValues(alpha: .5),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ],
-                        ),
                         const SizedBox(
                           height: 12,
                         ),
                         FancyWideButton(
                           "Save",
-                          () {}, //onSaveTapped,
+                          () {
+                            context
+                                .read<TransactionsBloc>()
+                                .add(SaveTransactionEvent(transaction));
+                          }, //onSaveTapped,
                           animateOnClick: true,
                         ),
                       ],

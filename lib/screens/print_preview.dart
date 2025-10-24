@@ -121,7 +121,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                                 pw.MainAxisAlignment.spaceBetween,
                             children: [
                               pw.Text(
-                                tx.date,
+                                DateFormat('yyyy-MM-dd').format(tx.date),
                                 style: commonStyle,
                               ),
                               pw.Text(
@@ -200,7 +200,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
                           pw.Text(
-                            tx.date,
+                            DateFormat('yyyy-MM-dd').format(tx.date),
                             style: const pw.TextStyle(
                                 fontSize: 14, color: PdfColors.grey600),
                           ),
@@ -296,7 +296,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Text(title,
+            Text(DateFormat('yyyy-MM-dd').format(title),
                 style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -312,7 +312,7 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        tx.date,
+                        DateFormat('yyyy-MM-dd').format(tx.date),
                         style: commonLabelStyle,
                       ),
                       Text(
@@ -359,7 +359,9 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                         onPressed: () async {
                           if (context.mounted) {
                             await _saveAsPdf(
-                                context, title, widget.transactions);
+                                context,
+                                DateFormat('yyyy-MM-dd').format(title),
+                                widget.transactions);
                           }
                         },
                         child: const Padding(
@@ -399,7 +401,9 @@ class _PrintPreviewScreenState extends State<PrintPreviewScreen> {
                         onPressed: () async {
                           if (context.mounted) {
                             await _sharePdf(
-                                context, title, widget.transactions);
+                                context,
+                                DateFormat('yyyy-MM-dd').format(title),
+                                widget.transactions);
                           }
                         },
                       ),

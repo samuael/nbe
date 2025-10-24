@@ -9,7 +9,7 @@ class TransactionsLocalProvider {
   static const String _gramCol = "gram";
   static const String _dateCol = "date";
   static const String _karatCol = "karat";
-  static const String _extraDays = "extraDays";
+  static const String _endDate = "endDate";
   static const String _athPrice = "athPrice";
   static const String _initialPrice = "initialPrice";
   static const String _taxValue = "taxValue";
@@ -29,8 +29,8 @@ class TransactionsLocalProvider {
         $_karatCol  ${SQLLiteTypes.doubleType} NOT NULL,
         $_specificGravityCol ${SQLLiteTypes.doubleType} NOT NULL,
         $_netCol ${SQLLiteTypes.doubleType} default 0.0,
-        $_settingIDCol ${SQLLiteTypes.intType} NOT NULL,
-        $_extraDays ${SQLLiteTypes.doubleType} NOT NULL,
+        $_settingIDCol ${SQLLiteTypes.stringType} NOT NULL,
+        $_endDate ${SQLLiteTypes.stringType} NOT NULL,
         $_athPrice ${SQLLiteTypes.doubleType} NOT NULL,
         $_initialPrice ${SQLLiteTypes.doubleType} NOT NULL,
         $_taxValue ${SQLLiteTypes.doubleType} NOT NULL,
@@ -46,7 +46,7 @@ class TransactionsLocalProvider {
     return db.insert(
       tableName,
       detail.toJson(),
-      conflictAlgorithm: ConflictAlgorithm.ignore,
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
@@ -70,11 +70,11 @@ class TransactionsLocalProvider {
     final db = await wrapper.database;
     final result = await db.query(
       tableName,
-      orderBy: _createdAtCol,
+      orderBy: "$_createdAtCol DESC",
       offset: offset,
       limit: limit,
     );
-    result.map((el) {
+    return result.map((el) {
       return Transaction.fromJson(
         el,
       );
