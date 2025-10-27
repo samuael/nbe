@@ -77,6 +77,9 @@ void main() {
         return SelectedTransactionBloc(
             priceDataProvider, priceDataNetworkProvider, stringProvider);
       }),
+      BlocProvider<DefaultNbeHoldDurationBloc>(create: (context) {
+        return DefaultNbeHoldDurationBloc(stringProvider);
+      }),
     ],
     child: const MyApp(),
   ));

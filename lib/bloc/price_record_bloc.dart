@@ -24,7 +24,7 @@ class PriceRecordBloc extends Bloc<PriceRecordEvent, PriceRecordState> {
 
         final payload = await stringProvider.getStringPayloadByID(222) ??
             StringPayload(222, "30", 0);
-        final maxPriceRecords = int.tryParse(payload.payload) ?? 0;
+        final maxPriceRecords = int.tryParse(payload.payload) ?? 0 + 10;
 
         for (int i = 1; i < maxPriceRecords; i++) {
           last = last.subtract(const Duration(days: 1));
@@ -37,8 +37,6 @@ class PriceRecordBloc extends Bloc<PriceRecordEvent, PriceRecordState> {
         final List<String> expiredPrices = [];
 
         for (int i = 0; i < savedPriceRecords.length; i++) {
-          print(
-              "dateFormat.format(savedPriceRecords[i]!.date!): ${dateFormat.format(savedPriceRecords[i]!.date!)}");
           if (priceRecords
               .contains(dateFormat.format(savedPriceRecords[i]!.date!))) {
             foundPrices[dateFormat.format(savedPriceRecords[i]!.date!)] =

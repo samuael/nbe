@@ -30,6 +30,7 @@ class TransactionsBloc extends Bloc<TransactionEvent, TransactionState> {
 
     on<GetSeeTransactionsEvent>((event, emit) async {
       final results = await provider.getRecentTransactions(0, 1000);
+      print("GetSeeTransactionsEvent: ${results?.length}");
       for (var val in results!) {
         print("${val.date} ${val.gram} \n");
       }

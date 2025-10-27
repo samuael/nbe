@@ -12,11 +12,9 @@ class SettingBloc extends Bloc<SingleSettingEvent, SettingState> {
       final stringPayload = await stringProvider
           .getStringPayloadByID(StaticConstant.LAST_SETTING_ID);
 
-      print("Payload : ${stringPayload!.payload}");
-      final setting = await provider.getSettingByID(stringPayload.payload);
+      final setting = await provider.getSettingByID(stringPayload!.payload);
 
       if (setting == null) {
-        throw Exception("here");
         emit(SettingLoadFailed("unable to find the recent setting"));
         return;
       }

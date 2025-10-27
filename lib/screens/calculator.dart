@@ -567,7 +567,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       );
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (ctx) => CalculationDetails(
+                      builder: (ctx) => TransactionDetails(
                           // transaction: transaction,
                           // setting: _setting,
                           ),

@@ -146,10 +146,13 @@ class _ReportScreenState extends State<ReportScreen> {
         ),
         actions: [
           IconButton(
-              onPressed: () {
-                context.read<TransactionsBloc>().add(GetSeeTransactionsEvent());
-              },
-              icon: Icon(Icons.restore_from_trash_rounded)),
+            onPressed: () {
+              context.read<TransactionsBloc>().add(GetSeeTransactionsEvent());
+            },
+            icon: const Icon(
+              Icons.restore_from_trash_rounded,
+            ),
+          ),
           Padding(
               padding: const EdgeInsets.only(right: 4),
               child: IconButton(
@@ -159,91 +162,80 @@ class _ReportScreenState extends State<ReportScreen> {
                   icon: const Icon(Icons.print)))
         ],
       ),
-      body: ListView.builder(
-        itemCount: months.length,
-        itemBuilder: (ctx, index) {
-          final month = months[index];
-          final transactions = grouped[month]!;
+      body: months.isNotEmpty
+          ? ListView.builder(
+              itemCount: months.length,
+              itemBuilder: (ctx, index) {
+                final month = months[index];
+                final transactions = grouped[month]!;
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  month,
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                ...transactions.map(
-                  (transaction) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: Color.fromARGB(160, 158, 158, 158),
-                            ),
-                          ),
-                        ),
-                        child: ListTile(
-                          onTap: () {
-                            // Navigator.of(context).push(MaterialPageRoute(
-                            //     builder: (ctx) => ReportDetailsScreen(
-                            //           transaction: transaction,
-                            //         )));
-                          },
-                          leading: Text(
-                            DateFormat.MMMd().format(
-                              DateTime.fromMillisecondsSinceEpoch(
-                                  transaction.createdAt * 1000),
-                            ),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          title: Text(
-                            '${transaction.gram.toStringAsFixed(2)} gram',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              transaction.isCompleted
-                                  ? const Icon(Icons.check)
-                                  : const Icon(Icons.circle),
-                              Text(
-                                transaction.isCompleted
-                                    ? 'Completed'
-                                    : 'Pending',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              )
-                            ],
-                          ),
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        month,
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    );
-                  },
-                )
-              ],
-            ),
-          );
-        },
-      ),
+                      ...transactions.map(
+                        (transaction) {
+                          return TransactionItemView(transaction);
+                        },
+                      )
+                    ],
+                  ),
+                );
+              },
+            )
+          : noOrderFound(),
+    );
+  }
+
+  Widget noOrderFound() {
+    return Column(
+      children: [
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.post_add_outlined,
+                  size: 48,
+                  color: Colors.grey[400],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'No Deposit transaction recorded',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Calculate and record your transasction to the national bank for later use and proper record management',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[500],
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

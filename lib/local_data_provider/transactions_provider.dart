@@ -2,7 +2,7 @@ import 'package:nbe/libs.dart' show NBEDatabase, SQLLiteTypes, Transaction;
 import 'package:sqflite/sqflite.dart' show ConflictAlgorithm;
 
 class TransactionsLocalProvider {
-  static const String tableName = "sell_record";
+  static const String tableName = "transactions";
 
   static const String _idCol = "id";
   static const String _netCol = "net";
@@ -70,7 +70,7 @@ class TransactionsLocalProvider {
     final db = await wrapper.database;
     final result = await db.query(
       tableName,
-      orderBy: "$_createdAtCol DESC",
+      orderBy: _createdAtCol,
       offset: offset,
       limit: limit,
     );

@@ -5,3 +5,4 @@ export 'price_record_bloc.dart';
 export 'todays_price_record.dart';
 export 'selected_date_price_record_bloc.dart';
 export 'selected_transaction_bloc.dart';
+export 'default_nbe_hold_duration_bloc.dart';

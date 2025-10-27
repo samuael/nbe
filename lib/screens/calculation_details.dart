@@ -1,14 +1,16 @@
 import 'package:nbe/libs.dart';
 import 'package:intl/intl.dart';
 
-class CalculationDetails extends StatefulWidget {
-  CalculationDetails({super.key});
+class TransactionDetails extends StatefulWidget {
+  const TransactionDetails({super.key});
   @override
-  State<CalculationDetails> createState() => _CalculationDetailsState();
+  State<TransactionDetails> createState() => _TransactionDetailsState();
 }
 
-class _CalculationDetailsState extends State<CalculationDetails> {
-  final _remainingController = TextEditingController();
+class _TransactionDetailsState extends State<TransactionDetails> {
+  // final _remainingController = TextEditingController();
+  int dayExtensions = 0;
+  bool extendTheDays = false;
 
   final TextStyle _commonLabelStyle = TextStyle(
     fontSize: 14,
@@ -49,12 +51,12 @@ class _CalculationDetailsState extends State<CalculationDetails> {
   late Setting setting;
   late PriceRecord selectedDatePriceRecord;
 
-  final TextStyle _labelStyle = const TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w500,
-    color: Colors.black,
-    overflow: TextOverflow.visible,
-  );
+  // final TextStyle _labelStyle = const TextStyle(
+  //   fontSize: 16,
+  //   fontWeight: FontWeight.w500,
+  //   color: Colors.black,
+  //   overflow: TextOverflow.visible,
+  // );
 
   @override
   Widget build(BuildContext context) {
@@ -79,11 +81,19 @@ class _CalculationDetailsState extends State<CalculationDetails> {
         .watch<PriceRecordBloc>()
         .getATHPriceRecord(selectedDatePriceRecord.date!);
 
+    transaction.date = selectedDatePriceRecord.date!;
     transaction.initialPrice = selectedDatePriceRecord.priceBirr!;
     transaction.athPrice = athPriceRecord!.priceBirr!;
     transaction.settingID = setting.id;
     transaction.setting = setting;
     transaction.initialPriceRecord = selectedDatePriceRecord;
+
+    final defaultNBEHodDays = (context.watch<DefaultNbeHoldDurationBloc>().state
+            as DefaultNbeHoldDurationLoaded)
+        .days;
+
+    transaction.endDate ??=
+        transaction.date.add(Duration(days: defaultNBEHodDays + dayExtensions));
 
     final holdRate = (setting.holdPercentage / 100);
     final karatRate = (transaction.karat / 24);
@@ -232,28 +242,150 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                               ),
                               const SizedBox(width: 8),
                               Flexible(
-                                child: Column(children: [
-                                  (context
-                                          .watch<SelectedDatePriceRecordBloc>()
-                                          .state is SelectedDatePriceRecordLoaded)
-                                      ? Text(
-                                          'Date: ${DateFormat.yMMMMd().format((context.watch<SelectedDatePriceRecordBloc>().state as SelectedDatePriceRecordLoaded).dateTime)}',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium
-                                              ?.copyWith(
-                                                color: Theme.of(context)
-                                                    .primaryColor,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                          overflow: TextOverflow.ellipsis,
-                                        )
-                                      : const Skeleton(width: 100, height: 10),
-                                ]),
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width * .9,
+                                  child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        (context
+                                                    .watch<
+                                                        SelectedDatePriceRecordBloc>()
+                                                    .state
+                                                is SelectedDatePriceRecordLoaded)
+                                            ? Text(
+                                                'Deposit Date: ${DateFormat.yMMMMd().format((context.watch<SelectedDatePriceRecordBloc>().state as SelectedDatePriceRecordLoaded).dateTime)}',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                      color: Theme.of(context)
+                                                          .primaryColor,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                overflow: TextOverflow.ellipsis,
+                                              )
+                                            : const Skeleton(
+                                                width: 100, height: 10),
+                                        if (context
+                                                .watch<
+                                                    SelectedDatePriceRecordBloc>()
+                                                .state
+                                            is SelectedDatePriceRecordLoaded)
+                                          Text(
+                                            'Settlement Date: ${DateFormat.yMMMMd().format(transaction.endDate!)}',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.copyWith(
+                                                  color: Theme.of(context)
+                                                      .primaryColor,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                      ]),
+                                ),
                               ),
                             ],
                           ),
                         ),
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
+                          margin: const EdgeInsets.symmetric(vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .primaryColor
+                                .withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: theme.primaryColor.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
+                          ),
+                          width: MediaQuery.of(context).size.width * .9,
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    flex: 1,
+                                    child: Checkbox(
+                                        value: extendTheDays,
+                                        onChanged: (val) {
+                                          setState(() {
+                                            extendTheDays = val!;
+                                          });
+                                        }),
+                                  ),
+                                  Expanded(
+                                    flex: 9,
+                                    child: Text(
+                                      'Would you like to extend settlement date?',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 13,
+                                          ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (extendTheDays)
+                                Row(
+                                  children: [
+                                    Text(
+                                      'Extend by ',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 13,
+                                          ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    FancyCounter(
+                                      dayExtensions,
+                                      (val) {
+                                        setState(() {
+                                          dayExtensions = val;
+                                        });
+                                        transaction.endDate = transaction.date
+                                            .add(Duration(
+                                                days: defaultNBEHodDays +
+                                                    dayExtensions));
+                                      },
+                                    ),
+                                    Text(
+                                      'days',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 13,
+                                          ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+                        ),
+                        const Divider(),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -318,6 +450,7 @@ class _CalculationDetailsState extends State<CalculationDetails> {
                             ),
                           ],
                         ),
+                        const Divider(),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
