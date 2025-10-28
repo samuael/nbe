@@ -1,14 +1,16 @@
 import 'package:nbe/libs.dart';
 import 'package:intl/intl.dart';
 
-class TransactionDetails extends StatefulWidget {
-  const TransactionDetails({super.key});
+class TransactionViewDetails extends StatefulWidget {
+  static const String routeName = "/view/transaction/detail";
+  final Transaction transaction;
+  final Setting setting;
+  const TransactionViewDetails(this.transaction, this.setting, {super.key});
   @override
-  State<TransactionDetails> createState() => _TransactionDetailsState();
+  State<TransactionViewDetails> createState() => _TransactionDetailsState();
 }
 
-class _TransactionDetailsState extends State<TransactionDetails> {
-  // final _remainingController = TextEditingController();
+class _TransactionDetailsState extends State<TransactionViewDetails> {
   int dayExtensions = 0;
   bool extendTheDays = false;
 
@@ -33,8 +35,6 @@ class _TransactionDetailsState extends State<TransactionDetails> {
         action: SnackBarAction(
             label: 'Retry',
             onPressed: () {
-              // _getPurchasingRate();
-              // _getSettings();
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
             }),
       ),
@@ -47,74 +47,34 @@ class _TransactionDetailsState extends State<TransactionDetails> {
     super.initState();
   }
 
-  late Transaction transaction;
-  late Setting setting;
-  late PriceRecord selectedDatePriceRecord;
-
-  // final TextStyle _labelStyle = const TextStyle(
-  //   fontSize: 16,
-  //   fontWeight: FontWeight.w500,
-  //   color: Colors.black,
-  //   overflow: TextOverflow.visible,
-  // );
-
   @override
   Widget build(BuildContext context) {
-    if (context.watch<SelectedTransactionBloc>().state
-        is! TransactionSelected) {
-      throw Exception("transaction not found");
-    }
-
-    transaction =
-        (context.watch<SelectedTransactionBloc>().state as TransactionSelected)
-            .transaction;
-
-    setting = (context.watch<SettingBloc>().state as SettingLoaded).setting;
-
-    selectedDatePriceRecord = (context
-            .watch<SelectedDatePriceRecordBloc>()
-            .state as SelectedDatePriceRecordLoaded)
-        .record
-        .get24KaratRecord()!;
-
-    final athPriceRecord = context
-        .watch<PriceRecordBloc>()
-        .getATHPriceRecord(selectedDatePriceRecord.date!);
-
-    transaction.date = selectedDatePriceRecord.date!;
-    transaction.initialPrice = selectedDatePriceRecord.priceBirr!;
-    transaction.athPrice = athPriceRecord!.priceBirr!;
-    transaction.settingID = setting.id;
-    transaction.setting = setting;
-    transaction.initialPriceRecord = selectedDatePriceRecord;
-
     final defaultNBEHodDays = (context.watch<DefaultNbeHoldDurationBloc>().state
             as DefaultNbeHoldDurationLoaded)
         .days;
 
-    transaction.endDate ??=
-        transaction.date.add(Duration(days: defaultNBEHodDays + dayExtensions));
+    final holdRate = (widget.setting.holdPercentage / 100);
+    final karatRate = (widget.transaction.karat / 24);
+    final bonusRate = (1 + (widget.setting.bonusByNBEInPercentage / 100));
 
-    final holdRate = (setting.holdPercentage / 100);
-    final karatRate = (transaction.karat / 24);
-    final bonusRate = (1 + (setting.bonusByNBEInPercentage / 100));
-
-    final totalOf95Percent = ((transaction.initialPrice * bonusRate) *
+    final totalOf95Percent = (widget.transaction.initialPrice * bonusRate) *
         karatRate *
-        transaction.gram *
-        (1 - holdRate));
+        widget.transaction.gram *
+        (1 - holdRate);
 
     final totalOfInitialHold =
-        (transaction.initialPrice * karatRate * bonusRate) *
-            transaction.gram *
+        (widget.transaction.initialPrice * karatRate * bonusRate) *
+            widget.transaction.gram *
             holdRate;
 
-    final bankFeeof95Percent = totalOf95Percent * setting.bankFeePercentage;
+    final bankFeeof95Percent =
+        totalOf95Percent * widget.setting.bankFeePercentage;
 
-    final increase = ((((transaction.athPrice - transaction.initialPrice) *
-        bonusRate *
-        karatRate *
-        transaction.gram)));
+    final increase =
+        ((((widget.transaction.athPrice - widget.transaction.initialPrice) *
+            bonusRate *
+            karatRate *
+            widget.transaction.gram)));
 
     return Scaffold(
       appBar: AppBar(
@@ -156,59 +116,8 @@ class _TransactionDetailsState extends State<TransactionDetails> {
                           // if (settingLoad.state is SettingLoaded)
                           SingleChildScrollView(
                             child: TitledContainer("Settings", [
-                              SettingItem(setting),
+                              SettingItem(widget.setting),
                             ]),
-                          ),
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            child: IconButton(
-                              onPressed: () async {
-                                final Setting? newSetting = await Navigator.of(
-                                        context)
-                                    .push(MaterialPageRoute(
-                                        builder: (ctx) => const SettingsScreen(
-                                            // nbe24KaratRate: double.tryParse(
-                                            //         pricesMap['24'] ?? '') ??
-                                            nbe24KaratRate: 0)));
-
-                                if (newSetting != null) {
-                                  setState(() {
-                                    setting = newSetting;
-                                  });
-                                }
-                              },
-                              splashColor: Theme.of(context).primaryColor,
-                              icon: Container(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 5),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(
-                                      color: Theme.of(context)
-                                          .primaryColor
-                                          .withValues(alpha: .5)),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "Edit",
-                                      style: TextStyle(
-                                        color: Theme.of(context).primaryColor,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 5),
-                                    Icon(
-                                      Icons.edit,
-                                      color: Theme.of(context).primaryColor,
-                                      size: 14,
-                                    )
-                                  ],
-                                ),
-                              ),
-                              color: Colors.blue,
-                            ),
                           ),
                         ],
                       ),
@@ -274,7 +183,7 @@ class _TransactionDetailsState extends State<TransactionDetails> {
                                                 .state
                                             is SelectedDatePriceRecordLoaded)
                                           Text(
-                                            'Settlement Date: ${DateFormat.yMMMMd().format(transaction.endDate!)}',
+                                            'Settlement Date: ${DateFormat.yMMMMd().format(widget.transaction.endDate!)}',
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodyMedium
@@ -361,7 +270,8 @@ class _TransactionDetailsState extends State<TransactionDetails> {
                                         setState(() {
                                           dayExtensions = val;
                                         });
-                                        transaction.endDate = transaction.date
+                                        widget.transaction.endDate = widget
+                                            .transaction.date
                                             .add(Duration(
                                                 days: defaultNBEHodDays +
                                                     dayExtensions));
@@ -397,7 +307,7 @@ class _TransactionDetailsState extends State<TransactionDetails> {
                             Row(
                               children: [
                                 Text(
-                                  "${transaction.gram}",
+                                  "${widget.transaction.gram}",
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -430,7 +340,7 @@ class _TransactionDetailsState extends State<TransactionDetails> {
                               children: [
                                 Text(
                                   currencyFormatWith2DecimalValues(
-                                      transaction.karat),
+                                      widget.transaction.karat),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -464,9 +374,10 @@ class _TransactionDetailsState extends State<TransactionDetails> {
                               children: [
                                 Text(
                                   currencyFormatWith2DecimalValues(
-                                      transaction.initialPrice *
+                                      widget.transaction.initialPrice *
                                           (1 +
-                                              (setting.bonusByNBEInPercentage /
+                                              (widget.setting
+                                                      .bonusByNBEInPercentage /
                                                   100))),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
@@ -500,9 +411,10 @@ class _TransactionDetailsState extends State<TransactionDetails> {
                               children: [
                                 Text(
                                   currencyFormatWith2DecimalValues(
-                                      transaction.athPrice *
+                                      widget.transaction.athPrice *
                                           (1 +
-                                              (setting.bonusByNBEInPercentage /
+                                              (widget.setting
+                                                      .bonusByNBEInPercentage /
                                                   100))),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
@@ -528,7 +440,7 @@ class _TransactionDetailsState extends State<TransactionDetails> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Total of ${100 - setting.holdPercentage} %",
+                              "Total of ${100 - widget.setting.holdPercentage} %",
                               textAlign: TextAlign.center,
                               style: _commonLabelStyle,
                             ),
@@ -561,7 +473,7 @@ class _TransactionDetailsState extends State<TransactionDetails> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Total of ${setting.holdPercentage} %",
+                              "Total of ${widget.setting.holdPercentage} %",
                               textAlign: TextAlign.center,
                               style: _commonLabelStyle,
                             ),
@@ -594,7 +506,7 @@ class _TransactionDetailsState extends State<TransactionDetails> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Bank Fee of ${100 - setting.holdPercentage} %',
+                              'Bank Fee of ${100 - widget.setting.holdPercentage} %',
                               textAlign: TextAlign.center,
                               style: _commonLabelStyle,
                             ),
@@ -627,7 +539,7 @@ class _TransactionDetailsState extends State<TransactionDetails> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Tax of ${transaction.gram} gram',
+                              'Tax of ${widget.transaction.gram} gram',
                               textAlign: TextAlign.center,
                               style: _commonLabelStyle,
                             ),
@@ -635,7 +547,8 @@ class _TransactionDetailsState extends State<TransactionDetails> {
                               children: [
                                 Text(
                                   NumberFormat('#,##0').format(
-                                      transaction.gram * setting.taxPerGram),
+                                      widget.transaction.gram *
+                                          widget.setting.taxPerGram),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -699,34 +612,38 @@ class _TransactionDetailsState extends State<TransactionDetails> {
                             Row(
                               children: [
                                 Text(
-                                  currencyFormatWith2DecimalValues(
-                                      ((selectedDatePriceRecord.priceBirr! *
+                                  currencyFormatWith2DecimalValues(((widget
+                                                  .transaction.initialPrice *
+                                              (1 +
+                                                  (widget.setting
+                                                          .bonusByNBEInPercentage /
+                                                      100))) *
+                                          (widget.transaction.karat / 24) *
+                                          widget.transaction.gram *
+                                          ((100 -
+                                                  widget
+                                                      .setting.holdPercentage) /
+                                              100))
+
+                                      // Bank Fee
+                                      -
+                                      (((widget.transaction.initialPrice *
                                                   (1 +
-                                                      (setting.bonusByNBEInPercentage /
+                                                      (widget.setting
+                                                              .bonusByNBEInPercentage /
                                                           100))) *
-                                              (transaction.karat / 24) *
-                                              transaction.gram *
-                                              ((100 - setting.holdPercentage) /
-                                                  100))
+                                              (widget.transaction.karat / 24) *
+                                              widget.transaction.gram *
+                                              (1 -
+                                                  (widget.setting
+                                                          .holdPercentage /
+                                                      100))) *
+                                          widget.setting.bankFeePercentage)
+                                      // Tax Deduction
 
-                                          // Bank Fee
-                                          -
-                                          (((selectedDatePriceRecord
-                                                          .priceBirr! *
-                                                      (1 +
-                                                          (setting.bonusByNBEInPercentage /
-                                                              100))) *
-                                                  (transaction.karat / 24) *
-                                                  transaction.gram *
-                                                  (1 -
-                                                      (setting.holdPercentage /
-                                                          100))) *
-                                              setting.bankFeePercentage)
-                                          // Tax Deduction
-
-                                          -
-                                          (transaction.gram *
-                                              setting.taxPerGram)),
+                                      -
+                                      (widget.transaction.gram *
+                                          widget.setting.taxPerGram)),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 13,
@@ -748,67 +665,70 @@ class _TransactionDetailsState extends State<TransactionDetails> {
                           ],
                         ),
                         const Divider(),
-                        if (athPriceRecord != null)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Remaining',
-                                textAlign: TextAlign.center,
-                                style: _commonLabelStyle,
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    // Increase
-                                    currencyFormatWith2DecimalValues(((athPriceRecord
-                                                    .priceBirr! *
-                                                (1 +
-                                                    (setting.bonusByNBEInPercentage /
-                                                        100))) *
-                                            (transaction.karat / 24) *
-                                            transaction.gram) -
-                                        ((selectedDatePriceRecord.priceBirr! *
-                                                (1 +
-                                                    (setting.bonusByNBEInPercentage /
-                                                        100))) *
-                                            (transaction.karat / 24) *
-                                            transaction.gram *
-                                            ((100 - setting.holdPercentage) /
-                                                100))),
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Remaining',
+                              textAlign: TextAlign.center,
+                              style: _commonLabelStyle,
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  // Increase
+                                  currencyFormatWith2DecimalValues(((widget
+                                                  .transaction.athPrice *
+                                              (1 +
+                                                  (widget.setting
+                                                          .bonusByNBEInPercentage /
+                                                      100))) *
+                                          (widget.transaction.karat / 24) *
+                                          widget.transaction.gram) -
+                                      ((widget.transaction.initialPrice *
+                                              (1 +
+                                                  (widget.setting
+                                                          .bonusByNBEInPercentage /
+                                                      100))) *
+                                          (widget.transaction.karat / 24) *
+                                          widget.transaction.gram *
+                                          ((100 -
+                                                  widget
+                                                      .setting.holdPercentage) /
+                                              100))),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
                                   ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    "BIRR",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black.withValues(alpha: .5),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ],
-                          ),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  "BIRR",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black.withValues(alpha: .5),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
                         const Divider(),
                         const SizedBox(
                           height: 12,
                         ),
-                        FancyWideButton(
-                          "Save",
-                          () {
-                            context
-                                .read<TransactionsBloc>()
-                                .add(SaveTransactionEvent(transaction));
-                          }, //onSaveTapped,
-                          animateOnClick: true,
-                        ),
+                        // FancyWideButton(
+                        //   "Save",
+                        //   () {
+                        //     context
+                        //         .read<TransactionsBloc>()
+                        //         .add(SaveTransactionEvent(widget.transaction));
+                        //   }, //onSaveTapped,
+                        //   animateOnClick: true,
+                        // ),
                       ],
                     ),
                   ),

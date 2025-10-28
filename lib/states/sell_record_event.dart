@@ -15,3 +15,8 @@ class SaveTransactionEvent extends TransactionEvent {
 }
 
 class GetSeeTransactionsEvent extends TransactionEvent {}
+
+class DeleteTransactionsEvent extends TransactionEvent {
+  Set<String> ids;
+  DeleteTransactionsEvent(this.ids);
+}

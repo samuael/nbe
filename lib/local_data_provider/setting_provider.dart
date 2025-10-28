@@ -42,7 +42,7 @@ class SettingLocalProvider {
   Future<Setting?> getSettingByID(String id) async {
     final db = await wrapper.database;
     final result =
-        await db.query(tableName); //, where: "$_idCol=?", whereArgs: [id]);
+        await db.rawQuery("SELECT * FROM $tableName WHERE $_idCol = $id");
     if (result.isEmpty) {
       return null;
     }

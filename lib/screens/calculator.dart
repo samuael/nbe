@@ -252,74 +252,98 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                     right: BorderSide(color: Colors.orange),
                                   ),
                                 ),
-                                child: Row(children: [
-                                  const Expanded(
-                                    flex: 2,
-                                    child: Text(
-                                      'Calculating rate ',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: BlocBuilder<
-                                        SelectedDatePriceRecordBloc,
-                                        SelectedDatePriceRecordState>(
-                                      builder: (context, state) {
-                                        switch (state.runtimeType) {
-                                          case SelectedDatePriceRecordInit:
-                                            return const ShimmerSkeleton(
-                                                width: 100, height: 10);
-                                          case SelectedDatePriceRecordLoaded:
-                                            return Text(
-                                              NumberFormat('#.####').format((state
-                                                      as SelectedDatePriceRecordLoaded)
-                                                  .record
-                                                  .get24KaratRecord()!
-                                                  .priceBirr!),
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 14,
-                                                color: Colors.black
-                                                    .withValues(alpha: .7),
-                                              ),
-                                            );
-                                          default:
-                                            return Stack(
-                                              children: [
-                                                const ShimmerSkeleton(
-                                                    width: 100, height: 10),
-                                                GestureDetector(
-                                                  onTap: () {
-                                                    context
-                                                        .read<
-                                                            SelectedDatePriceRecordBloc>()
-                                                        .add(
-                                                            SelectOtherDatePriceRecordEvent(
-                                                                DateTime
-                                                                    .now()));
-                                                  },
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(
-                                                          Icons.replay_outlined,
-                                                          color: Colors.black
-                                                              .withValues(
-                                                                  alpha: .5)),
-                                                      const Text(
-                                                        "Reload",
-                                                      )
-                                                    ],
+                                child: Column(children: [
+                                  BlocBuilder<SelectedDatePriceRecordBloc,
+                                      SelectedDatePriceRecordState>(
+                                    builder: (context, state) {
+                                      switch (state.runtimeType) {
+                                        case SelectedDatePriceRecordInit:
+                                          return const ShimmerSkeleton(
+                                              width: 100, height: 10);
+                                        case SelectedDatePriceRecordLoaded:
+                                          return Column(
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  const Text(
+                                                    "Calculating Rate",
                                                   ),
-                                                )
-                                              ],
-                                            );
-                                        }
-                                      },
-                                    ),
+                                                  Text(
+                                                    NumberFormat('#,##0.##')
+                                                        .format((state
+                                                                as SelectedDatePriceRecordLoaded)
+                                                            .record
+                                                            .get24KaratRecord()!
+                                                            .priceBirr!),
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                      fontSize: 13,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    "With Bonus of ${(context.watch<SettingBloc>().state as SettingLoaded).setting.bonusByNBEInPercentage}%",
+                                                  ),
+                                                  Text(
+                                                    NumberFormat('#,##0.##').format((1 +
+                                                            ((context.watch<SettingBloc>().state
+                                                                        as SettingLoaded)
+                                                                    .setting
+                                                                    .bonusByNBEInPercentage /
+                                                                100)) *
+                                                        state.record
+                                                            .get24KaratRecord()!
+                                                            .priceBirr!),
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                      fontSize: 13,
+                                                    ),
+                                                  )
+                                                ],
+                                              )
+                                            ],
+                                          );
+                                        default:
+                                          return Stack(
+                                            children: [
+                                              const ShimmerSkeleton(
+                                                  width: 100, height: 10),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  context
+                                                      .read<
+                                                          SelectedDatePriceRecordBloc>()
+                                                      .add(
+                                                          SelectOtherDatePriceRecordEvent(
+                                                              DateTime.now()));
+                                                },
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.replay_outlined,
+                                                        color: Colors.black
+                                                            .withValues(
+                                                                alpha: .5)),
+                                                    const Text(
+                                                      "Reload",
+                                                    )
+                                                  ],
+                                                ),
+                                              )
+                                            ],
+                                          );
+                                      }
+                                    },
                                   ),
                                 ]),
                               ),

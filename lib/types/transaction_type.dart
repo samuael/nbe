@@ -33,7 +33,7 @@ class Transaction {
     this.settingID,
     this.initialPrice, {
     required this.athPrice,
-    required this.specificGravity,
+    this.specificGravity,
     this.net = 0,
     this.setting,
     this.endDate,
@@ -55,7 +55,6 @@ class Transaction {
       data["karat"],
       data["settingID"],
       data["initialPrice"],
-      specificGravity: data["specificGravity"],
       createdAt: data["createdAt"],
       endDate: data["endDate"] != null ? DateTime.parse(data["endDate"]) : null,
       athPrice: data["athPrice"],
@@ -70,7 +69,6 @@ class Transaction {
     return {
       "id": id,
       "gram": gram,
-      "specificGravity": specificGravity,
       "createdAt": createdAt,
       "settingID": settingID,
       "date": DateFormat('yyyy-MM-dd').format(date),

@@ -6,3 +6,4 @@ export 'report_details.dart';
 export 'print_preview.dart';
 export 'price_history_screen.dart';
 export 'balance_screen.dart';
+export 'transaction_view_screen.dart';

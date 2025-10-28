@@ -12,12 +12,9 @@ class _ReportScreenState extends State<ReportScreen> {
   int selectedMonth = DateTime.now().month;
   int selectedYear = DateTime.now().year;
 
-  // void _loadRecords() async {
-  //   final tran = await DataHandler.instance.loadAllTransactions();
-  //   setState(() {
-  //     // transactions.addAll(tran.reversed);
-  //   });
-  // }
+  Set<String> selectedTransactions = {};
+  Set<String> selectedMonths = {};
+  bool selecting = false;
 
   void _showPrintDialog(BuildContext context) {
     showDialog(
@@ -85,14 +82,6 @@ class _ReportScreenState extends State<ReportScreen> {
                     selectedYear,
                   );
                   Navigator.pop(ctx);
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (_) => PrintPreviewScreen(
-                  //       transactions: transactions,
-                  //     ),
-                  //   ),
-                  // );
                 },
               ),
             ],
@@ -130,8 +119,7 @@ class _ReportScreenState extends State<ReportScreen> {
           .records;
 
       for (var tran in records!.values) {
-        final key = DateFormat.yMMMM()
-            .format(DateTime.fromMillisecondsSinceEpoch(tran.createdAt * 1000));
+        final key = DateFormat.yMMMM().format(tran.date);
         grouped.putIfAbsent(key, () => []);
         grouped[key]!.add(tran);
       }
@@ -147,12 +135,50 @@ class _ReportScreenState extends State<ReportScreen> {
         actions: [
           IconButton(
             onPressed: () {
-              context.read<TransactionsBloc>().add(GetSeeTransactionsEvent());
+              final Set dSelectedMonths = {};
+              final selectedTransactionIDs = records!.values.map<String>((tr) {
+                return tr.id;
+              }).toList();
+              setState(() {
+                if (selectedTransactions.isEmpty) {
+                  selectedTransactions.addAll(selectedTransactionIDs);
+                  selecting = true;
+                } else {
+                  selectedTransactions.removeAll(selectedTransactionIDs);
+                  selecting = false;
+                }
+              });
             },
-            icon: const Icon(
-              Icons.restore_from_trash_rounded,
+            icon: Row(
+              children: [
+                Text(
+                  "Select all",
+                  style: TextStyle(
+                    color: Colors.black.withValues(alpha: .5),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Icon(
+                  Icons.check_box,
+                  color: records!.values.length == selectedTransactions.length
+                      ? Theme.of(context).primaryColorLight
+                      : Colors.black.withValues(alpha: .1),
+                  size: 18,
+                )
+              ],
             ),
           ),
+          IconButton(
+              onPressed: () {
+                context
+                    .read<TransactionsBloc>()
+                    .add(DeleteTransactionsEvent(selectedTransactions));
+              },
+              icon: const Icon(
+                Icons.delete,
+                size: 18,
+              )),
           Padding(
               padding: const EdgeInsets.only(right: 4),
               child: IconButton(
@@ -175,16 +201,82 @@ class _ReportScreenState extends State<ReportScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        month,
-                        style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.w600,
+                      GestureDetector(
+                        onTap: () => (String mon) {
+                          if (selectedMonths.contains(mon)) {
+                            selectedTransactions
+                                .removeAll(transactions.map<String>((el) {
+                              return el.id;
+                            }).toList());
+                          } else {
+                            selectedTransactions
+                                .addAll(transactions.map<String>((el) {
+                              return el.id;
+                            }).toList());
+                          }
+                        }(month),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              month,
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Icon(
+                              selectedMonths.contains(month)
+                                  ? Icons.rectangle_outlined
+                                  : Icons.rectangle_outlined,
+                              color: selectedMonths.contains(month)
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.black.withValues(alpha: .1),
+                            ),
+                          ],
                         ),
                       ),
                       ...transactions.map(
                         (transaction) {
-                          return TransactionItemView(transaction);
+                          return Stack(
+                            children: [
+                              if (selecting)
+                                Positioned(
+                                  top: 0,
+                                  bottom: 0,
+                                  child: Icon(
+                                    Icons.check_box,
+                                    color: selectedTransactions
+                                            .contains(transaction.id)
+                                        ? Theme.of(context).primaryColorLight
+                                        : Colors.black.withValues(alpha: .1),
+                                    size: 18,
+                                  ),
+                                ),
+                              TransactionItemView(
+                                transaction,
+                                selecting: selecting,
+                                onSelect: (String transactionID) {
+                                  setState(() {
+                                    if (selectedTransactions
+                                        .contains(transactionID)) {
+                                      selectedTransactions.add(transactionID);
+                                    } else {
+                                      selectedTransactions
+                                          .remove(transactionID);
+                                    }
+                                    if (selectedTransactions.isNotEmpty) {
+                                      selecting = true;
+                                    }
+                                    // if(selectedMonths.contains(month)  )
+                                  });
+                                },
+                                isSelected: (String id) {
+                                  return selectedTransactions.contains(id);
+                                },
+                              ),
+                            ],
+                          );
                         },
                       )
                     ],

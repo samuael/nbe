@@ -14,6 +14,9 @@ class _SettingsPageState extends State<SettingsPage> {
     final settingsCall = context.read<SettingsBloc>();
     settingsCall.add(SettingsLoadEvent());
 
+    final selectedSetting =
+        (context.watch<SettingBloc>().state as SettingLoaded).setting;
+
     return SingleChildScrollView(
       child: Column(children: [
         if (settingsLoad.state is SettingsInit)
@@ -35,7 +38,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 .settings
                 .values
                 .map<SettingItem>((elm) {
-              return SettingItem(elm);
+              return SettingItem(
+                elm,
+                quoted: selectedSetting.id == elm.id,
+              );
             }).toList(),
           ),
       ]),

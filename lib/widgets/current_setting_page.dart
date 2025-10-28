@@ -109,7 +109,7 @@ class _CurrentSettingState extends State<CurrentSetting> {
                   final bankFee = double.tryParse(bankFeeController.text) ?? 0;
                   final bonus = double.tryParse(bonusController.text) ?? 0;
                   final holdPercentage =
-                      double.tryParse(bonusController.text) ?? 0;
+                      double.tryParse(nbeTemporaryController.text) ?? 0;
                   final setting = Setting(
                     "${DateTime.now().millisecondsSinceEpoch}",
                     tax,

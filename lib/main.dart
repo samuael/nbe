@@ -33,7 +33,7 @@ void main() {
     SettingLocalProvider.insertDefaultSetting(setting),
     StringDataProvider.createOrReplaceTableString(),
     StringDataProvider.insertNBEConstants(
-        StaticConstant.MAX_HOLD_DURATION_ID, "30"),
+        StaticConstant.MAX_HOLD_DURATION_ID, "90"),
     StringDataProvider.insertNBEConstants(
         StaticConstant.LAST_SETTING_ID, setting.id),
     TransactionsLocalProvider.createOrReplaceTableString(),
@@ -117,19 +117,37 @@ class MyApp extends StatelessWidget {
     context.read<TransactionsBloc>().add(LoadTransactions());
 
     return MaterialApp(
-      theme: ThemeData(
-        primaryColorLight: const Color(0xFF1a87da),
-        primaryColor: Color(_mainThemeValue),
-        primarySwatch: ourMainThemeColor,
-        // canvasColor: Colors.black,
-      ),
-      title: 'Gold Purchasing Rate',
-      home: const NavigationController(),
-    );
+        theme: ThemeData(
+          primaryColorLight: const Color(0xFF1a87da),
+          primaryColor: Color(_mainThemeValue),
+          primarySwatch: ourMainThemeColor,
+          // canvasColor: Colors.black,
+        ),
+        title: 'Gold Purchasing Rate',
+        home: const NavigationController(),
+        initialRoute: NavigationController.routeName, // AuthScreen.RouteName,
+        onGenerateRoute: (setting) {
+          switch (setting.name) {
+            case TransactionViewDetails.routeName:
+              {
+                final arg = (setting.arguments as TransactionDetailParam);
+                return MaterialPageRoute(builder: (context) {
+                  return TransactionViewDetails(arg.transaction, arg.setting);
+                });
+              }
+            case NavigationController.routeName:
+              {
+                return MaterialPageRoute(builder: (context) {
+                  return const NavigationController();
+                });
+              }
+          }
+        });
   }
 }
 
 class NavigationController extends StatefulWidget {
+  static const String routeName = "navigator/screen";
   const NavigationController({super.key});
 
   @override

@@ -8,4 +8,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       emit(SettingsLoaded({for (var obj in result) obj.id: obj}));
     });
   }
+
+  Future<Setting?> getSettingByID(String settingID) async {
+    return await provider.getSettingByID(settingID);
+  }
 }

@@ -22,34 +22,33 @@ class SettingBloc extends Bloc<SingleSettingEvent, SettingState> {
     });
 
     on<UpdateSettingEvent>((event, emit) async {
-      if (state is! SettingLoaded) {
-        final newSetting = await provider.getSettingByDetail(event.setting);
-        if (newSetting != null) {
-          emit(SettingLoaded(newSetting));
+      if (state is SettingLoaded) {
+        final currentSetting = (state as SettingLoaded);
+        if (event.setting.bankFeePercentage ==
+                currentSetting.setting.bankFeePercentage &&
+            event.setting.taxPerGram == currentSetting.setting.taxPerGram &&
+            event.setting.holdPercentage ==
+                currentSetting.setting.holdPercentage) {
           return;
         }
-
-        final count = await provider.insertSetting(event.setting);
-        if (count == 0) {
-          throw Exception("here");
-          emit(SettingLoadFailed("setting update failed"));
-          return;
-        }
-        emit(SettingLoaded(event.setting));
-        await stringProvider.insertStringPayload(StringPayload(
-            StaticConstant.LAST_SETTING_ID,
-            event.setting.id,
-            (DateTime.now().millisecondsSinceEpoch / 1000).toInt()));
+      }
+      final newSetting = await provider.getSettingByDetail(event.setting);
+      if (newSetting != null) {
+        emit(SettingLoaded(newSetting));
         return;
       }
-      final currentSetting = (state as SettingLoaded);
-      if (event.setting.bankFeePercentage ==
-              currentSetting.setting.bankFeePercentage &&
-          event.setting.taxPerGram == currentSetting.setting.taxPerGram &&
-          event.setting.holdPercentage ==
-              currentSetting.setting.holdPercentage) {
+      event.setting.id =
+          "${(DateTime.now().millisecondsSinceEpoch / 1000).toInt()}";
+      final count = await provider.insertSetting(event.setting);
+      if (count == 0) {
+        emit(SettingLoadFailed("setting update failed"));
         return;
       }
+      emit(SettingLoaded(event.setting));
+      await stringProvider.insertStringPayload(StringPayload(
+          StaticConstant.LAST_SETTING_ID,
+          event.setting.id,
+          (DateTime.now().millisecondsSinceEpoch / 1000).toInt()));
     });
 
     on<SelectSettingByIDEvent>((event, emit) async {

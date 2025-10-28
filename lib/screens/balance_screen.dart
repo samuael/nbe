@@ -9,8 +9,6 @@ class BalanceScreen extends StatefulWidget {
 }
 
 class _BalanceScreenState extends State<BalanceScreen> {
-  bool showAllKaratValues = true;
-
   final TextStyle _commonLabelStyle = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w500,
@@ -39,6 +37,48 @@ class _BalanceScreenState extends State<BalanceScreen> {
       body: Column(
         children: [
           Container(
+              height: 100,
+              width: MediaQuery.of(context).size.width * .9,
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: .1),
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(
+                  color: Colors.green.withValues(alpha: .2),
+                ),
+              ),
+              child: Column(
+                children: [
+                  const Text(
+                    "Balance",
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      const Text(
+                        "1,235,345,4",
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        "Birr",
+                        style: TextStyle(
+                          color: Colors.black.withValues(alpha: .5),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              )),
+          Container(
             width: MediaQuery.of(context).size.width * .9,
             decoration: const BoxDecoration(
               border: Border(
@@ -50,12 +90,7 @@ class _BalanceScreenState extends State<BalanceScreen> {
             margin: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5),
             child: TitledContainer(
               'Today\'s National Bank Rate',
-              (showAllKaratValues
-                      ? ["24", "23", "22", "21", "20", "19", "18", "16"]
-                      : [
-                          "24",
-                        ])
-                  .map<Column>((k) {
+              ["24", "23", "22", "21", "20", "19", "18", "16"].map<Column>((k) {
                 return Column(
                   children: [
                     Row(
@@ -114,6 +149,7 @@ class _BalanceScreenState extends State<BalanceScreen> {
               }).toList(),
             ),
           ),
+          const Divider(),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             margin: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -178,24 +214,6 @@ class _BalanceScreenState extends State<BalanceScreen> {
                 ),
               ],
             ),
-          ),
-          Row(
-            children: [
-              Checkbox(
-                  value: showAllKaratValues,
-                  onChanged: (val) {
-                    setState(() {
-                      showAllKaratValues = val ?? false;
-                    });
-                  }),
-              Text(
-                "Show all karat prices",
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black.withValues(alpha: .5),
-                ),
-              ),
-            ],
           ),
         ],
       ),

@@ -41,7 +41,8 @@ class PriceRecordProvider {
 
   Future<List<PriceRecord?>> getPriceRecords() async {
     final db = await wrapper.database;
-    final result = await db.query(tableName);
+    final result =
+        await db.rawQuery("SELECT * FROM $tableName ORDER BY $_dateCol DESC");
     if (result.isEmpty) {
       return [];
     }

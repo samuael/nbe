@@ -41,7 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               () {
                 return pageIndex;
               },
-              titles: const ["Current Setting", "Setting History"],
+              titles: const ["Setting History", "Current Setting"],
             ),
           ),
           Expanded(
@@ -54,8 +54,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 });
               },
               children: const [
-                CurrentSetting(),
                 SettingsPage(),
+                CurrentSetting(),
               ],
             ),
           ),

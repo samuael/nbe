@@ -27,7 +27,6 @@ class TransactionsLocalProvider {
         $_idCol ${SQLLiteTypes.stringType} PRIMARY KEY,
         $_gramCol ${SQLLiteTypes.doubleType} NOT NULL,
         $_karatCol  ${SQLLiteTypes.doubleType} NOT NULL,
-        $_specificGravityCol ${SQLLiteTypes.doubleType} NOT NULL,
         $_netCol ${SQLLiteTypes.doubleType} default 0.0,
         $_settingIDCol ${SQLLiteTypes.stringType} NOT NULL,
         $_endDate ${SQLLiteTypes.stringType} NOT NULL,
@@ -68,17 +67,21 @@ class TransactionsLocalProvider {
   Future<List<Transaction>?> getRecentTransactions(
       int offset, int limit) async {
     final db = await wrapper.database;
-    final result = await db.query(
-      tableName,
-      orderBy: _createdAtCol,
-      offset: offset,
-      limit: limit,
+    final result = await db.rawQuery(
+      "SELECT * FROM $tableName  ORDER BY $_createdAtCol DESC",
     );
     return result.map((el) {
       return Transaction.fromJson(
         el,
       );
     }).toList();
+  }
+
+  Future<int> deleteTransactionsByID(Set<String> ids) async {
+    final db = await wrapper.database;
+    final joinedIDs = ids.join(",");
+    return await db
+        .rawDelete("DELETE FROM $tableName WHERE $_idCol IN ($joinedIDs)");
   }
 
   Future<Transaction?> getTransactionByID(int id) async {

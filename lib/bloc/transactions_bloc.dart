@@ -36,6 +36,17 @@ class TransactionsBloc extends Bloc<TransactionEvent, TransactionState> {
       }
     });
 
+    on<DeleteTransactionsEvent>((event, emit) async {
+      final results = await provider.deleteTransactionsByID(event.ids);
+      if (results > 0) {
+        (state as TransactionLoaded).records.removeWhere((key, tr) {
+          return event.ids.contains(tr.id);
+        });
+        emit((state as TransactionLoaded).clone());
+        return;
+      }
+    });
+
     on<SaveTransactionEvent>((event, emit) async {
       final result = await provider.insertTransaction(event.transaction);
       if (result == 0) {
