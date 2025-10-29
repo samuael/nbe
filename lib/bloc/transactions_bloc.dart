@@ -2,7 +2,10 @@ import 'package:nbe/libs.dart';
 
 class TransactionsBloc extends Bloc<TransactionEvent, TransactionState> {
   final TransactionsLocalProvider provider;
-  TransactionsBloc(this.provider) : super(TransactionInit()) {
+  final SettingLocalProvider settingProvider;
+
+  TransactionsBloc(this.provider, this.settingProvider)
+      : super(TransactionInit()) {
     on<LoadTransactions>(
       (event, emit) async {
         int offset = 0;
@@ -11,6 +14,8 @@ class TransactionsBloc extends Bloc<TransactionEvent, TransactionState> {
           offset = (state as TransactionLoaded).records.length;
           limit = offset + 10;
         }
+        double sumAll = 0.0;
+        double increaseAll = 0.0;
         final result = await provider.getRecentTransactions(offset, limit);
         if (result != null) {
           if (state is TransactionLoaded) {
@@ -20,9 +25,58 @@ class TransactionsBloc extends Bloc<TransactionEvent, TransactionState> {
                 return el;
               });
             }
-            emit(TransactionLoaded(records));
+            final Map<String, Setting> theSettings = {};
+            for (var set in records.entries) {
+              if (set.value.endDate!.isBefore(DateTime.now())) {
+                set.value.isCompleted = true;
+              } else {
+                if (getATHPriceRecord(set.value.date, event.loadRecords,
+                        endDate: set.value.endDate) !=
+                    null) {
+                  set.value.athPrice =
+                      getATHPriceRecord(set.value.date, event.loadRecords)!
+                          .priceBirr!;
+                }
+              }
+              if (theSettings[set.key] == null) {
+                theSettings[set.key] = (await settingProvider
+                    .getSettingByID(set.value.settingID))!;
+              }
+              provider.insertTransaction(set.value);
+              if (!set.value.isCompleted) {
+                sumAll += set.value.getRemaining(theSettings[set.key]!);
+                increaseAll += set.value.getIncreases(theSettings[set.key]!);
+              }
+            }
+            emit(TransactionLoaded(records,
+                openSum: sumAll, openIncrease: increaseAll));
           } else {
-            emit(TransactionLoaded({for (var obj in result) obj.id: obj}));
+            final records = {for (var obj in result) obj.id: obj};
+            final Map<String, Setting> theSettings = {};
+            for (var set in records.entries) {
+              if (set.value.endDate!.isBefore(DateTime.now())) {
+                set.value.isCompleted = true;
+              } else {
+                if (getATHPriceRecord(set.value.date, event.loadRecords,
+                        endDate: set.value.endDate) !=
+                    null) {
+                  set.value.athPrice =
+                      getATHPriceRecord(set.value.date, event.loadRecords)!
+                          .priceBirr!;
+                }
+              }
+              if (theSettings[set.key] == null) {
+                theSettings[set.key] = (await settingProvider
+                    .getSettingByID(set.value.settingID))!;
+              }
+              provider.insertTransaction(set.value);
+              if (!set.value.isCompleted) {
+                sumAll += set.value.getRemaining(theSettings[set.key]!);
+              }
+            }
+
+            emit(TransactionLoaded({for (var obj in result) obj.id: obj},
+                openSum: sumAll, openIncrease: increaseAll));
           }
         }
       },
@@ -61,5 +115,26 @@ class TransactionsBloc extends Bloc<TransactionEvent, TransactionState> {
       }
       emit(TransactionLoaded({event.transaction.id: event.transaction}));
     });
+  }
+
+  PriceRecord? getATHPriceRecord(DateTime date, PriceRecordsLoaded prLoaded,
+      {DateTime? endDate}) {
+    final dateTime = date;
+    if (dateTime.isBefore(DateTime.now().subtract(const Duration(days: 30)))) {
+      return null;
+    }
+    final priceRecords = prLoaded.records;
+    double highest = 0;
+    PriceRecord? highestRecord;
+    for (var pr in priceRecords) {
+      final theDateTime = pr.date!;
+      if ((theDateTime.isBefore(dateTime) || pr.priceBirr! <= highest) ||
+          (endDate != null && endDate.isBefore(theDateTime))) {
+        continue;
+      }
+      highest = pr.priceBirr!;
+      highestRecord = pr;
+    }
+    return highestRecord;
   }
 }

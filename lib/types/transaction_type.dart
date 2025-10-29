@@ -47,6 +47,23 @@ class Transaction {
     }
   }
 
+  double getRemaining(Setting setting) {
+    return ((athPrice * (1 + (setting.bonusByNBEInPercentage / 100))) *
+            (karat / 24) *
+            gram) -
+        ((initialPrice * (1 + (setting.bonusByNBEInPercentage / 100))) *
+            (karat / 24) *
+            gram *
+            ((100 - setting.holdPercentage) / 100));
+  }
+
+  double getIncreases(Setting setting) {
+    return ((((athPrice - initialPrice) *
+        (1 + (setting.bonusByNBEInPercentage / 100)) *
+        (karat / 24) *
+        gram)));
+  }
+
   factory Transaction.fromJson(Map<String, dynamic> data) {
     return Transaction(
       data["id"],
@@ -62,6 +79,21 @@ class Transaction {
       bankFeeValue: data["bankFeeValue"],
       net: data["net"],
       isCompleted: data["isCompleted"] == 1,
+    );
+  }
+
+  static DateTime intToDateTime(int input) {
+    if (input == 0) {
+      return DateTime.now();
+    }
+    final day = input % 100;
+    input = (input / 100).floor();
+    final month = (input % 100);
+    input = (input / 100).floor();
+    return DateTime(
+      input,
+      month,
+      day,
     );
   }
 

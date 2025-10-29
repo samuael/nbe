@@ -5,7 +5,7 @@ class PriceNetworkRecordProvider {
 
   PriceNetworkRecordProvider(this.networkProvider);
 
-  Future<PriceRecordResponse> getPriceRecordByDate(String date) async {
+  Future<PriceRecordResponse> getPriceRecordByDate(int date) async {
     return networkProvider.get("/api/filter-gold-rates", {"date": date});
   }
 }

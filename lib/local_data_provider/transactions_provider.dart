@@ -16,7 +16,6 @@ class TransactionsLocalProvider {
   static const String _bankFeeValue = "bankFeeValue";
   static const String _createdAtCol = "createdAt";
   static const String _settingIDCol = "settingID";
-  static const String _specificGravityCol = "specificGravity";
   static const String _isCompleted = "isCompleted";
 
   final NBEDatabase wrapper;

@@ -6,7 +6,7 @@ class PriceRecordBloc extends Bloc<PriceRecordEvent, PriceRecordState> {
   final PriceNetworkRecordProvider networkProvider;
   final StringDataProvider stringProvider;
 
-  final dateFormat = DateFormat('yyyy-MM-dd');
+  final dateFormat = DateFormat('yyyyMMdd');
 
   // generate dates
   PriceRecordBloc(this.provider, this.networkProvider, this.stringProvider)
@@ -20,7 +20,7 @@ class PriceRecordBloc extends Bloc<PriceRecordEvent, PriceRecordState> {
           return;
         }
         DateTime last = DateTime.now();
-        final Set<String> priceRecords = {dateFormat.format(last)};
+        final Set<int> priceRecords = {int.parse(dateFormat.format(last))};
 
         final payload = await stringProvider.getStringPayloadByID(222) ??
             StringPayload(222, "30", 0);
@@ -28,27 +28,30 @@ class PriceRecordBloc extends Bloc<PriceRecordEvent, PriceRecordState> {
 
         for (int i = 1; i < maxPriceRecords; i++) {
           last = last.subtract(const Duration(days: 1));
-          priceRecords.add(dateFormat.format(last));
+          priceRecords.add(int.parse(dateFormat.format(last)));
         }
 
         final savedPriceRecords = await provider.getPriceRecords();
 
-        final Map<String, PriceRecord> foundPrices = {};
-        final List<String> expiredPrices = [];
+        final Map<int, PriceRecord> foundPrices = {};
+        final List<int> expiredPrices = [];
 
         for (int i = 0; i < savedPriceRecords.length; i++) {
-          if (priceRecords
-              .contains(dateFormat.format(savedPriceRecords[i]!.date!))) {
-            foundPrices[dateFormat.format(savedPriceRecords[i]!.date!)] =
+          if (priceRecords.contains(
+              int.parse(dateFormat.format(savedPriceRecords[i]!.date!)))) {
+            foundPrices[
+                    int.parse(dateFormat.format(savedPriceRecords[i]!.date!))] =
                 savedPriceRecords[i]!;
-            priceRecords.remove(dateFormat.format(savedPriceRecords[i]!.date!));
+            priceRecords.remove(
+                int.parse(dateFormat.format(savedPriceRecords[i]!.date!)));
           } else {
-            expiredPrices.add(dateFormat.format(savedPriceRecords[i]!.date!));
+            expiredPrices
+                .add(int.parse(dateFormat.format(savedPriceRecords[i]!.date!)));
           }
         }
 
         try {
-          Set<String> fetched = {};
+          Set<int> fetched = {};
           // load and check the missing dates.
           for (int i = 0; i < priceRecords.length; i++) {
             final response = await networkProvider
@@ -57,7 +60,7 @@ class PriceRecordBloc extends Bloc<PriceRecordEvent, PriceRecordState> {
               final karat24Value = response.get24KaratRecord();
               if (karat24Value != null) {
                 fetched.add(priceRecords.toList()[i]);
-                foundPrices[dateFormat.format(karat24Value.date!)] =
+                foundPrices[int.parse(dateFormat.format(karat24Value.date!))] =
                     karat24Value;
                 await provider.insertOrUpdatePriceRecord(karat24Value);
               }
@@ -72,8 +75,11 @@ class PriceRecordBloc extends Bloc<PriceRecordEvent, PriceRecordState> {
           emit(PriceRecordsLoadFailed("loading prices was not succesful"));
           return;
         }
-
-        emit(PriceRecordsLoaded(foundPrices.values.toList(), DateTime.now()));
+        final sortedFoundPrices = Map.fromEntries(
+          foundPrices.entries.toList()..sort((a, b) => b.key.compareTo(a.key)),
+        );
+        emit(PriceRecordsLoaded(
+            sortedFoundPrices.values.toList(), DateTime.now()));
       },
     );
 

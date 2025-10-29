@@ -25,8 +25,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String specificGravityErr = "";
   String karatErr = "";
 
-  Setting _setting =
-      Setting("${DateTime.now().millisecondsSinceEpoch}", 250, 0.01, 5, 15);
+  // Setting _setting =
+  //     Setting("${DateTime.now().millisecondsSinceEpoch}", 250, 0.01, 5, 15);
 
   // areSameDates to check if the day has changed
   bool areSameDates(DateTime day1, DateTime day2) {
@@ -52,38 +52,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         action: SnackBarAction(
             label: 'Retry',
             onPressed: () {
-              _getSettings();
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
             }),
       ),
     );
-  }
-
-  // Transaction? _calculate() {
-  //   final weight = double.tryParse(_weightController.text);
-  //   if (weight == null || specificGravity == null) {
-  //     return null;
-  //   }
-
-  //   // final rate = ((karat24AfterBonous! * karat!) / 24);
-  //   // final totalAmount = rate * weight;
-  //   return Transaction(
-  //     "${DateTime.now().millisecondsSinceEpoch}",
-  //     DateFormat('yyyy-MM-dd').format(DateTime.now()),
-  //     weight,
-  //     karat!,
-  //     _setting.id,
-  //     karat24AfterBonous!,
-  //     athPrice: karat24AfterBonous!,
-  //     specificGravity: specificGravity!,
-  //   );
-  // }
-
-  void _getSettings() async {
-    setState(() {
-      _setting =
-          Setting("${DateTime.now().millisecondsSinceEpoch}", 250, 0.01, 5, 15);
-    });
   }
 
   void calculateValues() {
@@ -102,7 +74,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   @override
   void initState() {
-    _getSettings();
     super.initState();
   }
 
@@ -115,7 +86,22 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    selectedDate ??= DateTime.now();
+    if (context.watch<PriceRecordBloc>().state is PriceRecordsLoaded) {
+      context.read<TransactionsBloc>().add(LoadTransactions(
+          (context.watch<PriceRecordBloc>().state as PriceRecordsLoaded)));
+    }
+
+    if ((context.watch<SelectedDatePriceRecordBloc>().state
+        is SelectedDatePriceRecordLoaded)) {
+      selectedDate = (context.watch<SelectedDatePriceRecordBloc>().state
+              as SelectedDatePriceRecordLoaded)
+          .dateTime;
+    } else {
+      context
+          .read<SelectedDatePriceRecordBloc>()
+          .add(SelectOtherDatePriceRecordEvent(DateTime.now()));
+      selectedDate ??= DateTime.now();
+    }
 
     final priceWatch = context.read<PriceRecordBloc>();
     if (priceWatch.state is! PriceRecordsLoaded) {
@@ -188,6 +174,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   initialDate: DateTime.now(),
                   firstDate: DateTime.now().add(const Duration(days: -50)),
                   lastDate: DateTime.now(),
+                  currentDate: selectedDate,
                   barrierColor:
                       Theme.of(context).primaryColorLight.withValues(alpha: .3),
                 );
@@ -591,10 +578,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       );
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (ctx) => TransactionDetails(
-                          // transaction: transaction,
-                          // setting: _setting,
-                          ),
+                      builder: (ctx) => const TransactionDetails(),
                     ),
                   );
                 } catch (e, a) {

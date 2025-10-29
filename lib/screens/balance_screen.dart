@@ -18,11 +18,11 @@ class _BalanceScreenState extends State<BalanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Container _tinyDivider = Container(
-      color: Colors.amber.withValues(alpha: .1),
-      width: MediaQuery.of(context).size.width * .5,
-      height: 0.5,
-    );
+    context.read<SettingBloc>().add(LoadLastSettingEvent());
+    if (context.watch<PriceRecordBloc>().state is PriceRecordsLoaded) {
+      context.read<TransactionsBloc>().add(LoadTransactions(
+          (context.watch<PriceRecordBloc>().state as PriceRecordsLoaded)));
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -36,48 +36,19 @@ class _BalanceScreenState extends State<BalanceScreen> {
       ),
       body: Column(
         children: [
-          Container(
-              height: 100,
-              width: MediaQuery.of(context).size.width * .9,
-              decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: .1),
-                borderRadius: BorderRadius.circular(5),
-                border: Border.all(
-                  color: Colors.green.withValues(alpha: .2),
-                ),
-              ),
-              child: Column(
-                children: [
-                  const Text(
-                    "Balance",
-                    style: TextStyle(
-                      color: Colors.green,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 16,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      const Text(
-                        "1,235,345,4",
-                        style: TextStyle(
-                          color: Colors.green,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        "Birr",
-                        style: TextStyle(
-                          color: Colors.black.withValues(alpha: .5),
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  )
-                ],
-              )),
+          OpenDepositsWidget(
+            remainingBalance: (context.watch<TransactionsBloc>().state
+                    is TransactionLoaded)
+                ? (context.watch<TransactionsBloc>().state as TransactionLoaded)
+                    .openSum
+                : null,
+            increaseTotal: (context.watch<TransactionsBloc>().state
+                    is TransactionLoaded)
+                ? (context.watch<TransactionsBloc>().state as TransactionLoaded)
+                    .openIncrease
+                : null,
+          ),
+          // if ((context.watch<TransactionsBloc>().state is! TransactionLoaded))
           Container(
             width: MediaQuery.of(context).size.width * .9,
             decoration: const BoxDecoration(
@@ -90,7 +61,9 @@ class _BalanceScreenState extends State<BalanceScreen> {
             margin: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5),
             child: TitledContainer(
               'Today\'s National Bank Rate',
-              ["24", "23", "22", "21", "20", "19", "18", "16"].map<Column>((k) {
+              [
+                "24", /* "23", "22", "21", "20", "19", "18", "16"*/
+              ].map<Column>((k) {
                 return Column(
                   children: [
                     Row(
@@ -143,7 +116,11 @@ class _BalanceScreenState extends State<BalanceScreen> {
                               ),
                       ],
                     ),
-                    _tinyDivider,
+                    Container(
+                      color: Colors.amber.withValues(alpha: .1),
+                      width: MediaQuery.of(context).size.width * .5,
+                      height: 0.5,
+                    ),
                   ],
                 );
               }).toList(),
@@ -161,16 +138,18 @@ class _BalanceScreenState extends State<BalanceScreen> {
             ),
             child: Row(
               children: [
-                Expanded(
-                  flex: 13,
-                  child: Text(
-                    '24 Karat After ${(context.watch<SettingBloc>().state as SettingLoaded).setting.bonusByNBEInPercentage}% Bonus ',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
+                (context.watch<SettingBloc>().state is SettingLoaded)
+                    ? Expanded(
+                        flex: 13,
+                        child: Text(
+                          '24 Karat After ${(context.watch<SettingBloc>().state as SettingLoaded).setting.bonusByNBEInPercentage}% Bonus ',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 12,
+                          ),
+                        ),
+                      )
+                    : const ShimmerSkeleton(width: 200, height: 20),
                 Expanded(
                   flex: 14,
                   child: ((context.watch<SettingBloc>().state

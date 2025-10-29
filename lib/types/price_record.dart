@@ -60,10 +60,6 @@ class PriceRecord {
       this.goldType});
 
   PriceRecord.fromJson(Map<String, dynamic> json) {
-    // if (json['date'] is int) {
-    //   print(
-    //       "DateFormat('yyyy-MM-dd').format(json['date']): ${DateFormat('yyyy-MM-dd').format(DateTime.fromMillisecondsSinceEpoch(json['date']))}\n");
-    // }
     id = json['id'];
     goldTypeId = json['gold_type_id'];
     priceUsd = json['price_usd'];
@@ -74,6 +70,10 @@ class PriceRecord {
     goldType = json['gold_type'] != null
         ? GoldType.fromJson(json['gold_type'])
         : GoldType(karat: "24");
+  }
+
+  double clipPrice(double input) {
+    return input - (input % 0.0001);
   }
 
   Map<String, dynamic> toJson() {

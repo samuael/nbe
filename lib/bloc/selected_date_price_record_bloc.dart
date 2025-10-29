@@ -9,7 +9,7 @@ class SelectedDatePriceRecordBloc
   final PriceRecordProvider provider;
   final StringDataProvider stringProvider;
 
-  final dateFormat = DateFormat('yyyy-MM-dd');
+  final dateFormat = DateFormat('yyyyMMdd');
 
   SelectedDatePriceRecordBloc(
       this.provider, this.networkProvider, this.stringProvider)
@@ -21,13 +21,17 @@ class SelectedDatePriceRecordBloc
               dateFormat.format(event.dateTime)) {
         return;
       }
+
       var lastDate = event.dateTime;
-      var dateString = dateFormat.format(lastDate);
+
+      print("dateFormat.format(lastDate): ${dateFormat.format(lastDate)}\n\n");
+
+      var dateInt = int.parse(dateFormat.format(lastDate));
       try {
         var response = await getLastPriceRecordResponse();
         if (response != null &&
             response.data!.isNotEmpty &&
-            response.data![0].date == dateString) {
+            int.parse(dateFormat.format(response.data![0].date!)) == dateInt) {
           emit(SelectedDatePriceRecordLoaded(response, event.dateTime));
           return;
         }
@@ -37,8 +41,8 @@ class SelectedDatePriceRecordBloc
       }
 
       for (int i = 0; i < 7; i++) {
-        dateString = dateFormat.format(lastDate);
-        var response = await networkProvider.getPriceRecordByDate(dateString);
+        dateInt = int.parse(dateFormat.format(lastDate));
+        var response = await networkProvider.getPriceRecordByDate(dateInt);
         if (response.success == true && response.data!.isNotEmpty) {
           // emit the data
           emit(SelectedDatePriceRecordLoaded(response, lastDate));

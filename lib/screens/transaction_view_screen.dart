@@ -163,7 +163,7 @@ class _TransactionDetailsState extends State<TransactionViewDetails> {
                                                     .state
                                                 is SelectedDatePriceRecordLoaded)
                                             ? Text(
-                                                'Deposit Date: ${DateFormat.yMMMMd().format((context.watch<SelectedDatePriceRecordBloc>().state as SelectedDatePriceRecordLoaded).dateTime)}',
+                                                'Deposit Date: ${DateFormat.yMMMMd().format(widget.transaction.date)}',
                                                 style: Theme.of(context)
                                                     .textTheme
                                                     .bodyMedium
@@ -275,7 +275,12 @@ class _TransactionDetailsState extends State<TransactionViewDetails> {
                                             .add(Duration(
                                                 days: defaultNBEHodDays +
                                                     dayExtensions));
+
+                                        context.read<TransactionsBloc>().add(
+                                            SaveTransactionEvent(
+                                                widget.transaction));
                                       },
+                                      min: -10,
                                     ),
                                     Text(
                                       'days',

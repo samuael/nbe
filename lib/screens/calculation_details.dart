@@ -8,7 +8,6 @@ class TransactionDetails extends StatefulWidget {
 }
 
 class _TransactionDetailsState extends State<TransactionDetails> {
-  // final _remainingController = TextEditingController();
   int dayExtensions = 0;
   bool extendTheDays = false;
 
@@ -50,13 +49,6 @@ class _TransactionDetailsState extends State<TransactionDetails> {
   late Transaction transaction;
   late Setting setting;
   late PriceRecord selectedDatePriceRecord;
-
-  // final TextStyle _labelStyle = const TextStyle(
-  //   fontSize: 16,
-  //   fontWeight: FontWeight.w500,
-  //   color: Colors.black,
-  //   overflow: TextOverflow.visible,
-  // );
 
   @override
   Widget build(BuildContext context) {
@@ -365,7 +357,11 @@ class _TransactionDetailsState extends State<TransactionDetails> {
                                             .add(Duration(
                                                 days: defaultNBEHodDays +
                                                     dayExtensions));
+
+                                        context.read<TransactionsBloc>().add(
+                                            SaveTransactionEvent(transaction));
                                       },
+                                      min: -10,
                                     ),
                                     Text(
                                       'days',
@@ -808,6 +804,10 @@ class _TransactionDetailsState extends State<TransactionDetails> {
                                 .add(SaveTransactionEvent(transaction));
                           }, //onSaveTapped,
                           animateOnClick: true,
+                          enabled: ((context.watch<TransactionsBloc>().state
+                                      as TransactionLoaded)
+                                  .records[transaction.id] ==
+                              null),
                         ),
                       ],
                     ),

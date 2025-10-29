@@ -56,7 +56,7 @@ void main() {
         return SettingsBloc(settingProvider);
       }),
       BlocProvider<TransactionsBloc>(create: (context) {
-        return TransactionsBloc(sellRecordProvider);
+        return TransactionsBloc(sellRecordProvider, settingProvider);
       }),
       BlocProvider<SettingBloc>(create: (context) {
         return SettingBloc(settingProvider, stringProvider);
@@ -111,10 +111,15 @@ class MyApp extends StatelessWidget {
     context.read<PriceRecordBloc>().add(LoadPriceRecordsEvent());
     context.read<TodaysPriceRecordBloc>().add(LoadTodaysPriceRecordsEvent());
     context.read<SettingBloc>().add(LoadLastSettingEvent());
-    context
-        .read<SelectedDatePriceRecordBloc>()
-        .add(SelectOtherDatePriceRecordEvent(DateTime.now()));
-    context.read<TransactionsBloc>().add(LoadTransactions());
+    // context.read<TransactionsBloc>().add(LoadTransactions());
+
+    if (context.watch<SelectedDatePriceRecordBloc>().state
+        is! SelectedDatePriceRecordLoaded) {
+      context
+          .read<SelectedDatePriceRecordBloc>()
+          .add(SelectOtherDatePriceRecordEvent(DateTime.now()));
+      print("main .dart");
+    }
 
     return MaterialApp(
         theme: ThemeData(

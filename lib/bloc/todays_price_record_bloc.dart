@@ -20,12 +20,13 @@ class TodaysPriceRecordBloc
         return;
       }
       var lastDate = DateTime.now();
-      var dateString = DateFormat('yyyy-MM-dd').format(lastDate);
+      var dateInt = int.parse(DateFormat('yyyyMMdd').format(lastDate));
       try {
         var response = await getLastPriceRecordResponse();
         if (response != null &&
             response.data!.isNotEmpty &&
-            response.data![0].date == dateString) {
+            int.parse(DateFormat('yyyyMMdd').format(response.data![0].date!)) ==
+                dateInt) {
           emit(TodayPriceRecordsLoaded(response, lastDate));
           return;
         }
@@ -35,8 +36,8 @@ class TodaysPriceRecordBloc
       }
 
       for (int i = 0; i < 7; i++) {
-        dateString = DateFormat('yyyy-MM-dd').format(lastDate);
-        var response = await networkProvider.getPriceRecordByDate(dateString);
+        dateInt = int.parse(DateFormat('yyyyMMdd').format(lastDate));
+        var response = await networkProvider.getPriceRecordByDate(dateInt);
         if (response.success == true && response.data!.isNotEmpty) {
           // save the last price record record to the database.
           print("Saved String: ${jsonEncode(response.toJson())}");

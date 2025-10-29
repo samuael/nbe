@@ -114,6 +114,11 @@ class _ReportScreenState extends State<ReportScreen> {
   Widget build(BuildContext context) {
     final Map<String, List<Transaction>> grouped = {};
 
+    if (context.watch<PriceRecordBloc>().state is PriceRecordsLoaded) {
+      context.read<TransactionsBloc>().add(LoadTransactions(
+          (context.watch<PriceRecordBloc>().state as PriceRecordsLoaded)));
+    }
+
     if (context.watch<TransactionsBloc>().state is TransactionLoaded) {
       records = (context.watch<TransactionsBloc>().state as TransactionLoaded)
           .records;
@@ -130,45 +135,76 @@ class _ReportScreenState extends State<ReportScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Row(
-          children: [Icon(Icons.history), SizedBox(width: 10), Text('History')],
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.history),
+            SizedBox(width: 10),
+            Text(
+              'History',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            )
+          ],
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              final Set dSelectedMonths = {};
-              final selectedTransactionIDs = records!.values.map<String>((tr) {
-                return tr.id;
-              }).toList();
-              setState(() {
-                if (selectedTransactions.isEmpty) {
-                  selectedTransactions.addAll(selectedTransactionIDs);
-                  selecting = true;
-                } else {
-                  selectedTransactions.removeAll(selectedTransactionIDs);
+          if (selecting &&
+              (context.watch<TransactionsBloc>().state is TransactionLoaded))
+            IconButton(
+              onPressed: () {
+                setState(() {
                   selecting = false;
-                }
-              });
-            },
-            icon: Row(
-              children: [
-                Text(
-                  "Select all",
-                  style: TextStyle(
-                    color: Colors.black.withValues(alpha: .5),
-                    fontWeight: FontWeight.w600,
-                  ),
+                  selectedMonths = {};
+                  selectedTransactions = {};
+                });
+              },
+              icon: Text(
+                "Cancel",
+                style: TextStyle(
+                  color: Colors.black.withValues(alpha: .5),
+                  fontWeight: FontWeight.w600,
                 ),
-                const SizedBox(width: 5),
-                Icon(
-                  Icons.check_box,
-                  color: records!.values.length == selectedTransactions.length
-                      ? Theme.of(context).primaryColorLight
-                      : Colors.black.withValues(alpha: .1),
-                  size: 18,
-                )
-              ],
+              ),
             ),
-          ),
+          if (context.watch<TransactionsBloc>().state is TransactionLoaded)
+            IconButton(
+              onPressed: () {
+                // final Set dSelectedMonths = {};
+                final selectedTransactionIDs =
+                    records!.values.map<String>((tr) {
+                  return tr.id;
+                }).toList();
+                setState(() {
+                  if (selectedTransactions.isEmpty) {
+                    selectedTransactions.addAll(selectedTransactionIDs);
+                    selecting = true;
+                  } else {
+                    selectedTransactions.removeAll(selectedTransactionIDs);
+                    selecting = false;
+                  }
+                });
+              },
+              icon: Row(
+                children: [
+                  Text(
+                    "Select all",
+                    style: TextStyle(
+                      color: Colors.black.withValues(alpha: .5),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Icon(
+                    Icons.check_box,
+                    color: records!.values.length == selectedTransactions.length
+                        ? Theme.of(context).primaryColorLight
+                        : Colors.black.withValues(alpha: .1),
+                    size: 18,
+                  )
+                ],
+              ),
+            ),
           IconButton(
               onPressed: () {
                 context
@@ -258,7 +294,7 @@ class _ReportScreenState extends State<ReportScreen> {
                                 selecting: selecting,
                                 onSelect: (String transactionID) {
                                   setState(() {
-                                    if (selectedTransactions
+                                    if (!selectedTransactions
                                         .contains(transactionID)) {
                                       selectedTransactions.add(transactionID);
                                     } else {

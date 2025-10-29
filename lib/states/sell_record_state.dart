@@ -6,8 +6,9 @@ class TransactionInit extends TransactionState {}
 
 class TransactionLoaded extends TransactionState {
   Map<String, Transaction> records;
-
-  TransactionLoaded(this.records);
+  double openSum;
+  double openIncrease;
+  TransactionLoaded(this.records, {this.openSum = 0, this.openIncrease = 0});
 
   TransactionLoaded clone() {
     return TransactionLoaded(records);
